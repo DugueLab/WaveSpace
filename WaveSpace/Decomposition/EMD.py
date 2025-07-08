@@ -10,9 +10,10 @@ import multiprocessing
 from itertools import product
 import joblib
 import platform
-emd.logger.set_up()
-emd.logger.set_up(level='CRITICAL')  # supress the warning about too few IMFs
 
+
+def start_emd_logging():
+    emd.logger.set_up(level='CRITICAL')  # supress the warning about too few IMFs
 
 # Utility funs________________________________________________
 def FreqAmpPhaseFromAnalytic(waveData, smooth_phase=None, smooth_freq = 3, dataBucketName="", timeRange=(slice(None))):
