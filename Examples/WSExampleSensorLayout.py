@@ -141,16 +141,16 @@ surface, polySurface = sensors.create_surface_from_points(waveData,
                                                             type='channels',
                                                             num_points=1000)
 #Debug, Remove
-render_surfaces(surface, polySurface)
+#render_surfaces(surface, polySurface)
 
 sensors.distance_along_surface(waveData, surface, tolerance=0.1, get_extent = chanInds, plotting= True)
 sensors.distmat_to_2d_coordinates_Isomap(waveData) #can also use MDS here
-grid_x, grid_y, mask =sensors.interpolate_pos_to_grid(
-    waveData, 
-    numGridBins=18,
-    return_mask=True, 
-    mask_stretching=True
-    )
+# grid_x, grid_y, mask =sensors.interpolate_pos_to_grid(
+#     waveData, 
+#     numGridBins=18,
+#     return_mask=True, 
+#     mask_stretching=True
+#     )
 
 
 #%% cortical distance

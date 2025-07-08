@@ -9,7 +9,7 @@ import copy
 import numpy as np
 import matplotlib.pyplot as plt 
 
-def cluster_imfs(waveData, highpass, lowpass, dataBucket="AnalyticSignal", nIMFs=7, plotting = False): 
+def cluster_imfs(waveData, highpass, lowpass, dataBucket="complexData", nIMFs=7, plotting = False): 
     emd.logger.set_up()
     emd.logger.set_up(level='CRITICAL')#supress the warning about too few IMFs
     nIMFs=7    
@@ -35,7 +35,7 @@ def cluster_imfs(waveData, highpass, lowpass, dataBucket="AnalyticSignal", nIMFs
     maxSTD_type = 'log' # 'linear'
     ampCutoff = 0.02#cutoff for amplitudes in selectIMF
     #
-    ComplexPhaseData = np.empty((nTrials), dtype=object)
+    complexData = np.empty((nTrials), dtype=object)
 
     for trl in range(nTrials):
         FreqClustersFound = False
@@ -115,12 +115,12 @@ def cluster_imfs(waveData, highpass, lowpass, dataBucket="AnalyticSignal", nIMFs
                                                 [wave_timerange[0]:wave_timerange[1],\
                                                 potentialTW_info.iloc[ind]['IMF_inds'][ii]]     
                 Wavedata = np.multiply(testdata_amplitude[0,10,:], np.cos(testdata_phase[0,10,:])) 
-                CurrentComplexPhaseData= testdata_amplitude* np.exp(1j * testdata_phase)
+                CurrentcomplexData= testdata_amplitude* np.exp(1j * testdata_phase)
             #build object or whatever this is called with dims [trl][component,channel,time]. 
             # Component is either a potential traveling wave (if clustermethod == overlap) or a singleton dim (if clustermethod == FOI)
-            ComplexPhaseData[trl]=CurrentComplexPhaseData
-    complexPhaseDataBucket = wa.DataBucket(ComplexPhaseData, "IMF_Cluster", "trl_chan_time" )
-    waveData.add_data_bucket(complexPhaseDataBucket)
+            complexData[trl]=CurrentcomplexData
+    complexDataBucket = wa.DataBucket(complexData, "IMF_Cluster", "trl_chan_time" )
+    waveData.add_data_bucket(complexDataBucket)
     
     #@Seb: here, the dimorder is [trl][component,channel,time], but could also be empty... 'Component' is an intrinsic mode function (so not a fixed frequency) and channels can vary accross trials. We need to keep track of inst_freq for the IMFs that are used in the end
 

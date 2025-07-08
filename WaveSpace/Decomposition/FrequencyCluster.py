@@ -15,19 +15,19 @@ def get_frequency_cluster(waveData, dataBucket="", freqList=[]):
     sampleRate = waveData.get_sample_rate()
     nTrials, nChannels, nTime = data.shape
 
-    ComplexPhaseData_FreqCluster = np.empty(ComplexPhaseData.shape[0], dtype=object)
-    ClusterContacts=np.empty(ComplexPhaseData.shape[0], dtype=object)
+    complexData_FreqCluster = np.empty(complexData.shape[0], dtype=object)
+    ClusterContacts=np.empty(complexData.shape[0], dtype=object)
     
     #take power-spectra, subtract 1/f, find freq peaks, cluster channels that have freq peaks in common
-    for trl in range(ComplexPhaseData.shape[0]):        
-        power = np.mean(abs(ComplexPhaseData[trl]) **2, axis=2).T
-        # power_log = np.log10(abs(ComplexPhaseData[trl]) **2)
+    for trl in range(complexData.shape[0]):        
+        power = np.mean(abs(complexData[trl]) **2, axis=2).T
+        # power_log = np.log10(abs(complexData[trl]) **2)
         # power_log_mean = (np.mean(power_log, axis = 1)).T
         FreqPeaks = find_freq_peaks(power, freqList, Options["plotting"])
         #find clusters of channels with similar freq-peaks
         maxDist = None
         FreqPeaks = np.delete(FreqPeaks, [1,2] , 1)#remove unnecessary columns. Each row of FreqPeaks is now peak, channel
-        FreqClusterContacts, FreqClusterFrequencies = find_freq_cluster(ComplexPhaseData,FreqPeaks, distMat, maxDist)
+        FreqClusterContacts, FreqClusterFrequencies = find_freq_cluster(complexData,FreqPeaks, distMat, maxDist)
         #Note that there can be several Clusters per (median) frequency. 
         #This happens if there are several spatially separate groups of contacts with a similar FreqPeak
 
@@ -50,12 +50,12 @@ def get_frequency_cluster(waveData, dataBucket="", freqList=[]):
             inst_amplitude = np.abs(data_hilbert)
             inst_phase = np.angle(data_hilbert)
             temp[clusterind]= np.squeeze(inst_amplitude * np.exp(1j * inst_phase))
-        ComplexPhaseData_FreqCluster[trl]=temp
+        complexData_FreqCluster[trl]=temp
         ClusterContacts[trl]=FreqClusterContacts
-    #Overwrite ComplexPhaseData with new one:
-    ComplexPhaseData = ComplexPhaseData_FreqCluster
+    #Overwrite complexData with new one:
+    complexData = complexData_FreqCluster
 
-def find_freq_cluster(ComplexPhaseData,FreqPeaks,distMat,maxDist=None):
+def find_freq_cluster(complexData,FreqPeaks,distMat,maxDist=None):
     Cluster = []
     #define neighbors from channel distances. Note that this depends on the datatype. 
     #e.g.,EEG allows for larger distances than ECoG

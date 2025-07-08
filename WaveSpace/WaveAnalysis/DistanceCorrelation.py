@@ -17,25 +17,25 @@ def calculate_distance_correlation(waveData, dataBucketName = "", sourcePoints =
         waveData.set_active_dataBucket(dataBucketName)
     
     hf.assure_consistency(waveData)
-    ComplexPhaseData = waveData.get_data(dataBucketName)
+    complexData = waveData.get_data(dataBucketName)
     origDimord = waveData.DataBuckets[dataBucketName].get_dimord()
-    origShape = ComplexPhaseData.shape
+    origShape = complexData.shape
     desiredDimord = "trl_posx_posy_time"
-    hasBeenReshaped, ComplexPhaseData =  hf.force_dimord(ComplexPhaseData, origDimord , desiredDimord)
-    nTrials = ComplexPhaseData.shape[0]
+    hasBeenReshaped, complexData =  hf.force_dimord(complexData, origDimord , desiredDimord)
+    nTrials = complexData.shape[0]
     if os.name == 'posix':  # Unix 
         pool = Pool(cpu_count())
-        output = pool.map(distcorr_process_trial, [(ii, ComplexPhaseData, evaluationAngle, tolerance, X, Y, pixelspacing) for ii in range(nTrials)])
+        output = pool.map(distcorr_process_trial, [(ii, complexData, evaluationAngle, tolerance, X, Y, pixelspacing) for ii in range(nTrials)])
 
     else:  # Windows or Mac
-        output = Parallel(n_jobs=cpu_count())(delayed(phase_dist_corr_task)([np.angle(ComplexPhaseData[ii]),ii, sourcePoints, pixelSpacing]) for ii in range(nTrials))
+        output = Parallel(n_jobs=cpu_count())(delayed(phase_dist_corr_task)([np.angle(complexData[ii]),ii, sourcePoints, pixelSpacing]) for ii in range(nTrials))
     
     df = pd.concat(output, ignore_index=True)
     if hasBeenReshaped:
         origDimordList = str.split(origDimord, '_')
         groupDims  = [dim for dim in origDimordList if not (dim == "posx" or dim =="posy" or dim == "time")]
         groupDimSizes = origShape[:len(groupDims)]
-        multi_indices  = np.array(np.unravel_index(np.arange(ComplexPhaseData.shape[0]), groupDimSizes)).T
+        multi_indices  = np.array(np.unravel_index(np.arange(complexData.shape[0]), groupDimSizes)).T
           
     phaseCorrBucket = wa.DataBucket(df, "PhaseDistanceCorrelation", "DataFrame", waveData.get_channel_names())
     waveData.add_data_bucket(phaseCorrBucket)
@@ -79,13 +79,13 @@ def calculate_distance_correlation_GP(waveData, dataBucketName = "", evaluationA
     
     hf.assure_consistency(waveData)
 
-    ComplexPhaseData = waveData.get_data(dataBucketName)
+    complexData = waveData.get_data(dataBucketName)
     origDimord = waveData.DataBuckets[dataBucketName].get_dimord()
-    origShape = ComplexPhaseData.shape
+    origShape = complexData.shape
     desiredDimord = "trl_posx_posy_time"
-    hasBeenReshaped, ComplexPhaseData =  hf.force_dimord(ComplexPhaseData, origDimord , desiredDimord)
+    hasBeenReshaped, complexData =  hf.force_dimord(complexData, origDimord , desiredDimord)
 
-    if not ComplexPhaseData.dtype == complex:
+    if not complexData.dtype == complex:
         raise TypeError("Data needs to be complex") 
 
     if not np.any(waveData.get_distMat()):
@@ -97,7 +97,7 @@ def calculate_distance_correlation_GP(waveData, dataBucketName = "", evaluationA
     else:
         raise RuntimeError("Distance Matrix not found or not regular")
 
-    nTrials, nXpos, nYpos, nTime = ComplexPhaseData.shape
+    nTrials, nXpos, nYpos, nTime = complexData.shape
     if not np.any(waveData.get_channel_positions()):
         sensors.distmat_to_2d_coordinates_MDS(waveData)
     X = waveData.get_channel_positions()[:, 0]
@@ -107,17 +107,17 @@ def calculate_distance_correlation_GP(waveData, dataBucketName = "", evaluationA
 
     if os.name == 'posix':  # Unix 
         pool = Pool(cpu_count())
-        output = pool.map(distcorr_process_trial, [(ii, ComplexPhaseData, evaluationAngle, tolerance, X, Y, pixelspacing) for ii in range(nTrials)])
+        output = pool.map(distcorr_process_trial, [(ii, complexData, evaluationAngle, tolerance, X, Y, pixelspacing) for ii in range(nTrials)])
 
     else:  # Windows or Mac
-        output = Parallel(n_jobs=cpu_count())(delayed(distcorr_process_trial)([ii, ComplexPhaseData, evaluationAngle, tolerance, X, Y, pixelspacing]) for ii in range(nTrials))
+        output = Parallel(n_jobs=cpu_count())(delayed(distcorr_process_trial)([ii, complexData, evaluationAngle, tolerance, X, Y, pixelspacing]) for ii in range(nTrials))
 
     df = pd.concat(output, ignore_index=True)
     if hasBeenReshaped:
         origDimordList = str.split(origDimord, '_')
         groupDims  = [dim for dim in origDimordList if not (dim == "posx" or dim =="posy" or dim == "time")]
         groupDimSizes = origShape[:len(groupDims)]
-        multi_indices  = np.array(np.unravel_index(np.arange(ComplexPhaseData.shape[0]), groupDimSizes)).T
+        multi_indices  = np.array(np.unravel_index(np.arange(complexData.shape[0]), groupDimSizes)).T
         for ind, dim in enumerate(groupDims):
                 df.insert(0,dim,0)
 
@@ -134,14 +134,14 @@ def calculate_distance_correlation_GP(waveData, dataBucketName = "", evaluationA
     
 
 def distcorr_process_trial(args):
-    ii, ComplexPhaseData, evaluationAngle, tolerance, X, Y, pixelspacing = args
-    ComplexPhaseDataCube = ComplexPhaseData[ii, :, :, :]
-    ep = find_evaluation_points(ComplexPhaseDataCube, evaluationAngle, tolerance)
-    pm, pd, dx, dy = phase_gradient_complex_multiplication(ComplexPhaseDataCube, pixelspacing)
-    source = find_source_points(ComplexPhaseDataCube, X, Y, ep, dx, dy)
+    ii, complexData, evaluationAngle, tolerance, X, Y, pixelspacing = args
+    complexDataCube = complexData[ii, :, :, :]
+    ep = find_evaluation_points(complexDataCube, evaluationAngle, tolerance)
+    pm, pd, dx, dy = phase_gradient_complex_multiplication(complexDataCube, pixelspacing)
+    source = find_source_points(complexDataCube, X, Y, ep, dx, dy)
     rho = np.zeros((len(ep), 2))
     for idx, thispoint in enumerate(ep):
-        ph = np.angle(ComplexPhaseDataCube[:, :, thispoint])
+        ph = np.angle(complexDataCube[:, :, thispoint])
         rho[idx] = phase_dist_corr(ph, source[:, idx], pixelspacing)
     df = DataFrame(data={'trialind': ii, 'rho': rho[:, 0], 'p': rho[:, 1], 'sourcepointsX': source[0],
                      'sourcepointsY': source[1], 'evaluationpoints': ep})
@@ -171,38 +171,38 @@ def phase_dist_corr(ph, source, pixelSpacing):
     cc[0], cc[1] = CircStat.circular_linear_correlation(ph,D)
     return cc
 
-def phase_gradient_complex_multiplication(complexPhaseData, pixel_spacing=1,ifSign=1):
-    nXpos, nYpos, nTime = complexPhaseData.shape
+def phase_gradient_complex_multiplication(complexData, pixel_spacing=1,ifSign=1):
+    nXpos, nYpos, nTime = complexData.shape
     dx = np.zeros((nXpos,nYpos,nTime)) 
     dy = np.zeros((nXpos,nYpos,nTime)) 
     for timePoint in range(nTime):
         tmp_dx = np.zeros((nXpos, nYpos))
          # forward differences on left and right edges
-        tmp_dx[:,0] = np.angle(complexPhaseData[:,1,timePoint] * np.conj(complexPhaseData[:,0,timePoint])) / pixel_spacing
-        tmp_dx[:,nYpos-1] =np.angle(complexPhaseData[:,nYpos-1,timePoint] * np.conj(complexPhaseData[:,nYpos-2,timePoint])) / pixel_spacing
+        tmp_dx[:,0] = np.angle(complexData[:,1,timePoint] * np.conj(complexData[:,0,timePoint])) / pixel_spacing
+        tmp_dx[:,nYpos-1] =np.angle(complexData[:,nYpos-1,timePoint] * np.conj(complexData[:,nYpos-2,timePoint])) / pixel_spacing
         # centered differences on interior points
-        tmp_dx[:,1:nYpos-1] = np.angle(complexPhaseData[:,2:nYpos,timePoint] * np.conj(complexPhaseData[:,0:nYpos-2,timePoint])) / (2*pixel_spacing)
+        tmp_dx[:,1:nYpos-1] = np.angle(complexData[:,2:nYpos,timePoint] * np.conj(complexData[:,0:nYpos-2,timePoint])) / (2*pixel_spacing)
         dx[:,:,timePoint] = tmp_dx * -ifSign
 
         tmp_dy = np.zeros((nXpos, nYpos))
-        tmp_dy[0,:] = np.angle(complexPhaseData[1,:,timePoint] * np.conj(complexPhaseData[0,:,timePoint])) / pixel_spacing
-        tmp_dy[nXpos-1,:] =np.angle(complexPhaseData[nXpos-1,:,timePoint] * np.conj(complexPhaseData[nXpos-2,:,timePoint])) / pixel_spacing
+        tmp_dy[0,:] = np.angle(complexData[1,:,timePoint] * np.conj(complexData[0,:,timePoint])) / pixel_spacing
+        tmp_dy[nXpos-1,:] =np.angle(complexData[nXpos-1,:,timePoint] * np.conj(complexData[nXpos-2,:,timePoint])) / pixel_spacing
         # centered differences on interior points
-        tmp_dy[1:nXpos-1,:] = np.angle(complexPhaseData[2:nXpos,:,timePoint] * np.conj(complexPhaseData[0:nXpos-2,:,timePoint])) / (2*pixel_spacing)
+        tmp_dy[1:nXpos-1,:] = np.angle(complexData[2:nXpos,:,timePoint] * np.conj(complexData[0:nXpos-2,:,timePoint])) / (2*pixel_spacing)
         dy[:,:,timePoint] = tmp_dy * -ifSign
     pm = np.sqrt(np.power(dx,2) + np.power(dy,2)) / (2*np.pi)
     pd = np.arctan2(dy, dx)
     return pm, pd, dx, dy
 
-def find_evaluation_points(complexPhaseData, evaluationAngle, tolerance):
+def find_evaluation_points(complexData, evaluationAngle, tolerance):
     """ep = find_evaluation_points( r, evaluation_angle, tol )**
     estPhase = [ rows X columns X timepoints] complex double of (generalized) phase
     evaluation_angle - angle to evaluate phase crossing [rad]
     tol - numerical tolerance [rad]
     OUTPUT: points at which the phase distribution over channels passes
     a specified angle (within numerical tolerance "tol")"""   
-    nRows, nColumns, nTimepoints = complexPhaseData.shape
-    r = np.reshape(complexPhaseData, (nRows*nColumns, nTimepoints))
+    nRows, nColumns, nTimepoints = complexData.shape
+    r = np.reshape(complexData, (nRows*nColumns, nTimepoints))
     r = np.nansum(r, 0) / r.shape[0]
     r = np.abs( CircStat.circular_distance_between_angles(np.angle(r), evaluationAngle))
     dr = (np.where(np.diff(np.sign(np.diff(r)))==2))

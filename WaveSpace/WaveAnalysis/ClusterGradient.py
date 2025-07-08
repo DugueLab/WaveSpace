@@ -11,22 +11,22 @@ def perform_cluster_gradient(waveData, dataBucket="FrequencyCluster"):
     sampleRate = waveData.get_sample_rate()
     nTrials, nChannels, nTime = ClusterContacts.shape()
 
-    ComplexPhaseData_FreqCluster = waveData.get_data(dataBucket)
+    complexData_FreqCluster = waveData.get_data(dataBucket)
     chanpos2D = chanpos[:,:2]
     # For real data some sort of projection has to happen there e.g. 
     # project the first 2 principle components: 
     # pca = decomposition.PCA(n_components=2)
     # chanpos2D=pca.fit_transform(chanpos)
     for trl in range(nTrials):
-        for cluster in range(ComplexPhaseData_FreqCluster[trl].shape[0]):
-            ClusterPhase = np.angle(ComplexPhaseData_FreqCluster[trl][cluster])
+        for cluster in range(complexData_FreqCluster[trl].shape[0]):
+            ClusterPhase = np.angle(complexData_FreqCluster[trl][cluster])
             clusterchans = ClusterContacts[trl][cluster]
             angle_SF_corr_offset = getClusterGradient(ClusterPhase, chanpos2D[clusterchans,:]) 
     angle_bucket = wd.DataBucket(angle_SF_corr_offset, "Angle_sf", "trl_chan_freqcluster_time")
     waveData.add_data_bucket(angle_bucket)
 
 def getClusterGradient(ClusterPhase, chanpos2D):
- #ComplexPhaseData contains data per trial and frequency cluster (i.e., each [trl][Freqcluster] has dimord [channel,time])
+ #complexData contains data per trial and frequency cluster (i.e., each [trl][Freqcluster] has dimord [channel,time])
  #chanpos is the 2D or 3D positions of all channels within the current cluster 
     #get the maximum distance between neighboring contacts:
     distances = []
