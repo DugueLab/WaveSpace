@@ -16,12 +16,12 @@ from matplotlib import cm
 
 #%%
 
-waveData = ImportHelpers.load_wavedata_object("ExampleData/Output/ComplexData")
+waveData = ImportHelpers.load_wavedata_object("ExampleData/Output/complexData")
 
 # %% Here we look at the spatial basis functions of our data. We index into the dataBucket to use only a subset of trials (of the same conditon) and only the frequency of interest
 nBases=3
 dataInd= (slice(0,1),slice(10,12),slice(None),slice(None),slice(None))
-wa.find_wave_activity(waveData, dataBucketName="AnalyticSignal", dataInd=dataInd, nBases=nBases)
+wa.find_wave_activity(waveData, dataBucketName="complexData", dataInd=dataInd, nBases=nBases)
 
 bases = waveData.get_data('Bases')
 
@@ -48,7 +48,7 @@ plt.show()
 #%% alternatively, we cann calculate the bases on all data at once, and sort out the weights later:
 nBases=5
 dataInd= None
-wa.find_wave_activity(waveData, dataBucketName="AnalyticSignal", dataInd=dataInd, nBases=nBases)
+wa.find_wave_activity(waveData, dataBucketName="complexData", dataInd=dataInd, nBases=nBases)
 
 bases = waveData.get_data('Bases')
 

@@ -21,7 +21,7 @@ import matplotlib.gridspec as gridspec
 from matplotlib import colormaps
 # Load some simulated data
 dataPath  = os.path.join(path, "Examples/ExampleData/Output") 
-waveData = ImportHelpers.load_wavedata_object(dataPath + "/ComplexData")
+waveData = ImportHelpers.load_wavedata_object(dataPath + "/complexData")
 
 #%%
 tStart = time.time()
@@ -32,7 +32,7 @@ OpticalFlow.create_uv(waveData,
         Sigma=1, 
         alpha = 0.1, 
         nIter = 200, 
-        dataBucketName="AnalyticSignal",
+        dataBucketName="complexData",
         is_phase = False)
 
 print('optical flow took: ', time.time()-tStart)
@@ -41,7 +41,7 @@ trialToPlot = 4
 waveData.set_active_dataBucket('UV')
 ani = Plotting.plot_optical_flow(waveData, 
                                 UVBucketName = 'UV',
-                                PlottingDataBucketName = 'AnalyticSignal', 
+                                PlottingDataBucketName = 'complexData', 
                                 dataInds = (0, trialToPlot, slice(None), slice(None), slice(None)),
                                 plotangle=True,
                                 normVectorLength = True)  

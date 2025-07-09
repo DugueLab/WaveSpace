@@ -4,7 +4,8 @@ import WaveSpace.Utils.WaveData as wd
 
 def find_wave_activity(waveData, dataBucketName=None, dataInd = None, nBases=3):
     """Identifies dominant traveling wave patterns (spatial bases) in complex-valued waveData
-    via singular value decomposition on the data covariance 
+    via singular value decomposition on the data covariance. Converts complex data to normalized (unit-length) phase representation.
+
     Inputs:
     waveData : WaveData object        
     dataBucketName : str, optional
@@ -33,16 +34,17 @@ def find_wave_activity(waveData, dataBucketName=None, dataInd = None, nBases=3):
         waveData.set_active_dataBucket(dataBucketName)
 
     hf.assure_consistency(waveData)
-    complexPhaseData = waveData.get_data(dataBucketName)
+    complexData = waveData.get_data(dataBucketName)
     if dataInd:
-        complexPhaseData = complexPhaseData[dataInd]
+        complexData = complexData[dataInd]
     origDimord = waveData.DataBuckets[dataBucketName].get_dimord()
-    origShape = complexPhaseData.shape
+    origShape = complexData.shape
     desiredDimord = "trl_chan_time"
-    hasBeenReshaped, complexPhaseData =  hf.force_dimord(complexPhaseData, origDimord , desiredDimord)
+    hasBeenReshaped, complexData =  hf.force_dimord(complexData, origDimord , desiredDimord)
     # Make complex valued Phase/magnitude Timeseries per freq
+    complexData = np.exp(1j*np.angle(complexData))
     #reshape to (trial, time, channel)
-    phi= np.transpose(complexPhaseData, (0, 2, 1))
+    phi= np.transpose(complexData, (0, 2, 1))
     bases, fit, betas = c_TW_bases_betas(phi,nBases=nBases)
     chan_names = waveData.get_channel_names()
     if hasBeenReshaped:
@@ -56,7 +58,7 @@ def find_wave_activity(waveData, dataBucketName=None, dataInd = None, nBases=3):
 
         groupDimensions = splitDimensions[0:nGroupDimensions]
         groupDimSizes = origShape[:len(groupDimensions)]
-        multi_indices  = np.array(np.unravel_index(np.arange(complexPhaseData.shape[0]), groupDimSizes)).T
+        multi_indices  = np.array(np.unravel_index(np.arange(complexData.shape[0]), groupDimSizes)).T
         
         bases = np.reshape(bases, (*channelShape, bases.shape[-1]))
         basesBucket = wd.DataBucket(bases,"Bases","posx_posy_base", chan_names)

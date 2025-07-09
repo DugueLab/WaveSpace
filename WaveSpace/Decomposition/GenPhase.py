@@ -100,7 +100,7 @@ def generalized_phase(waveData, dataBucketName = ''):
         #
         outcome[trialNr,:] = md * np.exp( 1j * ph )
         # reshape original data
-    dataBucket = wd.DataBucket(outcome, "ComplexPhaseData", currentDimord, waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
+    dataBucket = wd.DataBucket(outcome, "complexData", currentDimord, waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
     if hasBeenReshaped:
         dataBucket.reshape(oldshape, currentDimord)  
 

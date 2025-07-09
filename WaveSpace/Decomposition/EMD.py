@@ -10,9 +10,10 @@ import multiprocessing
 from itertools import product
 import joblib
 import platform
-emd.logger.set_up()
-emd.logger.set_up(level='CRITICAL')  # supress the warning about too few IMFs
 
+
+def start_emd_logging():
+    emd.logger.set_up(level='CRITICAL')  # supress the warning about too few IMFs
 
 # Utility funs________________________________________________
 def FreqAmpPhaseFromAnalytic(waveData, smooth_phase=None, smooth_freq = 3, dataBucketName="", timeRange=(slice(None))):
@@ -346,7 +347,7 @@ def CombineIMFsIfPositiveJointInstFreq(data, potentialHarmonicInds):
 
     if hasbeenreshaped:
         currentData = np.reshape(currentData, origShape)
-    complexDataBucket = wd.DataBucket(currentData, "AnalyticSignal", data.DataBuckets[dataBucketName].get_dimord(), data.DataBuckets[data.ActiveDataBucket].get_channel_names())
+    complexDataBucket = wd.DataBucket(currentData, "complexData", data.DataBuckets[dataBucketName].get_dimord(), data.DataBuckets[data.ActiveDataBucket].get_channel_names())
     data.add_data_bucket(complexDataBucket)
     data.log_history(["EMD", "Combined harmonic IMFs"])
 
@@ -482,7 +483,7 @@ def EMD(waveData, nIMFs=7, dataBucketName="", noiseVar = 0.05, n_noiseChans = 10
     if hasBeenReshaped:
         complexData = np.reshape(complexData, (nIMFs,*origShape))
 
-    complexDataBucket = wd.DataBucket(complexData, "AnalyticSignal", "IMF_" + origDimord,
+    complexDataBucket = wd.DataBucket(complexData, "complexData", "IMF_" + origDimord,
                                         waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
     waveData.add_data_bucket(complexDataBucket)
     waveData.log_history(["Phase estimate", "EMD","siftType: " , siftType, "nIMFS: ", nIMFs])

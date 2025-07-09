@@ -26,12 +26,12 @@ def apply_hilbert(waveData, dataBucketName =None ):
     analytic_signal = hilbert(currentData)
     inst_amplitude = np.abs(analytic_signal)
     inst_phase  = np.unwrap(np.angle(analytic_signal))
-    ComplexPhaseData = inst_amplitude * np.exp(1j * inst_phase)
+    complexData = inst_amplitude * np.exp(1j * inst_phase)
     if hasBeenReshaped:
-        ComplexPhaseData = np.reshape(ComplexPhaseData, origShape)
+        complexData = np.reshape(complexData, origShape)
 
-    ComplexPhaseDataBucket = wd.DataBucket(ComplexPhaseData, "AnalyticSignal", origDimord, waveData.get_channel_names())
-    waveData.add_data_bucket(ComplexPhaseDataBucket)
+    complexDataBucket = wd.DataBucket(complexData, "complexData", origDimord, waveData.get_channel_names())
+    waveData.add_data_bucket(complexDataBucket)
     waveData.log_history(["Analytic Signal", "Hilbert"])
 
 

@@ -16,7 +16,7 @@ from WaveSpace.Preprocessing import Filter as filt
 from WaveSpace.Decomposition import Hilbert as hilb
 from WaveSpace.Decomposition import EMD as emd
 from WaveSpace.Utils import WaveData as wd
-from WaveSpace.Decomposition import GenPhase 
+from WaveSpace.Decomposition import GenPhase, Morlet 
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -44,11 +44,10 @@ for cond in unique_conds:
     plt.grid()
     plt.show()
 
-#%% Filter Hilbert approach
+#%%Option1: Filter Hilbert approach
 # we filter the data narrowly around our frequency of interest (10Hz) and then apply the Hilbert transform to get the analytic signal.
 # Note that this only makes sense if we **already know** that there is a narrowband oscillation at the frequency of interest. 
 # To demonstrate this, we will filter the data at 17Hz as well.
-
 for freqInd, freq in enumerate([10, 17]):  
     filt.filter_narrowband(waveData, dataBucketName = "SimulatedData", LowCutOff=freq-1, HighCutOff=freq+1, type = "FIR", order=100, causal=False)
     waveData.DataBuckets[str(freq)] =  waveData.DataBuckets.pop("NBFiltered") #Rename 
@@ -62,18 +61,18 @@ waveData.delete_data_bucket("17")
 hilb.apply_hilbert(waveData, dataBucketName = "NBFiltered")
 
 #plot. Try both frequencies and see for which one the phase makes sense 
-analytic_signal = waveData.DataBuckets["AnalyticSignal"].get_data()[0,0,18,19,:] #dimord is freq_trl_posx_posy_time
+complexData = waveData.DataBuckets["complexData"].get_data()[0,0,18,19,:] #dimord is freq_trl_posx_posy_time
 fig, axs = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
 # real part and envelope
-axs[0].plot(waveData.get_time(), np.real(analytic_signal), label='Real part')
-axs[0].plot(waveData.get_time(), np.abs(analytic_signal), label='Envelope', linestyle='--')
+axs[0].plot(waveData.get_time(), np.real(complexData), label='Real part')
+axs[0].plot(waveData.get_time(), np.abs(complexData), label='Envelope', linestyle='--')
 axs[0].set_ylabel('Amplitude')
 axs[0].set_title('Real part and Envelope of Analytic Signal')
 axs[0].legend()
 axs[0].grid()
 
 # phase
-axs[1].plot(waveData.get_time(), np.angle(analytic_signal), color='tab:orange')
+axs[1].plot(waveData.get_time(), np.angle(complexData), color='tab:orange')
 axs[1].set_ylabel('Phase (radians)')
 axs[1].set_xlabel('Time (s)')
 axs[1].set_title('Phase of Analytic Signal')
@@ -82,18 +81,19 @@ axs[1].grid()
 plt.tight_layout()
 plt.show()
 
-waveData.save_to_file(os.path.join(dataPath, "ComplexData"))
-#%% We can also do alternative decompositions
-# Generalised phase (adapted from # https://github.com/mullerlab/generalized-phase)
+waveData.save_to_file(os.path.join(dataPath, "complexData"))
+
+#%% Option2: Generalised phase (adapted from # https://github.com/mullerlab/generalized-phase)
 lowerCutOff = 1
 higherCutOff = 40
 filt.filter_broadband(waveData, "SimulatedData", lowerCutOff, higherCutOff, 5)
 GenPhase.generalized_phase(waveData, "BBFiltered")
 #plot
-complexSignal = waveData.DataBuckets["ComplexPhaseData"].get_data()[0,0,0,:] #dimord is freq_trl_posx_posy_time
+complexSignal = waveData.DataBuckets["complexData"].get_data()[0,0,0,:] #dimord is freq_trl_posx_posy_time
 origSignal = waveData.DataBuckets["SimulatedData"].get_data()[0,0,0,:]
 
 fig, axs = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
+fig.suptitle(f"Filter Hilbert")
 # real part and envelope
 axs[0].plot(waveData.get_time(), np.real(complexSignal), label='Real part')
 axs[0].plot(waveData.get_time(), origSignal, label='Envelope', linestyle='--')
@@ -120,6 +120,7 @@ xw = np.real(origSignal)
 xgp = complexSignal
 phase = np.angle(xgp)
 fig = plt.figure(figsize=(12.5, 4.2))
+fig.suptitle(f"Generalized phase")
 ax1 = fig.add_axes([0.08, 0.15, 0.7, 0.75])  
 
 ax1.plot(time, xw, linewidth=4, color='k', label='wideband signal')
@@ -148,7 +149,7 @@ ax2.set_xticklabels([])
 ax2.set_axis_off()
 plt.show()
 
-# %% Empirical mode decomposition (EMD) 
+# %%  Option3: Empirical mode decomposition (EMD) 
 # If we cannot expect the signal to be well behaved for FFT based approaches, we can use EMD
 # note that this is A LOT slower than Filter + Hilbert
 
@@ -175,4 +176,34 @@ IMFOfInterest = 4
 dataInds = (slice(None), TrialOfInterest, SelectedChannel[0], SelectedChannel[1])
 Plotting.plot_imfs(waveData, dataInds, IMFOfInterest)
 
+#%% Option4: Wavelets
+# 4.1 Time-Domain
+# frequencies are the centre frequencies of the wavelets and would normally be logarithmically spaced within your frequency range of interest.
+# for comparison with other methods we use the same two frequencies as above
 
+frequencies = [10,17]
+Morlet.wavelet_convolution(waveData, dataBucketName="SimulatedData", n_cycles=3, frequencies=frequencies)
+
+#plot. 
+complexData = waveData.DataBuckets["complexData"].get_data()[0,0,18,19,:] #dimord is freq_trl_posx_posy_time
+fig, axs = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
+fig.suptitle(f"Wavelet Convolution")
+# real part and envelope
+axs[0].plot(waveData.get_time(), np.real(complexData), label='Real part')
+axs[0].plot(waveData.get_time(), np.abs(complexData), label='Envelope', linestyle='--')
+axs[0].set_ylabel('Amplitude')
+axs[0].set_title('Real part and Envelope of Analytic Signal')
+axs[0].legend()
+axs[0].grid()
+
+# phase
+axs[1].plot(waveData.get_time(), np.angle(complexData), color='tab:orange')
+axs[1].set_ylabel('Phase (radians)')
+axs[1].set_xlabel('Time (s)')
+axs[1].set_title('Phase of Analytic Signal')
+axs[1].grid()
+
+plt.tight_layout()
+plt.show()
+
+# %%

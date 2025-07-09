@@ -338,7 +338,6 @@ def find_midline_channels(channel_positions, tolerance=0.1):
     plt.show()
     return sagittal_channels, coronal_channels
 
-
 def plot_distance_along_surface(waveData):
     """Plot the distance matrix on the surface with distance as color"""
 

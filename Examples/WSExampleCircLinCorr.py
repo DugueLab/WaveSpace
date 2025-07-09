@@ -27,7 +27,7 @@ import matplotlib.gridspec as gridspec
 from matplotlib import colormaps
 # Load some simulated data
 dataPath  = os.path.join(path, "Examples/ExampleData/Output") 
-waveData = ImportHelpers.load_wavedata_object(dataPath + "/ComplexData")
+waveData = ImportHelpers.load_wavedata_object(dataPath + "/complexData")
 
 #%% 
 # we already know that our data is on a regular grid because we generated it that way
@@ -36,7 +36,7 @@ waveData = ImportHelpers.load_wavedata_object(dataPath + "/ComplexData")
 sensors.regularGrid(waveData)
 
 #%% Generalized phase distance correlation
-DistanceCorrelation.calculate_distance_correlation_GP(waveData, dataBucketName = "AnalyticSignal", evaluationAngle=np.pi, tolerance=0.2)
+DistanceCorrelation.calculate_distance_correlation_GP(waveData, dataBucketName = "complexData", evaluationAngle=np.pi, tolerance=0.2)
 
 #%%
 #Calculate distance correlation based on selected sourcepoints
@@ -44,11 +44,11 @@ pointRange = range(0,20,2)
 sourcePoints = []
 for i in pointRange:
     sourcePoints.append((i,i))
-DistanceCorrelation.calculate_distance_correlation(waveData, dataBucketName = "AnalyticSignal", sourcePoints=sourcePoints, pixelSpacing=1)
+DistanceCorrelation.calculate_distance_correlation(waveData, dataBucketName = "complexData", sourcePoints=sourcePoints, pixelSpacing=1)
 
 #%% Plot phase-distance correlation over time for selected points on diagonal
 phaseDistCorr= waveData.get_data("PhaseDistanceCorrelation")
-shape = waveData.get_data("AnalyticSignal").shape
+shape = waveData.get_data("complexData").shape
 selectedTrial = 4
 fig, ax = plt.subplots(figsize=(8,6))
 for i, point in enumerate(sourcePoints):
@@ -67,7 +67,7 @@ for x in range(pointRange[0]):
     for y in range(pointRange[1]):
         sourcePoints.append((x,y))
 
-DistanceCorrelation.calculate_distance_correlation(waveData, dataBucketName = "AnalyticSignal", sourcePoints=sourcePoints, pixelSpacing=1)
+DistanceCorrelation.calculate_distance_correlation(waveData, dataBucketName = "complexData", sourcePoints=sourcePoints, pixelSpacing=1)
 
 output_path = os.path.join(path, "Examples/ExampleData/Output")
 waveData.save_to_file(os.path.join(output_path, "DistanceCorrelation"))
@@ -84,7 +84,7 @@ for x in range(pointRange[0]):
 phaseDistCorr= waveData.get_data("PhaseDistanceCorrelation")
 conditions = waveData.get_trialInfo()[::2]
 
-shape = waveData.get_data("AnalyticSignal").shape
+shape = waveData.get_data("complexData").shape
 selectedTrial = 4
 
 rho = np.zeros((8,20,20))

@@ -94,7 +94,7 @@ def plot_imfs(waveData, dataInds = (0), IMFofInterest = 1):
     """
     import emd
     time = waveData.get_time()
-    imfs = waveData.get_data("AnalyticSignal")[dataInds]    
+    imfs = waveData.get_data("complexData")[dataInds]    
     imfs = imfs.T
     IP = np.angle(imfs[:,IMFofInterest])  
     # remove any imfs that are NaN
