@@ -1,6 +1,6 @@
 Metadata-Version: 2.2
 Name: WaveSpace
-Version: 1.1.0
+Version: 1.1.2
 Summary: A Python package for the analysis of cortical traveling waves
 Home-page: https://github.com/kpetras/WaveSpace
 Author: Kirsten Petras
@@ -13,18 +13,19 @@ Classifier: Programming Language :: Python :: 3.9
 Classifier: Operating System :: OS Independent
 Requires-Python: >=3.9, <3.10
 Description-Content-Type: text/markdown
-Requires-Dist: numpy<2.0.0
+Requires-Dist: numpy>=1.26.4
 Requires-Dist: matplotlib>=3.9.2
 Requires-Dist: scipy>=1.13.1
 Requires-Dist: plotly>=5.24.1
 Requires-Dist: pint>=0.24.4
 Requires-Dist: pyvista>=0.44.2
-Requires-Dist: chaospy==4.0.1
+Requires-Dist: chaospy>=4.3.19
 Requires-Dist: pandas>=2.2.3
 Requires-Dist: scikit-learn>=1.6.1
-Requires-Dist: scikit-image>=0.24.0
+Requires-Dist: scikit-image>=0.18.1
 Requires-Dist: tvb-gdist>=2.2.1
 Requires-Dist: emd>=0.8.0
+Requires-Dist: mne>=1.8.0
 Dynamic: author
 Dynamic: author-email
 Dynamic: classifier
@@ -36,7 +37,7 @@ Dynamic: requires-dist
 Dynamic: requires-python
 Dynamic: summary
 
-# WaveSpace
+# WaveSpace version 1.1.2
 Python tools for the simulation and analysis of cortical traveling waves
 
 ## Installation
@@ -45,7 +46,7 @@ Download latest version from [here](https://github.com/kpetras/WaveSpace/tree/ma
 
 Open a terminal, navigate to the directory you downloaded to and install with
 ```
-pip install WaveSpace-1.1.0-py3-none-any.whl
+pip install WaveSpace-1.1.2-py3-none-any.whl
 ```
 
 ## Modules

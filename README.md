@@ -1,4 +1,4 @@
-# WaveSpace
+# WaveSpace version 1.1.2
 Python tools for the simulation and analysis of cortical traveling waves
 
 ## Installation
@@ -7,7 +7,7 @@ Download latest version from [here](https://github.com/kpetras/WaveSpace/tree/ma
 
 Open a terminal, navigate to the directory you downloaded to and install with
 ```
-pip install WaveSpace-1.1.0-py3-none-any.whl
+pip install WaveSpace-1.1.2-py3-none-any.whl
 ```
 
 ## Modules
