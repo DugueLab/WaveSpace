@@ -25,7 +25,7 @@ def calculate_distance_correlation(waveData, dataBucketName = "", sourcePoints =
     nTrials = complexData.shape[0]
     if os.name == 'posix':  # Unix 
         pool = Pool(cpu_count())
-        output = pool.map(distcorr_process_trial, [(ii, complexData, evaluationAngle, tolerance, X, Y, pixelspacing) for ii in range(nTrials)])
+        output = pool.map(phase_dist_corr_task, [(np.angle(complexData[ii]),ii, sourcePoints, pixelSpacing) for ii in range(nTrials)])
 
     else:  # Windows or Mac
         output = Parallel(n_jobs=cpu_count())(delayed(phase_dist_corr_task)([np.angle(complexData[ii]),ii, sourcePoints, pixelSpacing]) for ii in range(nTrials))

@@ -64,7 +64,8 @@ color_grid = Plotting.get_color_grid_from_probes((shape[spatialIndexStart],shape
 Plotting.add_color_grid_legend(ax, color_grid, position=[0.2, 0.2, 1.5, 1.5])
 plt.show()
 
-# %% Calculate and plot average phase-distance correlation for 600 to 1000 ms for all points
+# %% Only do if you have too much time on your hands:
+# Calculate and plot average phase-distance correlation for 600 to 1000 ms for all points
 pointRange = (20,20)
 sourcePoints = []
 for x in range(pointRange[0]):
