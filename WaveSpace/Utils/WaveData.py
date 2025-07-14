@@ -14,10 +14,13 @@ class DataBucket:
         self._unit = unit
         self._reservedNames = ["time", "chan", "posx", "posy", "trl"]
         if len(time) == 0:
-            assert("time" in dimord, "no time dimension found in data")
-            totalSamples = self._data.shape[self._dimord.split("_").index("time")]
-            totalTimeMS = (totalSamples / sampleRate) * 1000
-            self._time = np.arange(0, totalTimeMS, 1)
+            if not("time" in dimord):
+                print(f"Warning: no time dimension in databucket: {self._description} \n taking length of last dimension in {self._dimord} to construct timevector")
+                self._time = np.arange(0,data.shape[-1] ,1)
+            else:
+                totalSamples = self._data.shape[self._dimord.split("_").index("time")]
+                totalTimeMS = (totalSamples / sampleRate) * 1000
+                self._time = np.linspace(0, totalTimeMS, num=totalSamples, endpoint=False)
         else:
             self._time = time    
 
@@ -101,8 +104,8 @@ class WaveData():
         for key, dataBucket in self.DataBuckets.items():
             out += "DataBuckets[\"%s\"]| %s | %s \n" % (key , dataBucket.get_dimord(),dataBucket.get_data().shape )
         out += "%s | %s(Hz) \n" % ("Sampling Rate", self._sampleRate)
-        if len(self._time>1):
-            out += "%s | %s(S) - %s(S) \n" % ("Time", self._time[0], self._time[-1])
+        if len(self.get_time()>1):
+            out += "%s | %s(S) - %s(S) \n" % ("Time", self.get_time()[0], self.get_time()[-1])
         return out  
     
     def append_dataset(self, wavedata, dataBucketName):
@@ -145,13 +148,13 @@ class WaveData():
         Crop Data in time, input: Either: Start (s), Stop (s) OR: BufferDuration(S)
         """
         if len(args) > 1:
-            t0,_=hf.find_nearest(self._time, args[0])#Index of start time of interest
-            t1,_=hf.find_nearest(self._time, args[1])#Index of end time of interest 
+            t0,_=hf.find_nearest(self.get_time(), args[0])#Index of start time of interest
+            t1,_=hf.find_nearest(self.get_time(), args[1])#Index of end time of interest 
         else:
             nsamples = int(args[0] * self._sampleRate)             
             t0 = 0+nsamples
-            t1 = len(self._time)-nsamples
-        self._time = self._time[t0:t1]
+            t1 = len(self.get_time())-nsamples
+        self.set_time(self.get_time()[t0:t1])
         dimensions = self.DataBuckets[self.ActiveDataBucket]._dimord.split("_")
         timedim = [ind for ind, item in enumerate(dimensions) if re.search("time", item)]
         self.DataBuckets[self.ActiveDataBucket]._data = self.DataBuckets[self.ActiveDataBucket]._data.take(indices=range(t0,t1), axis = timedim[0])

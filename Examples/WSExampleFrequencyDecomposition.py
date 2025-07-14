@@ -2,6 +2,7 @@
 import sys
 import os
 
+
 # Add the project root directory to the Python path when working with source code, 
 # not necessary when package is installed
 path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -20,6 +21,7 @@ from WaveSpace.Decomposition import GenPhase, Morlet
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
 from scipy.signal import welch
 
 # Load some simulated data

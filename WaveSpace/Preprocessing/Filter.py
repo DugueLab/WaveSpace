@@ -19,10 +19,11 @@ def filter_broadband(data,dataBucketName = "", LowCutOff=0, HighCutOff=100,  n_j
     currentData = data.DataBuckets[dataBucketName].get_data()
     origDimord = data.DataBuckets[dataBucketName].get_dimord()
     origShape = currentData.shape
-    hasBeenReshaped, currentData =  hf.force_dimord(currentData, origDimord , "trl_chan_time")
+    desiredDimord = "trl_chan_time"
+    hasBeenReshaped, currentData =  hf.force_dimord(currentData, origDimord , desiredDimord)
 
     NewData = mne.filter.filter_data(data = currentData,sfreq = data.get_sample_rate(),l_freq = LowCutOff, h_freq= HighCutOff, n_jobs=n_jobs)
-    dataBucket = wd.DataBucket(NewData, "BBFiltered", data.DataBuckets[data.ActiveDataBucket].get_dimord(),sampleRate=data.get_sample_rate() ,chanNames=data.get_channel_names())
+    dataBucket = wd.DataBucket(NewData, "BBFiltered", desiredDimord, sampleRate=data.get_sample_rate() ,chanNames=data.get_channel_names())
     # reshape original data
     if hasBeenReshaped:
         dataBucket.reshape(origShape, origDimord)  

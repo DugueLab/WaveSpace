@@ -566,12 +566,12 @@ def combine_SimData(SimDataList, dimension = 'trl', SimCondList = None, dataBuck
         #update time
         time = np.arange(0+1/sampleRate, (newdata[0].shape[-1]/SimDataList[0].get_sample_rate())+1/sampleRate, 1/sampleRate)
     waveData = wd.WaveData(time=time)
+    waveData.set_sample_rate(sampleRate)
     waveData.set_channel_names(channel_names)
     waveData.set_channel_positions(channel_positions)
-    for ind,name in enumerate(dataBucketNames):
-        dataBucket = wd.DataBucket(newdata[ind], name,dimord,sampleRate=waveData.get_sample_rate() ,chanNames= channel_names)
-        waveData.add_data_bucket(dataBucket)
     waveData.set_simInfo(SimInfo)
     waveData.set_trialInfo([SimInfo["condname"] for SimInfo in waveData.get_SimInfo()])
-    waveData.set_sample_rate(sampleRate)
+    for ind,name in enumerate(dataBucketNames):
+        dataBucket = wd.DataBucket(newdata[ind], name,dimord, sampleRate=waveData.get_sample_rate() ,chanNames= channel_names)
+        waveData.add_data_bucket(dataBucket)
     return waveData
