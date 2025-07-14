@@ -97,7 +97,7 @@ def generalized_phase(waveData, dataBucketName = ''):
                 # Interpolate gaps from negative frequencies
                 p[np.isnan(p)] = naninterp(p)
                 p = rewrap(p)
-                ph[ii:] = p[0:ph.shape[1]]
+                ph[ii,:] = p[0:ph.shape[1]]
         #
         outcome[trialNr,:] = md * np.exp( 1j * ph )
         # reshape original data
