@@ -8,6 +8,7 @@ path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, path )
 print(path)
 
+from matplotlib.collections import LineCollection
 from WaveSpace.Simulation import SimulationFuns
 from WaveSpace.PlottingHelpers import Plotting
 from WaveSpace.Utils import HelperFuns as hf
@@ -96,7 +97,7 @@ fig, axs = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
 fig.suptitle(f"Filter Hilbert")
 # real part and envelope
 axs[0].plot(waveData.get_time(), np.real(complexSignal), label='Real part')
-axs[0].plot(waveData.get_time(), origSignal, label='Envelope', linestyle='--')
+axs[0].plot(waveData.get_time(), np.abs(complexSignal), label='Envelope', linestyle='--')
 axs[0].set_ylabel('Amplitude')
 axs[0].set_title('Real part and Envelope of Analytic Signal')
 axs[0].legend()

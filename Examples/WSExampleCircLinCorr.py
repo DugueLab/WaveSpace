@@ -37,6 +37,7 @@ sensors.regularGrid(waveData)
 
 #%% Generalized phase distance correlation
 DistanceCorrelation.calculate_distance_correlation_GP(waveData, dataBucketName = "complexData", evaluationAngle=np.pi, tolerance=0.2)
+dataFrame = waveData.get_data("PhaseDistanceCorrelation")
 
 #%%
 #Calculate distance correlation based on selected sourcepoints
@@ -49,18 +50,22 @@ DistanceCorrelation.calculate_distance_correlation(waveData, dataBucketName = "c
 #%% Plot phase-distance correlation over time for selected points on diagonal
 phaseDistCorr= waveData.get_data("PhaseDistanceCorrelation")
 shape = waveData.get_data("complexData").shape
-selectedTrial = 4
+dimord = waveData.DataBuckets["complexData"].get_dimord()
+splitDimord = dimord.split("_")
+spatialIndexStart = splitDimord.index("posx")
+selectedTrial = 0
 fig, ax = plt.subplots(figsize=(8,6))
 for i, point in enumerate(sourcePoints):
     rho = phaseDistCorr.loc[(phaseDistCorr["trialInd"] == selectedTrial) & (phaseDistCorr["sourcePointX"] == point[0]) & (phaseDistCorr["sourcePointY"] == point[1])]
     color = Plotting.getProbeColor(i, len(sourcePoints))
     ax.plot(rho["rho"].tolist(), label =str(point), color=color)
 ax.legend()
-color_grid = Plotting.get_color_grid_from_probes((shape[2],shape[3]), sourcePoints)
+color_grid = Plotting.get_color_grid_from_probes((shape[spatialIndexStart],shape[spatialIndexStart+1]), sourcePoints)
 Plotting.add_color_grid_legend(ax, color_grid, position=[0.2, 0.2, 1.5, 1.5])
 plt.show()
 
-# %% Calculate and plot average phase-distance correlation for 600 to 1000 ms for all points
+# %% Only do if you have too much time on your hands:
+# Calculate and plot average phase-distance correlation for 600 to 1000 ms for all points
 pointRange = (20,20)
 sourcePoints = []
 for x in range(pointRange[0]):

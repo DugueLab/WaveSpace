@@ -197,10 +197,11 @@ waveData = SimulationFuns.combine_SimData([planeWaveData, targetWaveData, spiral
 output_path = os.path.join(path, "Examples/ExampleData/Output")
 waveData.save_to_file(os.path.join(output_path, "SimulatedData"))
 
-#%% Plot an example timeseries
-ani = Plotting.animate_grid_data(waveData, DataBucketName="SimulatedData", dataInd=4, probepositions=[(0,15), (5,15), (10,15), (15,15), (19,15), (19,15)])
-plot_file = os.path.join(path, "Examples/ExampleData/Output/SimulationAnimation.mp4")
-ani.save(plot_file)
+#%% Plot an example timeseries (takes long)
+for trl in range(waveData.get_data("SimulatedData").shape[0]):
+    ani = Plotting.animate_grid_data(waveData, DataBucketName="SimulatedData", dataInd=trl, probepositions=[(0,15), (5,15), (10,15), (15,15), (19,15), (19,15)])
+    plot_file = os.path.join(path, f"Examples/ExampleData/Output/SimulationAnimation_{trl}.mp4")
+    ani.save(plot_file)
 
 
 
