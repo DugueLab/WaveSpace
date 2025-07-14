@@ -92,7 +92,7 @@ def create_uv(waveData, applyGaussianBlur=False, type = "real", Sigma=1, alpha =
         #reshape back to original dimord, take into account that the last dimension has been reduced by 1
         allUV = np.reshape(allUV, oldshape[:-1] + (oldshape[-1] - 1,))       
     dataBucket = wd.DataBucket(allUV, "UV",currentDimord,
-                               waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
+                               sampleRate=waveData.get_sample_rate() ,chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
     waveData.add_data_bucket(dataBucket)
 
 def HS(im1, im2, U,V, alpha, kernel, Niter, is_phase):
@@ -312,7 +312,7 @@ def calculate_directional_stability(waveData, dataBucketName = "", windowSize=10
         # has been reduced by the size of the window. passing -1 to reshape makes numpy 
         # figure out the correct size)
         averageVectors = np.reshape(averageVectors, (*oldshape[:-1],-1))
-    dataBucket = wd.DataBucket(averageVectors, "Directional_Stability_Timeseries",waveData.DataBuckets[dataBucketName].get_dimord(), waveData.DataBuckets[dataBucketName].get_channel_names() )
+    dataBucket = wd.DataBucket(averageVectors, "Directional_Stability_Timeseries",waveData.DataBuckets[dataBucketName].get_dimord(), sampleRate=waveData.get_sample_rate() ,chanNames=waveData.DataBuckets[dataBucketName].get_channel_names() )
     waveData.add_data_bucket(dataBucket)
     
 def source_sink_process_trial(thistrialInd, trial_data):
@@ -820,5 +820,5 @@ def opticalFlow(waveData, dataBucketName=None, angleFlag= 'True', maxIter=1000, 
     #reshape back to original dimord, take into account that the last dimension has been reduced by 1
     allUV = np.reshape(allUV, oldshape[:-1] + (oldshape[-1] - 1,))       
     dataBucket = wd.DataBucket(allUV, "UV",currentDimord,
-                               waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
+                               sampleRate=waveData.get_sample_rate() ,chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
     waveData.add_data_bucket(dataBucket)

@@ -5,7 +5,7 @@ import re
 import pickle
 
 class DataBucket:
-    def __init__(self, data, description, dimord, chanNames, unit=""):
+    def __init__(self, data, description, dimord, chanNames, sampleRate=1000, time=[], unit=""):
         self._data = data
         self._description = description
         self._dimord = dimord
@@ -13,6 +13,13 @@ class DataBucket:
         self._chanNames = chanNames
         self._unit = unit
         self._reservedNames = ["time", "chan", "posx", "posy", "trl"]
+        if len(time) == 0:
+            assert("time" in dimord, "no time dimension found in data")
+            totalSamples = self._data.shape[self._dimord.split("_").index("time")]
+            totalTimeMS = (totalSamples / sampleRate) * 1000
+            self._time = np.arange(0, totalTimeMS, 1)
+        else:
+            self._time = time    
 
     def get_channel_names(self):
         return self._chanNames
@@ -31,6 +38,12 @@ class DataBucket:
     
     def get_data(self):
         return self._data
+    
+    def get_time(self):
+        return self._time
+    
+    def set_time(self, time):
+        self._time = time
     
     def set_data(self, data, dimord):
         assert len(data.shape) == len(dimord.split("_")), "Dimord does not match data dimensions"
@@ -82,16 +95,6 @@ class WaveData():
         self._coords2D = []
         self._channames =[]
         
-        if len(time)>0:
-            if (len(time) < 2):
-                raise Exception("Time should contain two or more numbers")
-            elif (len(time) == 2):
-                self._time = np.arange(time[0]+1/sampleRate, time[-1]+1/sampleRate, 1/sampleRate)
-            else:
-                self._time = time
-        else:
-            self._time = time
-  
 
     def __repr__(self):
         out= ""
@@ -185,8 +188,10 @@ class WaveData():
         else:
             raise Exception("Incorrect format for channel positions. Supply ND-array or filepath")
         
-    def set_time(self, time):
-        self._time = time
+    def set_time(self, time, dataBucketName = ""):
+        if dataBucketName == "":
+            dataBucketName = self.ActiveDataBucket
+        self.DataBuckets[dataBucketName].set_time(time)
 
     def set_channel_names(self, ch_names):
         self._channames = ch_names
@@ -220,8 +225,10 @@ class WaveData():
     def get_SimInfo(self):
         return self._simInfo
 
-    def get_time(self):
-        return self._time
+    def get_time(self, dataBucketName=""):
+        if dataBucketName == "":
+            return self.DataBuckets[self.ActiveDataBucket].get_time()
+        return self.DataBuckets[dataBucketName].get_time()
 
     def get_sample_rate(self):
         return self._sampleRate

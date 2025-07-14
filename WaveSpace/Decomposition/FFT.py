@@ -55,6 +55,7 @@ def hann_fft(waveData, dataBucketName = "", timeStart = [], timeEnd = [], timeSt
         fft_result = np.reshape(fft_result, (freqs.shape(),*origShape))
 
     complexDataBucket = wd.DataBucket(fft_result, "FFT", origDimord.replace('time', 'freq'),
-                                        waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
+                                       sampleRate=waveData.get_sample_rate(),
+                                       chanNames= waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
     waveData.add_data_bucket(complexDataBucket)
     waveData.log_history(["Frequency Decomposition", "FFT", "Time range: " + str(timeStart) + " to " + str(timeEnd) + " in steps of " + str(timeStep), "Frequency range: " + str(freqStart) + " to " + str(freqEnd) + " in steps of " + str(freqStep)])

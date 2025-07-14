@@ -61,15 +61,15 @@ def find_wave_activity(waveData, dataBucketName=None, dataInd = None, nBases=3):
         multi_indices  = np.array(np.unravel_index(np.arange(complexData.shape[0]), groupDimSizes)).T
         
         bases = np.reshape(bases, (*channelShape, bases.shape[-1]))
-        basesBucket = wd.DataBucket(bases,"Bases","posx_posy_base", chan_names)
+        basesBucket = wd.DataBucket(bases,"Bases","posx_posy_base",sampleRate=waveData.get_sample_rate() ,chanNames= chan_names)
         fit = np.reshape(fit,(*groupDimSizes, fit.shape[-1]))
-        fitBucket = wd.DataBucket(fit,"Fit", ("_").join(groupDimensions) +"_time", chan_names)
+        fitBucket = wd.DataBucket(fit,"Fit", ("_").join(groupDimensions) +"_time", sampleRate=waveData.get_sample_rate() ,chanNames=chan_names)
         betas = np.reshape(betas,(*groupDimSizes, betas.shape[-2], betas.shape[-1]))
-        betasBucket = wd.DataBucket(betas,"betas",("_").join(groupDimensions) +"_time_beta", chan_names)
+        betasBucket = wd.DataBucket(betas,"betas",("_").join(groupDimensions) +"_time_beta",sampleRate=waveData.get_sample_rate() ,chanNames= chan_names)
     else:
-        basesBucket = wd.DataBucket(bases,"Bases","chan_base", chan_names)
-        fitBucket = wd.DataBucket(fit,"Fit","trl_time", chan_names)
-        betasBucket = wd.DataBucket(betas,"betas","trl_time_beta", chan_names)
+        basesBucket = wd.DataBucket(bases,"Bases","chan_base",sampleRate=waveData.get_sample_rate() ,chanNames= chan_names)
+        fitBucket = wd.DataBucket(fit,"Fit","trl_time",sampleRate=waveData.get_sample_rate() ,chanNames= chan_names)
+        betasBucket = wd.DataBucket(betas,"betas","trl_time_beta",sampleRate=waveData.get_sample_rate() ,chanNames= chan_names)
     waveData.add_data_bucket(basesBucket)
     waveData.add_data_bucket(fitBucket)
     waveData.add_data_bucket(betasBucket)

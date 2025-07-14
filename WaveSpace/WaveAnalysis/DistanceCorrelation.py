@@ -37,7 +37,7 @@ def calculate_distance_correlation(waveData, dataBucketName = "", sourcePoints =
         groupDimSizes = origShape[:len(groupDims)]
         multi_indices  = np.array(np.unravel_index(np.arange(complexData.shape[0]), groupDimSizes)).T
           
-    phaseCorrBucket = wa.DataBucket(df, "PhaseDistanceCorrelation", "DataFrame", waveData.get_channel_names())
+    phaseCorrBucket = wa.DataBucket(df, "PhaseDistanceCorrelation", "DataFrame", sampleRate=waveData.get_sample_rate() ,chanNames= waveData.get_channel_names())
     waveData.add_data_bucket(phaseCorrBucket)
 
 def phase_dist_corr_task(args):
@@ -129,7 +129,7 @@ def calculate_distance_correlation_GP(waveData, dataBucketName = "", evaluationA
     else:
         df = df.rename(columns={"trialind":"trl"})  
           
-    phaseCorrBucket = wa.DataBucket(df, "PhaseDistanceCorrelation", "DataFrame", waveData.get_channel_names())
+    phaseCorrBucket = wa.DataBucket(df, "PhaseDistanceCorrelation", "DataFrame", sampleRate=waveData.get_sample_rate() ,chanNames=waveData.get_channel_names())
     waveData.add_data_bucket(phaseCorrBucket)
     
 

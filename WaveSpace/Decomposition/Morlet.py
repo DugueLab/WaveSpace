@@ -70,7 +70,7 @@ def wavelet_convolution(waveData, frequencies, n_cycles=3, dataBucketName=None):
     if hasBeenReshaped:
         complexData = np.reshape(complexData, (len(frequencies), *oldshape))
     currentDimord = "freq_" + currentDimord    
-    complexDataBucket = wd.DataBucket(complexData, "complexData", currentDimord,waveData.get_channel_names())
+    complexDataBucket = wd.DataBucket(complexData, "complexData", currentDimord,sampleRate=waveData.get_sample_rate(),chanNames=waveData.get_channel_names())
     waveData.add_data_bucket(complexDataBucket)
 
 def gaussian(x, a, x0, sigma):
