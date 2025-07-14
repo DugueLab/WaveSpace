@@ -48,7 +48,7 @@ def wavelet_convolution(waveData, frequencies, n_cycles=3, dataBucketName=None):
         raise ValueError(f"Time series is too short for the selected frequency and number of cycles. \n " \
         f"Requested {n_cycles} at {np.min(frequencies)}Hz would need at least {n_cycles*1/np.min(frequencies)} seconds of data")
 
-    complexData = np.zeros((n_freqs, nTrials, nChans, nTime), dtype=complex)
+    complexData = np.zeros((n_freqs, nTrials, nChans, output_len), dtype=complex)
 
     for f_idx, frequency in enumerate(frequencies):
         wavelet_len = int(n_cycles * 1000.0 / (frequency * dt_ms))
@@ -63,14 +63,18 @@ def wavelet_convolution(waveData, frequencies, n_cycles=3, dataBucketName=None):
                 segments = segment_view[pad_cur:pad_cur + output_len] 
                 segMean = segments.mean(axis=1, keepdims=True)
                 convolved = np.sum((segments-segMean) * phase_wavelet[np.newaxis, :], axis=1)
-                complexData[f_idx, trl, chan, pad_min:-pad_min] = convolved
-    complexData[:,:,:,0:pad_min] = np.nan
-    complexData[:,:,:,-pad_min:] = np.nan
-     
+                complexData[f_idx, trl, chan, :] = convolved
+    
     if hasBeenReshaped:
+        index = currentDimord.split("_").index("time")
+        temp = list(oldshape)
+        temp[index] = output_len  
+        oldshape = tuple(temp)
         complexData = np.reshape(complexData, (len(frequencies), *oldshape))
     currentDimord = "freq_" + currentDimord    
-    complexDataBucket = wd.DataBucket(complexData, "complexData", currentDimord,sampleRate=waveData.get_sample_rate(),chanNames=waveData.get_channel_names())
+    time = waveData.get_time(dataBucketName)[pad_min:-pad_min]
+    print(f"Warning: this function uses {pad_min} samples of padding, output dataBucket will be shorter by twice that")
+    complexDataBucket = wd.DataBucket(complexData, "complexData", currentDimord,time=time,chanNames=waveData.get_channel_names())
     waveData.add_data_bucket(complexDataBucket)
 
 def gaussian(x, a, x0, sigma):

@@ -15,8 +15,8 @@ class DataBucket:
         self._reservedNames = ["time", "chan", "posx", "posy", "trl"]
         if len(time) == 0:
             if not("time" in dimord):
-                print(f"Warning: no time dimension in databucket: {self._description} \n taking length of last dimension in {self._dimord} to construct timevector")
-                self._time = np.arange(0,data.shape[-1] ,1)
+                print(f"Warning: no time dimension in databucket: {self._description} \n timevector will be empty")
+                self._time = []
             else:
                 totalSamples = self._data.shape[self._dimord.split("_").index("time")]
                 totalTimeMS = (totalSamples / sampleRate) * 1000

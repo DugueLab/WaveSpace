@@ -2,7 +2,6 @@
 import sys
 import os
 
-
 # Add the project root directory to the Python path when working with source code, 
 # not necessary when package is installed
 path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))

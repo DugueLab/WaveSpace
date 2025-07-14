@@ -27,7 +27,6 @@ class wavedata_test(unittest.TestCase):
     def test_existence_of_time(self):
         #Tests whether time vector exists and have right shape, for default databucket created on setup
         databuckettime = self.waveData.DataBuckets["test_bucket"].get_time()
-        self.assertEqual()
         self.assertIsNotNone(databuckettime, "time vector for databucket does not exist")
         databucketshape = self.waveData.get_data("test_bucket").shape
         self.assertEqual(databucketshape[2], len(self.waveData.DataBuckets["test_bucket"].get_time()), "length of time vector does not match length of data")

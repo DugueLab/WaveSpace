@@ -46,89 +46,6 @@ plt.figure()
 plt.scatter(waveData.get_2d_coordinates()[:,0], waveData.get_2d_coordinates()[:,1])
 plt.title('Contact position 2D embedding preserving inter-contact distances. Arbitrary units')
 
-#%% Debug, remove
-def create_vtk_polydata(vertices, faces):
-    """Convert [vertices, faces] to vtkPolyData"""
-    # Create VTK points
-    points = vtk.vtkPoints()
-    points.SetNumberOfPoints(len(vertices))
-    for i, vertex in enumerate(vertices):
-        points.InsertPoint(i, vertex)
-    
-    triangles = vtk.vtkCellArray()
-    # Create VTK cells (triangles)
-    if len(faces) % 3 != 0:
-        raise ValueError("Faces list length must be divisible by 3 (triangular mesh)")
-    
-    # Process faces in groups of 3
-    for i in range(0, len(faces), 3):
-        if i+2 >= len(faces):
-            break
-            
-        triangle = vtk.vtkTriangle()
-        triangle.GetPointIds().SetId(0, faces[i])
-        triangle.GetPointIds().SetId(1, faces[i+1])
-        triangle.GetPointIds().SetId(2, faces[i+2])
-        triangles.InsertNextCell(triangle)
-    # Create polydata object
-    polydata = vtk.vtkPolyData()
-    polydata.SetPoints(points)
-    polydata.SetPolys(triangles)
-    
-    return polydata
-
-def render_surfaces(surface, polysurface):
-    """Render both the surface (as [v,f]) and polysurface (vtkPolyData)"""
-    # Create renderer
-    renderer = vtk.vtkRenderer()
-    renderer.SetBackground(0.1, 0.2, 0.4)
-    
-    # Convert Python surface to VTK
-    vertices, faces = surface
-    surface_polydata = create_vtk_polydata(vertices, faces)
-    
-    # Create mapper for Python surface
-    surface_mapper = vtk.vtkPolyDataMapper()
-    surface_mapper.SetInputData(surface_polydata)
-    
-    # Create mapper for VTK polysurface
-    polysurface_mapper = vtk.vtkPolyDataMapper()
-    polysurface_mapper.SetInputData(polysurface)
-    
-    # Create actors
-    surface_actor = vtk.vtkActor()
-    surface_actor.SetMapper(surface_mapper)
-    surface_actor.GetProperty().SetColor(1, 0, 0)  # Red
-    surface_actor.GetProperty().SetOpacity(0.7)
-    surface_actor.SetPosition(-0.2,0,0)
-
-    polysurface_actor = vtk.vtkActor()
-    polysurface_actor.SetMapper(polysurface_mapper)
-    polysurface_actor.GetProperty().SetColor(0, 1, 0)  # Green
-    
-    # Add to renderer
-    renderer.AddActor(surface_actor)
-    renderer.AddActor(polysurface_actor)
-    
-    # Render window setup
-    render_window = vtk.vtkRenderWindow()
-    render_window.AddRenderer(renderer)
-    render_window.SetSize(800, 600)
-    
-    # Interactor
-    interactor = vtk.vtkRenderWindowInteractor()
-    interactor.SetRenderWindow(render_window)
-    
-    # Camera setup
-    renderer.ResetCamera()
-    renderer.GetActiveCamera().Azimuth(30)
-    renderer.GetActiveCamera().Elevation(30)
-    
-    # Start
-    render_window.Render()
-    interactor.Start()
-
-
 #%%
 # pick some channels and assign a spatial layout to them (this makes no sense at all for real data and
     #is only to demonstrate the interpolation to a reagular grid from 3d positions)
@@ -140,8 +57,6 @@ chanInds=True
 surface, polySurface = sensors.create_surface_from_points(waveData,
                                                             type='channels',
                                                             num_points=1000)
-#Debug, Remove
-#render_surfaces(surface, polySurface)
 
 sensors.distance_along_surface(waveData, surface, tolerance=0.1, get_extent = chanInds, plotting= True)
 sensors.distmat_to_2d_coordinates_Isomap(waveData) #can also use MDS here
@@ -151,7 +66,14 @@ sensors.distmat_to_2d_coordinates_Isomap(waveData) #can also use MDS here
 #     return_mask=True, 
 #     mask_stretching=True
 #     )
+grid_x, grid_y, mask =sensors.interpolate_pos_to_grid(
+    waveData, 
+    dataBucketName = "SimulatedData",
+    numGridBins=18,
+    return_mask = True,
+    mask_stretching = True)
 
+distMat = sensors.regularGrid(waveData)
 
 #%% cortical distance
 #[KP]Provide downsampled samplesurface + sample positions

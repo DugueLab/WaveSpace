@@ -68,8 +68,9 @@ def find_wave_activity(waveData, dataBucketName=None, dataInd = None, nBases=3):
         betasBucket = wd.DataBucket(betas,"betas",("_").join(groupDimensions) +"_time_beta",sampleRate=waveData.get_sample_rate() ,chanNames= chan_names)
     else:
         basesBucket = wd.DataBucket(bases,"Bases","chan_base",sampleRate=waveData.get_sample_rate() ,chanNames= chan_names)
-        fitBucket = wd.DataBucket(fit,"Fit","trl_time",sampleRate=waveData.get_sample_rate() ,chanNames= chan_names)
-        betasBucket = wd.DataBucket(betas,"betas","trl_time_beta",sampleRate=waveData.get_sample_rate() ,chanNames= chan_names)
+        time = waveData.DataBuckets[dataBucketName].get_time()
+        fitBucket = wd.DataBucket(fit,"Fit","trl_time", time=time ,chanNames= chan_names)
+        betasBucket = wd.DataBucket(betas,"betas","trl_time_beta",time=time ,chanNames= chan_names)
     waveData.add_data_bucket(basesBucket)
     waveData.add_data_bucket(fitBucket)
     waveData.add_data_bucket(betasBucket)

@@ -23,7 +23,7 @@ import multiprocessing
 
 #Sensor spatial arrangement_____________________________
 def regularGrid(waveData):    
-    if waveData.get_2d_coordinates():
+    if len(waveData.get_2d_coordinates()) > 0:
         pos = waveData.get_2d_coordinates()
     else:
         print("Warning: data doesn't have 2d coordinates, using a projection of 3d sensor positions")

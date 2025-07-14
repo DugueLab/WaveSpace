@@ -90,9 +90,11 @@ def create_uv(waveData, applyGaussianBlur=False, type = "real", Sigma=1, alpha =
 
     if hasBeenReshaped:
         #reshape back to original dimord, take into account that the last dimension has been reduced by 1
-        allUV = np.reshape(allUV, oldshape[:-1] + (oldshape[-1] - 1,))       
+        allUV = np.reshape(allUV, oldshape[:-1] + (oldshape[-1] - 1,)) 
+        time = waveData.get_time(dataBucketName)[:-1]      
     dataBucket = wd.DataBucket(allUV, "UV",currentDimord,
-                               sampleRate=waveData.get_sample_rate() ,chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
+                               time=time, 
+                               chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
     waveData.add_data_bucket(dataBucket)
 
 def HS(im1, im2, U,V, alpha, kernel, Niter, is_phase):

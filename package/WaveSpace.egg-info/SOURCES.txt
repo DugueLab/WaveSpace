@@ -32,7 +32,6 @@ setup.py
 ../WaveSpace/Utils/CircStat.py
 ../WaveSpace/Utils/HelperFuns.py
 ../WaveSpace/Utils/ImportHelpers.py
-../WaveSpace/Utils/LoGloTemp.py
 ../WaveSpace/Utils/WaveData.py
 ../WaveSpace/Utils/WaveResult.py
 ../WaveSpace/Utils/__init__.py
