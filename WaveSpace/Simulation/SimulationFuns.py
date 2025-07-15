@@ -82,7 +82,7 @@ def simulate_signal(Type, ntrials, MatrixSize, SampleRate, SimDuration, SimLayou
     if isMaskPresent: 
         if (len(fullMask.shape)==4 and SimLayout != "grid"):
             fullMask = np.reshape(fullMask,(fullMask.shape[0],fullMask.shape[1]*fullMask.shape[2],fullMask.shape[3]), order='C') 
-        dataBucket = wd.DataBucket(fullMask,"Mask", waveData.DataBuckets["SimulatedData"].get_dimord(), waveData.get_channel_names())   
+        dataBucket = wd.DataBucket(fullMask,"Mask", waveData.DataBuckets["SimulatedData"].get_dimord(),sampleRate=waveData.get_sample_rate() ,chanNames= waveData.get_channel_names())   
         waveData.add_data_bucket(dataBucket)
     return waveData
 
@@ -106,7 +106,7 @@ def create_wavedata(data, SampleRate, SimDuration, SimLayout, simOptions, name =
     waveData.set_simInfo(simOptions)
     waveData.set_channel_positions(chanpos)
     waveData.set_channel_names([str(s) for s in np.arange(len(chanpos))])
-    dataBucket = wd.DataBucket(data,name, dimord, waveData.get_channel_names(), unit="AU")
+    dataBucket = wd.DataBucket(data,name, dimord,sampleRate=waveData.get_sample_rate() ,chanNames= waveData.get_channel_names(), unit="AU")
     waveData.add_data_bucket(dataBucket)
 
     if SimLayout == "grid":
@@ -566,12 +566,12 @@ def combine_SimData(SimDataList, dimension = 'trl', SimCondList = None, dataBuck
         #update time
         time = np.arange(0+1/sampleRate, (newdata[0].shape[-1]/SimDataList[0].get_sample_rate())+1/sampleRate, 1/sampleRate)
     waveData = wd.WaveData(time=time)
+    waveData.set_sample_rate(sampleRate)
     waveData.set_channel_names(channel_names)
     waveData.set_channel_positions(channel_positions)
-    for ind,name in enumerate(dataBucketNames):
-        dataBucket = wd.DataBucket(newdata[ind], name,dimord, channel_names)
-        waveData.add_data_bucket(dataBucket)
     waveData.set_simInfo(SimInfo)
     waveData.set_trialInfo([SimInfo["condname"] for SimInfo in waveData.get_SimInfo()])
-    waveData.set_sample_rate(sampleRate)
+    for ind,name in enumerate(dataBucketNames):
+        dataBucket = wd.DataBucket(newdata[ind], name,dimord, sampleRate=waveData.get_sample_rate() ,chanNames= channel_names)
+        waveData.add_data_bucket(dataBucket)
     return waveData

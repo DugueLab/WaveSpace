@@ -5,7 +5,7 @@ with open('../README.md') as f:
 
 setup(
     name='WaveSpace',
-    version='1.1.2',
+    version='1.1.3',
     description='A Python package for the analysis of cortical traveling waves',
     package_dir={'': '../'},
     packages=find_packages(where='../'),

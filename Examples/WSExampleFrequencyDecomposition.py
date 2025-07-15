@@ -21,6 +21,7 @@ from WaveSpace.Decomposition import GenPhase, Morlet
 
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.collections import LineCollection
 from scipy.signal import welch
 
 # Load some simulated data
@@ -54,7 +55,7 @@ for freqInd, freq in enumerate([10, 17]):
     waveData.DataBuckets[str(freq)] =  waveData.DataBuckets.pop("NBFiltered") #Rename 
 
 temp = np.stack((waveData.DataBuckets["10"].get_data(), waveData.DataBuckets["17"].get_data()),axis=0) #Stack into single filtered databucket
-waveData.add_data_bucket(wd.DataBucket(temp, "NBFiltered", "freq_trl_posx_posy_time", waveData.get_channel_names()))
+waveData.add_data_bucket(wd.DataBucket(temp, "NBFiltered", "freq_trl_posx_posy_time", sampleRate=waveData.get_sample_rate(), chanNames=waveData.get_channel_names()))
 #remove the individual filtered data
 waveData.delete_data_bucket("10")
 waveData.delete_data_bucket("17")

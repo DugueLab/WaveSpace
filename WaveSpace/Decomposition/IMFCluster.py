@@ -119,7 +119,7 @@ def cluster_imfs(waveData, highpass, lowpass, dataBucket="complexData", nIMFs=7,
             #build object or whatever this is called with dims [trl][component,channel,time]. 
             # Component is either a potential traveling wave (if clustermethod == overlap) or a singleton dim (if clustermethod == FOI)
             complexData[trl]=CurrentcomplexData
-    complexDataBucket = wa.DataBucket(complexData, "IMF_Cluster", "trl_chan_time" )
+    complexDataBucket = wa.DataBucket(complexData, "IMF_Cluster", "trl_chan_time",sampleRate=waveData.get_sample_rate(), chanNames=waveData.get_channel_names())
     waveData.add_data_bucket(complexDataBucket)
     
     #@Seb: here, the dimorder is [trl][component,channel,time], but could also be empty... 'Component' is an intrinsic mode function (so not a fixed frequency) and channels can vary accross trials. We need to keep track of inst_freq for the IMFs that are used in the end

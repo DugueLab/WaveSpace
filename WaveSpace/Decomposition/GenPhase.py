@@ -34,7 +34,8 @@ def generalized_phase(waveData, dataBucketName = ''):
     currentDimord= waveData.DataBuckets[waveData.ActiveDataBucket].get_dimord()
     currentData = waveData.get_data(waveData.ActiveDataBucket)
     oldshape = currentData.shape
-    hasBeenReshaped, currentData =  hf.force_dimord(currentData, currentDimord , "trl_chan_time")
+    newDimord = "trl_chan_time"
+    hasBeenReshaped, currentData =  hf.force_dimord(currentData, currentDimord, newDimord )
     
     nwin = 3
     trials, nChan, npts = currentData.shape
@@ -100,7 +101,7 @@ def generalized_phase(waveData, dataBucketName = ''):
         #
         outcome[trialNr,:] = md * np.exp( 1j * ph )
         # reshape original data
-    dataBucket = wd.DataBucket(outcome, "complexData", currentDimord, waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
+    dataBucket = wd.DataBucket(outcome, "complexData", newDimord,sampleRate=waveData.get_sample_rate() ,chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
     if hasBeenReshaped:
         dataBucket.reshape(oldshape, currentDimord)  
 

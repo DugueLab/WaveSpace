@@ -77,7 +77,6 @@ DistanceCorrelation.calculate_distance_correlation(waveData, dataBucketName = "c
 output_path = os.path.join(path, "Examples/ExampleData/Output")
 waveData.save_to_file(os.path.join(output_path, "DistanceCorrelation"))
 
-
 #%%
 waveData = ImportHelpers.load_wavedata_object("ExampleData/Output/DistanceCorrelation")
 pointRange = (20,20)

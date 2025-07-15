@@ -22,7 +22,7 @@ def perform_cluster_gradient(waveData, dataBucket="FrequencyCluster"):
             ClusterPhase = np.angle(complexData_FreqCluster[trl][cluster])
             clusterchans = ClusterContacts[trl][cluster]
             angle_SF_corr_offset = getClusterGradient(ClusterPhase, chanpos2D[clusterchans,:]) 
-    angle_bucket = wd.DataBucket(angle_SF_corr_offset, "Angle_sf", "trl_chan_freqcluster_time")
+    angle_bucket = wd.DataBucket(angle_SF_corr_offset, "Angle_sf", "trl_chan_freqcluster_time" )
     waveData.add_data_bucket(angle_bucket)
 
 def getClusterGradient(ClusterPhase, chanpos2D):

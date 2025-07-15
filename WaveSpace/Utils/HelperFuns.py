@@ -218,20 +218,23 @@ def combine_grad_sensors(waveData, dataBucketName=None, method='RMS'):
     combined_dataBucket = wd.DataBucket(
         combined_data, 
         dataBucketName + "_combinedPlanar", 
-        waveData.DataBuckets[dataBucketName].get_dimord(), 
-        newChanNames)
+        waveData.DataBuckets[dataBucketName].get_dimord(),
+        sampleRate=waveData.get_sample_rate(),
+        chanNames= newChanNames)
     
     GradX_dataBucket = wd.DataBucket(
         gradXData, 
         dataBucketName + "_GradX", 
         waveData.DataBuckets[dataBucketName].get_dimord(), 
-        newChanNames)
+        sampleRate=waveData.get_sample_rate() ,
+        chanNames=newChanNames)
     
     GradY_dataBucket = wd.DataBucket(
         gradYData, 
         dataBucketName + "_GradY", 
-        waveData.DataBuckets[dataBucketName].get_dimord(), 
-        newChanNames)
+        waveData.DataBuckets[dataBucketName].get_dimord(),
+        sampleRate=waveData.get_sample_rate() ,
+        chanNames= newChanNames)
     
     waveData.set_channel_positions(waveData.get_channel_positions()[::2])#remove the second channels of each pair from positions
     waveData.add_data_bucket(combined_dataBucket)
@@ -427,7 +430,8 @@ def relative_phase(Data, ref=None, dataBucketName=""):
 
     # Create a new DataBucket with relative phase
     PhaseDataBucket = wd.DataBucket(rel_phase, "relativePhase", phase_dimord,
-                                    Data.DataBuckets[Data.ActiveDataBucket].get_channel_names())
+                                    sampleRate=Data.get_sample_rate(),
+                                    chanNames= Data.DataBuckets[Data.ActiveDataBucket].get_channel_names())
     Data.add_data_bucket(PhaseDataBucket)
 
     # Log history
@@ -460,7 +464,8 @@ def unwrap_phase(Data, dataBucketName=""):
         #reshape back to original dimord
         unwrappedPhaseofCurentData = np.reshape(unwrappedPhaseofCurentData, oldShape) 
     Unwrapped = wd.DataBucket(unwrappedPhaseofCurentData, "UnwrappedPhase", Data.DataBuckets[Data.ActiveDataBucket].get_dimord(),
-                                      Data.DataBuckets[Data.ActiveDataBucket].get_channel_names())
+                                      sampleRate=Data.get_sample_rate(),
+                                      chanNames= Data.DataBuckets[Data.ActiveDataBucket].get_channel_names())
     Data.add_data_bucket(Unwrapped)
     Data.log_history(["UnwrappedPhase", "Phase_unwrapped from " + dataBucketName])
 
@@ -541,7 +546,8 @@ def normalize_data(waveData, dimension = "", dataBucketName = " "):
 
     dataBucket = wd.DataBucket(data, dataBucketName + "_MagnitudeNormalized", 
                                dimord, 
-                               waveData.DataBuckets[dataBucketName].get_channel_names() )
+                               sampleRate=waveData.get_sample_rate(),
+                                chanNames=waveData.DataBuckets[dataBucketName].get_channel_names() )
     waveData.add_data_bucket(dataBucket)
     waveData.log_history(["Normalize magnitude", "Normalized over " + '_'.join(dimension)])
 
@@ -600,7 +606,8 @@ def z_score_data(waveData, dimension = "", dataBucketName = " "):
 
     dataBucket = wd.DataBucket(data, dataBucketName + "_zScored", 
                                dimord, 
-                               waveData.DataBuckets[dataBucketName].get_channel_names() )
+                               sampleRate=waveData.get_sample_rate(),
+                            chanNames=waveData.DataBuckets[dataBucketName].get_channel_names() )
     waveData.add_data_bucket(dataBucket)
     waveData.log_history(["z score", "z scored over " + '_'.join(dimension)])
 
@@ -651,7 +658,8 @@ def rescale_data_in_Bucket(waveData, dimension =['posx', 'posy', 'time'], range 
 
     dataBucket = wd.DataBucket(data, dataBucketName + "_rescaled", 
                                dimord, 
-                               waveData.DataBuckets[dataBucketName].get_channel_names() )
+                               sampleRate=waveData.get_sample_rate(),
+                               chanNames=waveData.DataBuckets[dataBucketName].get_channel_names() )
     waveData.add_data_bucket(dataBucket)
     waveData.log_history(["rescale", "rescaled over " + '_'.join(dimension)])
 
@@ -691,7 +699,8 @@ def average_over_trials(waveData, trialInfo=None, dataBucketName=" ", type = Non
         avg_data = np.expand_dims(avg_data, axis=trl_axis)  # Add singleton dimension for 'trl' (necessary for all function that use 'assure consistency')
         dataBucket = wd.DataBucket(avg_data, dataBucketName + "_average", 
                                    waveData.DataBuckets[dataBucketName].get_dimord(), 
-                                   waveData.DataBuckets[dataBucketName].get_channel_names() )
+                                   sampleRate=waveData.get_sample_rate(),
+                                chanNames=waveData.DataBuckets[dataBucketName].get_channel_names() )
         waveData.add_data_bucket(dataBucket)
         waveData.log_history(["Average", "Averaged over all trials"])
     else:
@@ -705,7 +714,8 @@ def average_over_trials(waveData, trialInfo=None, dataBucketName=" ", type = Non
             avg_data = np.expand_dims(avg_data, axis=trl_axis)
             dataBucket = wd.DataBucket(avg_data, dataBucketName + "_average_" + trial, 
                                        waveData.DataBuckets[dataBucketName].get_dimord(), 
-                                       waveData.DataBuckets[dataBucketName].get_channel_names() )
+                                       sampleRate=waveData.get_sample_rate(),
+                                       chanNames=waveData.DataBuckets[dataBucketName].get_channel_names() )
             waveData.add_data_bucket(dataBucket)
             waveData.log_history(["Average", "Averaged over trial: " + trial])
 
@@ -800,6 +810,7 @@ def merge_wavedata_objects(waveDataList):
             merged_data, 
             key, 
             waveDataList[0].DataBuckets[key].get_dimord(),
+            sampleRate=waveDataList[0].get_sample_rate(),                                chanNames=
             waveDataList[0].DataBuckets[key].get_channel_names())
         merged_waveData.add_data_bucket(merged_waveDataBucket)
     merged_waveData.log_history(["merged waveData objects", "trl in dimord corresponds to index of merged object"])

@@ -23,7 +23,7 @@ import multiprocessing
 
 #Sensor spatial arrangement_____________________________
 def regularGrid(waveData):    
-    if waveData.get_2d_coordinates():
+    if len(waveData.get_2d_coordinates()) > 0:
         pos = waveData.get_2d_coordinates()
     else:
         print("Warning: data doesn't have 2d coordinates, using a projection of 3d sensor positions")
@@ -673,7 +673,7 @@ def interpolate_pos_to_grid(waveData, numGridBins=10, dataBucketName = "", retur
     else:
         new_Dimord = desiredDimord
     new_Dimord = new_Dimord.replace("chan", "posx_posy")
-    InterpolatedData = wd.DataBucket(all_grid_z, dataBucketName + "Interpolated", new_Dimord, channames)
+    InterpolatedData = wd.DataBucket(all_grid_z, dataBucketName + "Interpolated", new_Dimord,sampleRate=waveData.get_sample_rate() ,chanNames= channames)
     waveData.add_data_bucket(InterpolatedData)
 
     if return_mask:
@@ -730,10 +730,10 @@ def apply_mask(waveData, mask, dataBucketName, overwrite = True, maskValue = 0.,
     if overwrite:
         waveData.DataBuckets[dataBucketName]._data = data
     else:
-        maskedData = wd.DataBucket(data, dataBucketName + "Masked", currentDimord, waveData.get_channel_names())
+        maskedData = wd.DataBucket(data, dataBucketName + "Masked", currentDimord,sampleRate=waveData.get_sample_rate() ,chanNames= waveData.get_channel_names())
         waveData.add_data_bucket(maskedData)
     if storeMask:
-        maskBucket = wd.DataBucket(mask, "Mask", "_".join(desiredDims[1:-1]), waveData.get_channel_names())
+        maskBucket = wd.DataBucket(mask, "Mask", "_".join(desiredDims[1:-1]),sampleRate=waveData.get_sample_rate() ,chanNames= waveData.get_channel_names())
         waveData.add_data_bucket(maskBucket)
     waveData.set_active_dataBucket(dataBucketName)#just to make sure that mask does not become the active dataBucket
 
@@ -779,7 +779,7 @@ def interpolate_spherical_spline_2d(waveData, resolution=10, scalePos=1000, func
         interpolated_data[:,:,:,j] = np.array(results)
 
     channames = [f'{i}_{j}' for i in range(grid_z.shape[1]) for j in range(grid_z.shape[2])]
-    InterpolatedData = wd.DataBucket(interpolated_data,"InterpolatedDataSphere","trial_posx_posy_time",channames)
+    InterpolatedData = wd.DataBucket(interpolated_data,"InterpolatedDataSphere","trial_posx_posy_time",sampleRate=waveData.get_sample_rate() ,chanNames=channames)
     
     # if waveData.has_data_bucket("InterpolatedData"):
     #     print("WARNING: InterpolatedData already exists, replacing it")
