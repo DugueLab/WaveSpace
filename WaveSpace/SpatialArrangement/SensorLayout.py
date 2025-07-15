@@ -673,7 +673,7 @@ def interpolate_pos_to_grid(waveData, numGridBins=10, dataBucketName = "", retur
     else:
         new_Dimord = desiredDimord
     new_Dimord = new_Dimord.replace("chan", "posx_posy")
-    InterpolatedData = wd.DataBucket(all_grid_z, dataBucketName + "Interpolated", new_Dimord,sampleRate=waveData.get_sample_rate() ,chanNames= channames)
+    InterpolatedData = wd.DataBucket(all_grid_z, dataBucketName + "Interpolated", new_Dimord, time=waveData.DataBuckets[dataBucketName].get_time() ,chanNames= channames)
     waveData.add_data_bucket(InterpolatedData)
 
     if return_mask:
@@ -730,14 +730,14 @@ def apply_mask(waveData, mask, dataBucketName, overwrite = True, maskValue = 0.,
     if overwrite:
         waveData.DataBuckets[dataBucketName]._data = data
     else:
-        maskedData = wd.DataBucket(data, dataBucketName + "Masked", currentDimord,sampleRate=waveData.get_sample_rate() ,chanNames= waveData.get_channel_names())
+        maskedData = wd.DataBucket(data, dataBucketName + "Masked", currentDimord,time=waveData.DataBuckets[dataBucketName].get_time() ,chanNames= waveData.get_channel_names())
         waveData.add_data_bucket(maskedData)
     if storeMask:
-        maskBucket = wd.DataBucket(mask, "Mask", "_".join(desiredDims[1:-1]),sampleRate=waveData.get_sample_rate() ,chanNames= waveData.get_channel_names())
+        maskBucket = wd.DataBucket(mask, "Mask", "_".join(desiredDims[1:-1]),time=waveData.DataBuckets[dataBucketName].get_time() ,chanNames= waveData.get_channel_names())
         waveData.add_data_bucket(maskBucket)
     waveData.set_active_dataBucket(dataBucketName)#just to make sure that mask does not become the active dataBucket
 
-def interpolate_spherical_spline_2d(waveData, resolution=10, scalePos=1000, function='multiquadric', n_jobs=-1):
+def interpolate_spherical_spline_2d(waveData, resolution=10, scalePos=1000, function='multiquadric', n_jobs=-1, dataBucketName=""):
     '''
     [KP] Something doesn't seem quite right about this. Fix it later.
     Interpolate positions to a regular grid using spherical spline interpolation, and
@@ -754,6 +754,10 @@ def interpolate_spherical_spline_2d(waveData, resolution=10, scalePos=1000, func
     n_jobs : int
         the number of jobs to run in parallel. -1 means using all processors.
     '''
+    if dataBucketName == "":
+        dataBucketName = waveData.ActiveDataBucket
+    else:
+        waveData.set_active_dataBucket(dataBucketName)
     pos_3d = waveData.get_channel_positions() * scalePos
     data = waveData.get_active_data()
     
@@ -779,7 +783,7 @@ def interpolate_spherical_spline_2d(waveData, resolution=10, scalePos=1000, func
         interpolated_data[:,:,:,j] = np.array(results)
 
     channames = [f'{i}_{j}' for i in range(grid_z.shape[1]) for j in range(grid_z.shape[2])]
-    InterpolatedData = wd.DataBucket(interpolated_data,"InterpolatedDataSphere","trial_posx_posy_time",sampleRate=waveData.get_sample_rate() ,chanNames=channames)
+    InterpolatedData = wd.DataBucket(interpolated_data,"InterpolatedDataSphere","trial_posx_posy_time",time=waveData.DataBuckets[dataBucketName].get_time() ,chanNames=channames)
     
     # if waveData.has_data_bucket("InterpolatedData"):
     #     print("WARNING: InterpolatedData already exists, replacing it")

@@ -74,19 +74,3 @@ grid_x, grid_y, mask =sensors.interpolate_pos_to_grid(
     mask_stretching = True)
 
 distMat = sensors.regularGrid(waveData)
-
-#%% cortical distance
-#[KP]Provide downsampled samplesurface + sample positions
-SurfaceFile = './ExampleData/surfaceFileInflated_LH' #path to freesurfer generated cortical surface
-with open(SurfaceFile, 'rb') as f:
-    Surface = pickle.load(f)
-
-sensors.distance_along_surface(waveData,Surface)
-
-plt.imshow(waveData.get_distMat(), origin= 'lower')
-plt.colorbar()
-plt.title('Contact-to-Contact distance along surface in m')
-plt.xlabel('SeedContact')
-plt.ylabel('TargetContact')
-
-# %%

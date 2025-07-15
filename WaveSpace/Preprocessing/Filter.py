@@ -8,51 +8,51 @@ from scipy.signal import impulse
 from scipy.signal import firwin
 import numpy as np
 
-def filter_broadband(data,dataBucketName = "", LowCutOff=0, HighCutOff=100,  n_jobs=5):
+def filter_broadband(waveData,dataBucketName = "", LowCutOff=0, HighCutOff=100,  n_jobs=5):
     import mne
     '''MNE non-causal filter'''
     if dataBucketName == "":
-        dataBucketName = data.ActiveDataBucket
+        dataBucketName = waveData.ActiveDataBucket
     else:
-        data.set_active_dataBucket(dataBucketName)
-    hf.assure_consistency(data)
-    currentData = data.DataBuckets[dataBucketName].get_data()
-    origDimord = data.DataBuckets[dataBucketName].get_dimord()
+        waveData.set_active_dataBucket(dataBucketName)
+    hf.assure_consistency(waveData)
+    currentData = waveData.DataBuckets[dataBucketName].get_data()
+    origDimord = waveData.DataBuckets[dataBucketName].get_dimord()
     origShape = currentData.shape
     desiredDimord = "trl_chan_time"
     hasBeenReshaped, currentData =  hf.force_dimord(currentData, origDimord , desiredDimord)
 
-    NewData = mne.filter.filter_data(data = currentData,sfreq = data.get_sample_rate(),l_freq = LowCutOff, h_freq= HighCutOff, n_jobs=n_jobs)
-    dataBucket = wd.DataBucket(NewData, "BBFiltered", desiredDimord, sampleRate=data.get_sample_rate() ,chanNames=data.get_channel_names())
+    NewData = mne.filter.filter_data(data = currentData,sfreq = waveData.get_sample_rate(),l_freq = LowCutOff, h_freq= HighCutOff, n_jobs=n_jobs)
+    dataBucket = wd.DataBucket(NewData, "BBFiltered", desiredDimord, time= waveData.DataBuckets[waveData.ActiveDataBucket].get_time() ,chanNames=waveData.get_channel_names())
     # reshape original data
     if hasBeenReshaped:
         dataBucket.reshape(origShape, origDimord)  
 
-    data.add_data_bucket(dataBucket)    
-    data.log_history(["Broadband Filter", "filt",LowCutOff, HighCutOff])
+    waveData.add_data_bucket(dataBucket)    
+    waveData.log_history(["Broadband Filter", "filt",LowCutOff, HighCutOff])
 
-def filter_notch(data, dataBucketName = "", LineNoiseFreq = 50, n_jobs=5):
+def filter_notch(waveData, dataBucketName = "", LineNoiseFreq = 50, n_jobs=5):
     '''MNE non-causal filter'''
     if dataBucketName == "":
-        dataBucketName = data.ActiveDataBucket
+        dataBucketName = waveData.ActiveDataBucket
     else:
-        data.set_active_dataBucket(dataBucketName)
-    hf.assure_consistency(data)
-    currentData = data.DataBuckets[dataBucketName].get_data()
-    origDimord = data.DataBuckets[dataBucketName].get_dimord()
+        waveData.set_active_dataBucket(dataBucketName)
+    hf.assure_consistency(waveData)
+    currentData = waveData.DataBuckets[dataBucketName].get_data()
+    origDimord = waveData.DataBuckets[dataBucketName].get_dimord()
     origShape = currentData.shape
     hasBeenReshaped, currentData =  hf.force_dimord(currentData, origDimord , "trl_chan_time")
 
-    NewData = mne.filter.notch_filter(x =data.get_active_data(), Fs=data.get_sample_rate(),freqs = LineNoiseFreq, 
+    NewData = mne.filter.notch_filter(x =waveData.get_active_data(), Fs=waveData.get_sample_rate(),freqs = LineNoiseFreq, 
         filter_length = 'auto', n_jobs=n_jobs)
-    dataBucket = wd.DataBucket(NewData, "NotchFiltered", data.DataBuckets[data.ActiveDataBucket].get_dimord(),sampleRate=data.get_sample_rate() ,chanNames= data.get_channel_names())
+    dataBucket = wd.DataBucket(NewData, "NotchFiltered", waveData.DataBuckets[waveData.ActiveDataBucket].get_dimord(),time= waveData.DataBuckets[waveData.ActiveDataBucket].get_time() ,chanNames= waveData.get_channel_names())
     # reshape original data
     if hasBeenReshaped:
-        data.DataBuckets[dataBucketName].reshape(origShape, origDimord)  
-        data.add_data_bucket(dataBucket)
+        waveData.DataBuckets[dataBucketName].reshape(origShape, origDimord)  
+        waveData.add_data_bucket(dataBucket)
         # reshape last bucket
-        data.DataBuckets[dataBucketName].reshape(origShape, origDimord)   
-        data.log_history(["Notch Filter", "notch", LineNoiseFreq])
+        waveData.DataBuckets[dataBucketName].reshape(origShape, origDimord)   
+        waveData.log_history(["Notch Filter", "notch", LineNoiseFreq])
 
 def bandpass(lowcut, highcut, fs, type="IIR", order=5):
     nyq = 0.5 * fs
@@ -113,6 +113,6 @@ def filter_narrowband(waveData, dataBucketName = "", LowCutOff=0, HighCutOff=120
     if hasBeenReshaped:
         NewData = np.reshape(NewData, origShape)
 
-    dataBucket = wd.DataBucket(NewData, "NBFiltered", waveData.DataBuckets[waveData.ActiveDataBucket].get_dimord(),sampleRate=waveData.get_sample_rate() ,chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
+    dataBucket = wd.DataBucket(NewData, "NBFiltered", waveData.DataBuckets[waveData.ActiveDataBucket].get_dimord(),time= waveData.DataBuckets[waveData.ActiveDataBucket].get_time() ,chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
     waveData.add_data_bucket(dataBucket)    
     waveData.log_history(["Narrowband Filter", "filt", LowCutOff, HighCutOff, "Type: " + type, "Causal: " + str(causal)])

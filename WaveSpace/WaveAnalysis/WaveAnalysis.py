@@ -91,9 +91,9 @@ def FFT_2D(waveData, channelIndices, lowerBound, upperBound, DataBucketName = ""
         'Spatial Frequency at Max Reverse': allReverseSpatFreq}
 
     df = pd.DataFrame.from_dict(info)  
-    fftBucket = wd.DataBucket(allFFT_abs,"FFT_ABS","trl_spatfreq_tempfreq", sampleRate=waveData.get_sample_rate() ,chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
+    fftBucket = wd.DataBucket(allFFT_abs,"FFT_ABS","trl_spatfreq_tempfreq", chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
     waveData.add_data_bucket(fftBucket)
-    resultBucket = wd.DataBucket(df, "Result", "2D_FFT", sampleRate=waveData.get_sample_rate() ,chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
+    resultBucket = wd.DataBucket(df, "Result", "2D_FFT", chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
     waveData.add_data_bucket(resultBucket)
 
 import copy
@@ -144,9 +144,9 @@ def FFT_2D_shuffle_and_average(waveData, channelIndices, lowerBound, upperBound,
         'Spatial Frequency at Max Reverse': [avgReverseSpatFreq]
     })
     # Create new data buckets with shuffled results
-    fftBucket_shuffled = wd.DataBucket(avgFFT_abs, "FFT_ABS_shuffled", "trl_spatfreq_tempfreq",sampleRate=waveData.get_sample_rate() ,chanNames= channelNames)
+    fftBucket_shuffled = wd.DataBucket(avgFFT_abs, "FFT_ABS_shuffled", "trl_spatfreq_tempfreq",chanNames= channelNames)
     waveData.add_data_bucket(fftBucket_shuffled)
-    resultBucket_shuffled = wd.DataBucket(averages_df, "2D_FFT_Result_shuffled", 'DataFrame',sampleRate=waveData.get_sample_rate() ,chanNames= channelNames)
+    resultBucket_shuffled = wd.DataBucket(averages_df, "2D_FFT_Result_shuffled", 'DataFrame', chanNames= channelNames)
     waveData.add_data_bucket(resultBucket_shuffled)
 
 def run_fft_shuffle(waveData, channelIndices, lowerBound, upperBound):

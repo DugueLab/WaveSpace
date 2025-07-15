@@ -32,7 +32,7 @@ def assertCorrectWaveSettings(Type, ntrials, waveSettings):
             assert len(item[1])==ntrials, f"Length of supplied array for \"{item[0]}\" must equal amount of trials"
 
 #%%
-def simulate_signal(Type, ntrials, MatrixSize, SampleRate, SimDuration, SimLayout= "channels", **waveSettings):
+def simulate_signal(Type, ntrials, MatrixSize, SampleRate, SimDuration, SimLayout= "channels",time=[], **waveSettings):
     assertCorrectWaveSettings(Type, ntrials, waveSettings)
     #InitializeDataCubes
     fullData = np.zeros((ntrials,MatrixSize,MatrixSize,int(np.floor(SampleRate*SimDuration))))
@@ -78,18 +78,21 @@ def simulate_signal(Type, ntrials, MatrixSize, SampleRate, SimDuration, SimLayou
         if Type == "FrequencyGradient":
             fullData[TrialNr,:,:,:] = create_frequency_gradient(MatrixSize, SampleRate, SimDuration, SimOption)
        
-    waveData = create_wavedata(fullData, SampleRate, SimDuration, SimLayout, simOptions)  
+    waveData = create_wavedata(fullData, SampleRate, SimDuration, SimLayout, simOptions, time=time)  
     if isMaskPresent: 
         if (len(fullMask.shape)==4 and SimLayout != "grid"):
             fullMask = np.reshape(fullMask,(fullMask.shape[0],fullMask.shape[1]*fullMask.shape[2],fullMask.shape[3]), order='C') 
-        dataBucket = wd.DataBucket(fullMask,"Mask", waveData.DataBuckets["SimulatedData"].get_dimord(),sampleRate=waveData.get_sample_rate() ,chanNames= waveData.get_channel_names())   
+        if len(time) > 0:
+           dataBucket = wd.DataBucket(fullMask,"Mask", waveData.DataBuckets["SimulatedData"].get_dimord(), time=time ,chanNames= waveData.get_channel_names())   
+        else:
+            dataBucket = wd.DataBucket(fullMask,"Mask", waveData.DataBuckets["SimulatedData"].get_dimord(), sampleRate=waveData.get_sample_rate() ,chanNames= waveData.get_channel_names())   
         waveData.add_data_bucket(dataBucket)
     return waveData
 
 def initialize_data(MatrixSize, SampleRate,SimDuration):
     return np.zeros((MatrixSize,MatrixSize,int(np.floor(SimDuration * SampleRate))))  
 
-def create_wavedata(data, SampleRate, SimDuration, SimLayout, simOptions, name = "SimulatedData"):
+def create_wavedata(data, SampleRate, SimDuration, SimLayout, simOptions, name = "SimulatedData", time=[]):
     #flatten channels
     if (len(data.shape)==4):
        data = np.reshape(data,(data.shape[0],data.shape[1]*data.shape[2],data.shape[3]), order='C') 
@@ -106,7 +109,10 @@ def create_wavedata(data, SampleRate, SimDuration, SimLayout, simOptions, name =
     waveData.set_simInfo(simOptions)
     waveData.set_channel_positions(chanpos)
     waveData.set_channel_names([str(s) for s in np.arange(len(chanpos))])
-    dataBucket = wd.DataBucket(data,name, dimord,sampleRate=waveData.get_sample_rate() ,chanNames= waveData.get_channel_names(), unit="AU")
+    if len(time) > 0: 
+        dataBucket = wd.DataBucket(data,name, dimord, time=time ,chanNames= waveData.get_channel_names(), unit="AU")
+    else:
+        dataBucket = wd.DataBucket(data,name, dimord, sampleRate=waveData.get_sample_rate() ,chanNames= waveData.get_channel_names(), unit="AU")
     waveData.add_data_bucket(dataBucket)
 
     if SimLayout == "grid":
@@ -572,6 +578,6 @@ def combine_SimData(SimDataList, dimension = 'trl', SimCondList = None, dataBuck
     waveData.set_simInfo(SimInfo)
     waveData.set_trialInfo([SimInfo["condname"] for SimInfo in waveData.get_SimInfo()])
     for ind,name in enumerate(dataBucketNames):
-        dataBucket = wd.DataBucket(newdata[ind], name,dimord, sampleRate=waveData.get_sample_rate() ,chanNames= channel_names)
+        dataBucket = wd.DataBucket(newdata[ind], name,dimord, time=time ,chanNames= channel_names)
         waveData.add_data_bucket(dataBucket)
     return waveData

@@ -30,7 +30,7 @@ def apply_hilbert(waveData, dataBucketName =None ):
     if hasBeenReshaped:
         complexData = np.reshape(complexData, origShape)
 
-    complexDataBucket = wd.DataBucket(complexData, "complexData", origDimord,sampleRate=waveData.get_sample_rate(),chanNames= waveData.get_channel_names())
+    complexDataBucket = wd.DataBucket(complexData, "complexData", origDimord,time=waveData.DataBuckets[waveData.ActiveDataBucket].get_time(),chanNames= waveData.get_channel_names())
     waveData.add_data_bucket(complexDataBucket)
     waveData.log_history(["Analytic Signal", "Hilbert"])
 

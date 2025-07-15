@@ -19,8 +19,8 @@ class DataBucket:
                 self._time = []
             else:
                 totalSamples = self._data.shape[self._dimord.split("_").index("time")]
-                totalTimeMS = (totalSamples / sampleRate) * 1000
-                self._time = np.linspace(0, totalTimeMS, num=totalSamples, endpoint=False)
+                totalTimeS = (totalSamples / sampleRate) 
+                self._time = np.linspace(0, totalTimeS, num=totalSamples, endpoint=False)
         else:
             self._time = time    
 

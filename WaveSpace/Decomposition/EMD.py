@@ -328,11 +328,14 @@ def assess_harmonic_criteria(IP, IF, IA, num_segments=None, base_imf=None, print
     HarmonicInds = df.index.values[condition]
     return HarmonicInds
 
-def CombineIMFsIfPositiveJointInstFreq(data, potentialHarmonicInds):
-    dataBucketName = data.ActiveDataBucket
-    currentData = data.get_data(dataBucketName)
+def CombineIMFsIfPositiveJointInstFreq(waveData, potentialHarmonicInds, dataBucketName=""):
+    if dataBucketName == "":
+        dataBucketName = waveData.ActiveDataBucket
+    else:
+        waveData.set_active_dataBucket(dataBucketName)
+    currentData = waveData.get_data(dataBucketName)
     origShape = currentData.shape
-    hasbeenreshaped, currentData = hf.force_dimord(currentData, data.DataBuckets[dataBucketName].get_dimord(), "imf_trl_chan_time")
+    hasbeenreshaped, currentData = hf.force_dimord(currentData, waveData.DataBuckets[dataBucketName].get_dimord(), "imf_trl_chan_time")
     for trl in range(currentData.shape[1]):
         for chan in range(currentData.shape[2]):
             # check if HarmonicInds has more than one value, if so, combine them
@@ -347,9 +350,9 @@ def CombineIMFsIfPositiveJointInstFreq(data, potentialHarmonicInds):
 
     if hasbeenreshaped:
         currentData = np.reshape(currentData, origShape)
-    complexDataBucket = wd.DataBucket(currentData, "complexData", data.DataBuckets[dataBucketName].get_dimord(),sampleRate=data.get_sample_rate() , chanNames=data.DataBuckets[data.ActiveDataBucket].get_channel_names())
-    data.add_data_bucket(complexDataBucket)
-    data.log_history(["EMD", "Combined harmonic IMFs"])
+    complexDataBucket = wd.DataBucket(currentData, "complexData", waveData.DataBuckets[dataBucketName].get_dimord(),time=waveData.DataBuckets[dataBucketName].get_time() , chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
+    waveData.add_data_bucket(complexDataBucket)
+    waveData.log_history(["EMD", "Combined harmonic IMFs"])
 
 def find_nearest_to_FOI(waveData, IF, FOI, start_time=None, end_time=None):
     """Find the index and value of the element in IF closest to FOI
@@ -484,8 +487,8 @@ def EMD(waveData, nIMFs=7, dataBucketName="", noiseVar = 0.05, n_noiseChans = 10
         complexData = np.reshape(complexData, (nIMFs,*origShape))
 
     complexDataBucket = wd.DataBucket(complexData, "complexData", "IMF_" + origDimord,
-                                      sampleRate=waveData.get_sample_rate()
-                                        ,chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
+                                      time=waveData.DataBuckets[waveData.ActiveDataBucket].get_time()
+                                      ,chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
     waveData.add_data_bucket(complexDataBucket)
     waveData.log_history(["Phase estimate", "EMD","siftType: " , siftType, "nIMFS: ", nIMFs])
 
