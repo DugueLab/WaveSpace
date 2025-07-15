@@ -23,6 +23,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.collections import LineCollection
 from scipy.signal import welch
+import copy 
 
 # Load some simulated data
 dataPath  = os.path.join(path, "Examples/ExampleData/Output") 
@@ -156,9 +157,10 @@ plt.show()
 # note that this is A LOT slower than Filter + Hilbert
 
 #We cut down the data to a small region to speed up the example
-waveData.DataBuckets["SimulatedData"].set_data(waveData.get_data("SimulatedData")[0:2,10:14,10:14,:], "trl_posx_posy_time")
+tempWaveData = copy.deepcopy(waveData)
+tempWaveData.DataBuckets["SimulatedData"].set_data(waveData.get_data("SimulatedData")[0:2,10:14,10:14,:], "trl_posx_posy_time")
 
-emd.EMD(waveData, 
+emd.EMD(tempWaveData, 
         siftType = 'masked_sift',
         nIMFs=7, 
         dataBucketName="SimulatedData", 
@@ -176,7 +178,7 @@ TrialOfInterest = 0
 SelectedChannel = (1,1)
 IMFOfInterest = 4
 dataInds = (slice(None), TrialOfInterest, SelectedChannel[0], SelectedChannel[1])
-Plotting.plot_imfs(waveData, dataInds, IMFOfInterest)
+Plotting.plot_imfs(tempWaveData, dataInds, IMFOfInterest)
 
 #%% Option4: Wavelets
 # 4.1 Time-Domain

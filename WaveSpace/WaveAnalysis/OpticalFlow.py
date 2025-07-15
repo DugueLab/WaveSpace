@@ -314,7 +314,8 @@ def calculate_directional_stability(waveData, dataBucketName = "", windowSize=10
         # has been reduced by the size of the window. passing -1 to reshape makes numpy 
         # figure out the correct size)
         averageVectors = np.reshape(averageVectors, (*oldshape[:-1],-1))
-    dataBucket = wd.DataBucket(averageVectors, "Directional_Stability_Timeseries",waveData.DataBuckets[dataBucketName].get_dimord(), sampleRate=waveData.get_sample_rate() ,chanNames=waveData.DataBuckets[dataBucketName].get_channel_names() )
+    time = waveData.get_time(dataBucketName)[:-windowSize]  
+    dataBucket = wd.DataBucket(averageVectors, "Directional_Stability_Timeseries",waveData.DataBuckets[dataBucketName].get_dimord(), time=time ,chanNames=waveData.DataBuckets[dataBucketName].get_channel_names() )
     waveData.add_data_bucket(dataBucket)
     
 def source_sink_process_trial(thistrialInd, trial_data):
@@ -720,7 +721,7 @@ def process_observation(obs, ExAll, EyAll, temporal_derivatives, angleFlag, maxI
     return obs, ivxx_all, ivyy_all
 
 #%% main function
-def opticalFlow(waveData, dataBucketName=None, angleFlag= 'True', maxIter=1000, maxChange=0.01, alpha=0.1, is_linear = True, beta=10.0, nThreads = 10):
+def opticalFlow(waveData, dataBucketName="", angleFlag= 'True', maxIter=1000, maxChange=0.01, alpha=0.1, is_linear = True, beta=10.0, nThreads = 10):
     '''
     Calculates the optical flow of a 3d timeseries. The data is expected to be in the format of a 4D array with the dimensions
     trial, posx, posy, time. Variatinons in the form of e.g., freq,trial, posx, poy, time are accepted. 
@@ -740,7 +741,7 @@ def opticalFlow(waveData, dataBucketName=None, angleFlag= 'True', maxIter=1000, 
     nThreads: number of threads to use for the calculation. Default is 10. Set to however many cores you have -1 for optimal performance.
     '''
     
-    if dataBucketName is None:
+    if dataBucketName is "":
         dataBucketName = waveData.ActiveDataBucket
     else:
         waveData.set_active_dataBucket(dataBucketName)
@@ -820,7 +821,8 @@ def opticalFlow(waveData, dataBucketName=None, angleFlag= 'True', maxIter=1000, 
             velocityY[obs,:,:,:] = ivyy_all
     allUV = velocityX + 1j * velocityY
     #reshape back to original dimord, take into account that the last dimension has been reduced by 1
-    allUV = np.reshape(allUV, oldshape[:-1] + (oldshape[-1] - 1,))       
+    allUV = np.reshape(allUV, oldshape[:-1] + (oldshape[-1] - 1,)) 
+    time = waveData.get_time(dataBucketName)[:-1]        
     dataBucket = wd.DataBucket(allUV, "UV",currentDimord,
-                               sampleRate=waveData.get_sample_rate() ,chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
+                               time=time ,chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
     waveData.add_data_bucket(dataBucket)
