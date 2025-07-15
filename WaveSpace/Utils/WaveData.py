@@ -143,17 +143,14 @@ class WaveData():
         '''
         return bucket_name in self.DataBuckets
 
-    def crop_data(self, *args):
-        """_summary_
-        Crop Data in time, input: Either: Start (s), Stop (s) OR: BufferDuration(S)
-        """
-        if len(args) > 1:
-            t0,_=hf.find_nearest(self.get_time(), args[0])#Index of start time of interest
-            t1,_=hf.find_nearest(self.get_time(), args[1])#Index of end time of interest 
+    def crop_data(self, start, stop, dataBucketName=""):
+        if  dataBucketName == "":
+            dataBucketName =  self.ActiveDataBucket
         else:
-            nsamples = int(args[0] * self._sampleRate)             
-            t0 = 0+nsamples
-            t1 = len(self.get_time())-nsamples
+            self.set_active_dataBucket(dataBucketName)
+
+        t0,_=hf.find_nearest(self.get_time(dataBucketName), start)#Index of start time of interest
+        t1,_=hf.find_nearest(self.get_time(dataBucketName), stop)#Index of end time of interest 
         self.set_time(self.get_time()[t0:t1])
         dimensions = self.DataBuckets[self.ActiveDataBucket]._dimord.split("_")
         timedim = [ind for ind, item in enumerate(dimensions) if re.search("time", item)]
@@ -200,6 +197,8 @@ class WaveData():
         self._channames = ch_names
 
     def set_active_dataBucket(self, name):
+        if not (name in self.DataBuckets.keys()):
+            raise Exception(f"DataBucket {name} does not exist, can not set as active databucket")
         self.ActiveDataBucket = name
 
     def set_sample_rate(self, sampleRate):
