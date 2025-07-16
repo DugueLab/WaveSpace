@@ -5,7 +5,6 @@ import WaveSpace.Utils.WaveData as wd
 
 class wavedata_test(unittest.TestCase):
     def setUp(self):
-        print("done")
         self.nTrials = 3
         self.nChannels = 16
         self.nTimepoints = 500

@@ -548,11 +548,11 @@ def is_regular_grid_2d(distMat, tolerance = 0.001):
     return True
 
 def interpolate_pos_to_grid_process_trial(k, data, indices,distances, grid_x_shape, idw_power):
-    grid_z = np.empty((grid_x_shape[0] * grid_x_shape[1], data.shape[2]), dtype=data.dtype)
-    for j in range(data.shape[2]):
+    grid_z = np.empty((grid_x_shape[0] * grid_x_shape[1], data.shape[-1]), dtype=data.dtype)
+    for j in range(data.shape[-1]):
         z = data[k, indices, j]
         grid_z[:, j] = idw_interpolation(z, distances, idw_power=idw_power)
-    return grid_z.reshape((grid_x_shape[0], grid_x_shape[1], data.shape[2]))
+    return grid_z.reshape((grid_x_shape[0], grid_x_shape[1], data.shape[-1]))
 
 def interpolate_pos_to_grid(waveData, numGridBins=10, dataBucketName = "", return_mask= False, mask_stretching = False):
     '''Interpolate positions to a regular grid
@@ -647,18 +647,9 @@ def interpolate_pos_to_grid(waveData, numGridBins=10, dataBucketName = "", retur
 
     nbrs = NearestNeighbors(n_neighbors=3, algorithm='ball_tree').fit(pos_2d)
     distances, indices = nbrs.kneighbors(grid_points)
-    
-    if platform.system() == 'Linux':
-        with multiprocessing.Pool() as pool:
-            all_grid_z = pool.starmap(interpolate_pos_to_grid_process_trial, 
-                                      [(k, data, indices,distances, grid_x.shape, 2) 
-                                        for k in range(data.shape[0])])
-    else:
-        all_grid_z = joblib.Parallel(n_jobs=joblib.cpu_count())(
-                                        joblib.delayed(interpolate_pos_to_grid_process_trial)
-                                        (k, data, indices, distances, grid_x.shape, 2) 
-                                        for k in range(data.shape[0]))
-    all_grid_z = np.stack(all_grid_z, axis=0)
+    all_grid_z = np.zeros((data.shape[0], numGridBins, numGridBins, data.shape[-1]))
+    for k in range(data.shape[0]):
+        all_grid_z[k] = interpolate_pos_to_grid_process_trial(k, data, indices, distances, grid_x.shape, 2)
 
     # make fake channames for the interpolated data
     channames = []
