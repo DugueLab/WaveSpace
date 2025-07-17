@@ -24,6 +24,11 @@ def naninterp(xp):
   	
    
 def generalized_phase(waveData, dataBucketName = ''):
+    """
+    References
+    -----
+    Davis, *Muller, Martinez-Trujillo, Sejnowski, Reynolds. Spontaneous travelling cortical waves gate perception in behaving primates. Nature, 2020 (*equal contribution) 
+    """
     reshape = False
     # % parameters
     if dataBucketName == "":
