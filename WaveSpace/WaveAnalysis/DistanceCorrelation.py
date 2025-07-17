@@ -69,7 +69,11 @@ def calculate_distance_correlation_GP(waveData, dataBucketName = "", evaluationA
     Notes
     -----
     Needs a distance matrix to be defined in the WaveData object. See SpatialArrangement if not already there.  
-    """
+    
+    References
+    -----
+    -   Muller L, Piantoni G, Koller D, Cash SS, Halgren E, Sejnowski TJ (2016) Rotating waves during human sleep spindles organize global patterns of activity that repeat precisely through the night. eLife 5: e17267 
+    """   
     
     #sanity checks:
     if  dataBucketName == "":
