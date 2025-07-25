@@ -91,7 +91,7 @@ def create_uv(waveData, applyGaussianBlur=False, type = "real", Sigma=1, alpha =
     if hasBeenReshaped:
         #reshape back to original dimord, take into account that the last dimension has been reduced by 1
         allUV = np.reshape(allUV, oldshape[:-1] + (oldshape[-1] - 1,)) 
-        time = waveData.get_time(dataBucketName)[:-1]      
+    time = waveData.get_time(dataBucketName)[:-1]      
     dataBucket = wd.DataBucket(allUV, "UV",currentDimord,
                                time=time, 
                                chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
