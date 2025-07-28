@@ -821,8 +821,6 @@ def merge_wavedata_objects(waveDataList):
 def cosine_similarity_complex(a, b):
     return np.abs(np.vdot(a, b)) / (np.linalg.norm(a) * np.linalg.norm(b))
 
-
-#%%
 def find_wave_motifs(waveData, dataBucketName=None, oscillationThresholdDataBucket = None, oscillationThresholdFlag = False, baselinePeriod = None, threshold = .7, nTimepointsEdge = 50, mergeThreshold =.6, minFrames = 10, pixelThreshold = .3, magnitudeThreshold = .1, dataInds = None, Mask = None):
     """
     Identifies reocurring motifs in UV maps.
@@ -880,7 +878,7 @@ def find_wave_motifs(waveData, dataBucketName=None, oscillationThresholdDataBuck
     #mask and flatten data to one spatial dimension  
     data = data[:, Mask, :]
 
-    epsilon = 1e-10  # small constant
+    epsilon = 1e-18  # to avoid diving by zero later
     framesequence = []
     temp_stable_patterns = []
 
@@ -907,7 +905,7 @@ def find_wave_motifs(waveData, dataBucketName=None, oscillationThresholdDataBuck
                     tStart = t
                     framesequence = []
                     break
-                elif oscillationThresholdFlag:
+                if oscillationThresholdFlag:
                     # Count the number of x,y positions that meet the power threshold
                     num_pixels_above_threshold = (oscillationThresholdData[trl,:,t] > oscillationThreshold).sum()
                     if num_pixels_above_threshold < minPixels:
@@ -939,7 +937,7 @@ def find_wave_motifs(waveData, dataBucketName=None, oscillationThresholdDataBuck
                 tStart = t + 1
         if len(framesequence) >= minFrames :
             temp_stable_patterns.append({'average': np.mean(framesequence, axis=0), 'trial': [trl], 'frames': [(tStart, t)], 'num_frames': t-tStart+1})
-    print(f"Number of sequences before merging: {len(temp_stable_patterns)}")
+    print(f"temporally stable sequences: {len(temp_stable_patterns)}")
 
     # for pattern in temp_stable_patterns:
     #     print(f"Trial: {pattern['trial']}, Frames: {pattern['frames']}")
@@ -1019,7 +1017,7 @@ def merge_motifs_across_subjects(motifs, mergeThreshold = .6, pixelThreshold = 1
     MergeCount = 0
 
     mask = motifs[0]['average'] != 0
-
+    epsilon = 1e-18
     if not merged_motifs:
         first_motif = motifs.pop(0)
         first_motif['trial_frames'] = [(first_motif['subject'], tf) for tf in first_motif['trial_frames']]
@@ -1029,8 +1027,8 @@ def merge_motifs_across_subjects(motifs, mergeThreshold = .6, pixelThreshold = 1
         has_merged = False
         motif['trial_frames'] = [(motif['subject'], tf) for tf in motif['trial_frames']]
         for merged_motif in merged_motifs:
-            normalized_merged_motif = merged_motif['average'][mask] / np.abs(merged_motif['average'][mask])
-            normalized_motif = motif['average'][mask] / np.abs(motif['average'][mask])
+            normalized_merged_motif = merged_motif['average'][mask] / (np.abs(merged_motif['average'][mask]) + epsilon)
+            normalized_motif = motif['average'][mask] / (np.abs(motif['average'][mask]) + epsilon)
             cosine_similarity = np.real(normalized_merged_motif * np.conj(normalized_motif))
             if np.sum(cosine_similarity >= mergeThreshold) >= minPixels:
                 MergeCount += 1
@@ -1051,6 +1049,59 @@ def merge_motifs_across_subjects(motifs, mergeThreshold = .6, pixelThreshold = 1
     print ('MergeCount:', MergeCount)
     print ('NotMergeCount:', NotMergeCount)
     return merged_motifs
+
+def match_motifs_to_templates(motifs, templates=None, mergeThreshold = None, pixelThreshold = 1):
+    """
+    Matches motifs to templates based on cosine similarity.
+
+    Parameters:
+    motifs (list): A list of motifs, where each motif is a dictionary that includes an 'average' field.
+    templates (list, optional): A list of templates to match the motifs against. If None, uses the first motif as the template. Defaults to None.
+    mergeThreshold (float, optional): The threshold for the cosine similarity between motifs to consider them the same and merge them. Can be between 0 and 1 or None, which does winner takes all.
+    pixelThreshold (float, optional): The minimum proportion of pixels that must meet the threshold for a motif to be considered part of a merged motif. Defaults to 1. Not applicable if mergeThreshold is None.
+
+    Returns:
+    list: A list of matched motifs.
+    """
+    minPixels = motifs[0]['average'].shape[0] * motifs[0]['average'].shape[1] * pixelThreshold
+    epsilon = 1e-18
+    # Ensure templates is a list of dicts with required fields
+    if templates is None:
+        templates = [{'average': motifs[0]['average'], 'num_frames': 0, 'trial_frames': []}]
+    elif isinstance(templates, np.ndarray):
+        templates = [{'average': templates, 'num_frames': 0, 'trial_frames': []}]
+    elif isinstance(templates, list):
+        if not isinstance(templates[0], dict):
+            templates = [{'average': t, 'num_frames': 0, 'trial_frames': []} for t in templates]
+
+    for motif in motifs:        
+        motif_trial_frames = [(motif['subject'], tf) for tf in motif['trial_frames']]
+        motif_num_frames = motif['num_frames']
+
+        # Compute similarity to each template
+        cosine_similarity_array = np.zeros(len(templates))
+        for templateInd, template in enumerate(templates):
+            normalized_template = template['average'] / (np.abs(template['average'])+ epsilon)
+            normalized_motif = motif['average'] / (np.abs(motif['average']) + epsilon)
+            sim = np.real(normalized_template * np.conj(normalized_motif))
+            if mergeThreshold is not None:
+                cosine_similarity_array[templateInd] = np.sum(sim >= mergeThreshold)
+            else:
+                cosine_similarity_array[templateInd] = np.sum(sim)
+        print(cosine_similarity_array)
+        top_template_index = np.argmax(cosine_similarity_array)
+        if mergeThreshold is not None:
+            if cosine_similarity_array[top_template_index] >= minPixels:
+                templates[top_template_index]['trial_frames'].extend(motif_trial_frames)
+                templates[top_template_index]['num_frames'] += motif_num_frames
+        else: #winner takes all, whatever the actual similarity
+            templates[top_template_index]['trial_frames'].extend(motif_trial_frames)
+            templates[top_template_index]['num_frames'] += motif_num_frames
+
+    # The 'average' field for each template remains unchanged (the template itself)
+    return templates
+
+
 
 
 def nan_gradient(data, dx, dy, dz):

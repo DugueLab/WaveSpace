@@ -543,7 +543,7 @@ def get_surround_locs(nrows, ncols):
     print('Surround Locs Done')
     return surroundLocs
 
-@numba.jit(nopython=True)    
+#@numba.jit(nopython=True)    
 def anglesubtract(a, b):
     return (a - b + np.pi) % (2 * np.pi) - np.pi
 
@@ -721,7 +721,7 @@ def process_observation(obs, ExAll, EyAll, temporal_derivatives, angleFlag, maxI
     return obs, ivxx_all, ivyy_all
 
 #%% main function
-def opticalFlow(waveData, dataBucketName="", angleFlag= 'True', maxIter=1000, maxChange=0.01, alpha=0.1, is_linear = True, beta=10.0, nThreads = 10):
+def opticalFlow(waveData, dataBucketName="", angleFlag= True, maxIter=1000, maxChange=0.01, alpha=0.1, is_linear = True, beta=10.0, nThreads = 10):
     '''
     Calculates the optical flow of a 3d timeseries. The data is expected to be in the format of a 4D array with the dimensions
     trial, posx, posy, time. Variatinons in the form of e.g., freq,trial, posx, poy, time are accepted. 
@@ -763,10 +763,13 @@ def opticalFlow(waveData, dataBucketName="", angleFlag= 'True', maxIter=1000, ma
     velocityY = np.zeros((nObs,posx,posy,nframes-1))
     
     if angleFlag:
-        if np.iscomplex(currentData).all():
+        if np.iscomplexobj(currentData):
             currentData = np.angle(currentData)
     else:
-        currentData = np.abs(currentData)
+        if np.iscomplexobj(currentData):
+            currentData = np.abs(currentData)
+        else:
+            currentData = np.real(currentData)
 
     # Pre-calculate phase gradients and temporal derivatives
     phase_gradients_x = np.empty((nObs, currentData.shape[1], currentData.shape[2], nframes))
@@ -787,7 +790,7 @@ def opticalFlow(waveData, dataBucketName="", angleFlag= 'True', maxIter=1000, ma
             else:
                 ExAll[obs,:,:,t] = (phase_gradients_x[obs,:,:,t] + phase_gradients_x[obs,:,:,t+1]) / 2
                 EyAll[obs,:,:,t] = (phase_gradients_y[obs,:,:,t] + phase_gradients_y[obs,:,:,t+1]) / 2
-            if np.iscomplex(currentData[obs, :, :, t]).all():
+            if angleFlag:
                 temporal_derivatives[obs, :, :, t] = anglesubtract(np.angle(currentData[obs, :, :, t]), np.angle(currentData[obs, :, :, t+1]))
             else:
                 temporal_derivatives[obs, :, :, t] = anglesubtract(currentData[obs, :, :, t+1], currentData[obs, :, :, t])
