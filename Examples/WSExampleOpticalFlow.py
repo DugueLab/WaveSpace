@@ -31,7 +31,7 @@ OpticalFlow.create_uv(waveData,
         type = "angle", 
         Sigma=1, 
         alpha = 0.1, 
-        nIter = 200, 
+        maxIter = 200, 
         dataBucketName="complexData",
         is_phase = False)
 

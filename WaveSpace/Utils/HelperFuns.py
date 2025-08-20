@@ -856,6 +856,8 @@ def find_wave_motifs(waveData, dataBucketName=None, oscillationThresholdDataBuck
     assure_consistency(waveData)
     oldShape = waveData.DataBuckets[waveData.ActiveDataBucket].get_data().shape
     currentDimord= waveData.DataBuckets[waveData.ActiveDataBucket].get_dimord()
+    if dataInds is None:
+        dataInds = slice(None)
     data=waveData.DataBuckets[waveData.ActiveDataBucket].get_data()[dataInds]    
     splitDimord = currentDimord.split('_')	
     if 'posx' in splitDimord and 'posy' in splitDimord:
