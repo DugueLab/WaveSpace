@@ -54,7 +54,7 @@ def create_uv(waveData, applyGaussianBlur=False, type = "real", Sigma=1, alpha =
     # set up initial velocities
     uInitial = np.zeros([posx, posy])
     vInitial = np.zeros([posx, posy])
-    # set up averaging kernel for HS function
+    # set up averaging kernel for Horn Schunck function
     kernel = np.array([[1 / 12, 1 / 6, 1 / 12],
                        [1 / 6, 0, 1 / 6],
                        [1 / 12, 1 / 6, 1 / 12]], float)
