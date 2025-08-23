@@ -96,7 +96,7 @@ complexSignal = waveData.DataBuckets["complexData"].get_data()[0,0,0,:] #dimord 
 origSignal = waveData.DataBuckets["SimulatedData"].get_data()[0,0,0,:]
 
 fig, axs = plt.subplots(2, 1, figsize=(10, 6), sharex=True)
-fig.suptitle(f"Filter Hilbert")
+fig.suptitle(f"Generalized Phase")
 # real part and envelope
 axs[0].plot(waveData.get_time(), np.real(complexSignal), label='Real part')
 axs[0].plot(waveData.get_time(), np.abs(complexSignal), label='Envelope', linestyle='--')

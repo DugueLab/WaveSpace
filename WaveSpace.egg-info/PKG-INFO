@@ -1,6 +1,6 @@
-Metadata-Version: 2.2
+Metadata-Version: 2.1
 Name: WaveSpace
-Version: 1.1.5
+Version: 1.1.6
 Summary: A Python package for the analysis of cortical traveling waves
 Home-page: https://github.com/kpetras/WaveSpace
 Author: Kirsten Petras
@@ -26,18 +26,8 @@ Requires-Dist: scikit-image>=0.18.1
 Requires-Dist: tvb-gdist>=2.2.1
 Requires-Dist: emd>=0.8.0
 Requires-Dist: mne>=1.8.0
-Dynamic: author
-Dynamic: author-email
-Dynamic: classifier
-Dynamic: description
-Dynamic: description-content-type
-Dynamic: home-page
-Dynamic: license
-Dynamic: requires-dist
-Dynamic: requires-python
-Dynamic: summary
 
-# WaveSpace version 1.1.5
+# WaveSpace version 1.1.6
 Python tools for the simulation and analysis of cortical traveling waves
 
 ## Installation
@@ -91,7 +81,7 @@ The `WaveData` class serves as a container for time-series data related to corti
   - Saves objects to files for later retrieval (`save_to_file`).
   - Provides a structured string representation (`__repr__`) for quick dataset summaries.
 
-This class is essential for organizing and processing large-scale neural recordings, offering flexibility in data structuring, preprocessing, and visualization. Let me know if youâ€™d like any refinements!
+This class is essential for organizing and processing large-scale neural recordings, offering flexibility in data structuring, preprocessing, and visualization. Let me know if you’d like any refinements!
 
 ### Wave Analysis: 
 Core module for detecting, characterizing, and quantifying cortical traveling waves using advanced signal processing techniques.

@@ -1,9 +1,4 @@
 setup.py
-../WaveSpace.egg-info/PKG-INFO
-../WaveSpace.egg-info/SOURCES.txt
-../WaveSpace.egg-info/dependency_links.txt
-../WaveSpace.egg-info/requires.txt
-../WaveSpace.egg-info/top_level.txt
 ../WaveSpace/__init__.py
 ../WaveSpace.egg-info/PKG-INFO
 ../WaveSpace.egg-info/SOURCES.txt
