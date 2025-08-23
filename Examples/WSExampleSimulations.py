@@ -194,13 +194,15 @@ for item in Conditions:
 
 waveData = SimulationFuns.combine_SimData([planeWaveData, targetWaveData, spiralWaveData, oscillatorWaveData], dimension = 'trl', SimCondList = simCondList)
 # save for later use
-output_path = os.path.join(path, "Examples/ExampleData/Output")
+output_path = "ExampleData/Output"
+if not os.path.exists(output_path):
+    os.makedirs(output_path)
 waveData.save_to_file(os.path.join(output_path, "SimulatedData"))
 
 #%% Plot an example timeseries (takes long)
 for trl in range(waveData.get_data("SimulatedData").shape[0]):
     ani = Plotting.animate_grid_data(waveData, DataBucketName="SimulatedData", dataInd=trl, probepositions=[(0,15), (5,15), (10,15), (15,15), (19,15), (19,15)])
-    plot_file = os.path.join(path, f"Examples/ExampleData/Output/SimulationAnimation_{trl}.mp4")
+    plot_file = output_path + "/SimulationAnimation_{trl}.gif"
     ani.save(plot_file)
 
 
