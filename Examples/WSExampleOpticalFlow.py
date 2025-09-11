@@ -89,11 +89,11 @@ plt.colorbar()
 fig, axs = plt.subplots(1, len(motifs[0:6]), figsize=(12, 6), gridspec_kw={'wspace': 0.3})
 
 for motifInd, motif  in enumerate(motifs[0:6]):
-        # Quiver plot
-        axs[motifInd].quiver(-np.real(motif['average']), -np.imag(motif['average']), color='black')
-        axs[motifInd].set_facecolor('white')
-        axs[motifInd].set_aspect('equal')
-        for spine in axs[motifInd].spines.values():
-            spine.set_edgecolor(cmap(motifInd+1))
-            spine.set_linewidth(2)
+    # Quiver plot
+    axs[motifInd].quiver(-np.real(motif['average']), -np.imag(motif['average']), color='black')
+    axs[motifInd].set_facecolor('white')
+    axs[motifInd].set_aspect('equal')
+    for spine in axs[motifInd].spines.values():
+        spine.set_edgecolor(cmap(motifInd+1))
+        spine.set_linewidth(2)
 # %%
