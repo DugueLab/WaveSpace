@@ -10,6 +10,12 @@ Open a terminal, navigate to the directory you downloaded to and install with
 pip install WaveSpace-1.1.6-py3-none-any.whl
 ```
 
+## Unit testing
+Run tests locally using Python's built-in `unittest` framework from the `UnitTest` folder:
+```bash
+python -m unittest discover UnitTest
+```
+
 ## Modules
 ### Decomposition: 
 Implements various frequency decomposition techniques, such as Fourier and wavelet transforms, Empirical Mode Decomposition (EMD)
