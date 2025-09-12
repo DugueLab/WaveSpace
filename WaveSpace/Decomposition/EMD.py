@@ -189,9 +189,7 @@ def check_for_harmonics(waveData, IPs, IFs, IAs, base_imf_list):
             args[argnum][2] = arg[2][ind][:] 
 
     if platform.system() == 'Linux':
-        # Create a pool of workers
         with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
-            # Distribute the work among the workers
             df = pool.map(parallel_assess_harmonic_criteria, args)    
             # loop over the IMFs that are not the base
             condition = (df['Integer IF p-value'] < .01) \
@@ -295,6 +293,7 @@ def EMD(waveData, nIMFs=7, dataBucketName="", noiseVar = 0.05, n_noiseChans = 10
         n_noiseChans (int, optional): Defaults to 10. Number of noise channels to add for multivariate siftfun
         noiseVar (float, optional): Defaults to 0.05. Variance of noise to add for multivariate siftfun
         dataBucketName (str, optional):Defaults to ""
+        Special stuff for multivariate sift:
         ndir (int, optional): Defaults to None. Number of signal projections. Should be at least twice the number of data channels ("None" will do that). Only for multivariate siftfun
         sd (float, optional): Defaults to 0.075. Only for multivariate siftfun
         sd2 (float, optional): Defaults to 0.75. Only for multivariate siftfun

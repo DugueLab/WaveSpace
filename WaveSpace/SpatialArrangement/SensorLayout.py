@@ -732,7 +732,7 @@ def interpolate_spherical_spline_2d(waveData, resolution=10, scalePos=1000, func
     '''
     [KP] Something doesn't seem quite right about this. Fix it later.
     Interpolate positions to a regular grid using spherical spline interpolation, and
-    return data on a 2D grid. This function uses parallel processing.
+    return data on a 2D grid. 
     Parameters 
     ----------
     waveData : WaveData object
