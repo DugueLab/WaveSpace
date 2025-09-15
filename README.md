@@ -1,5 +1,8 @@
 # WaveSpace version 1.1.6
-Python tools for the simulation and analysis of cortical traveling waves
+WaveSpace is a Python toolbox for simulating, detecting, and analyzing spatiotemporal traveling waves in neural sensor array data. It provides  tools for generating synthetic datasets, and applying a range of wave analysis techniques such as optical flow, 2D FFT, circular-linear correlation and singular value decomposition. In addition, it contains pipelines to decompose multi-dimensional timeseries data into its frequency components to derive robust phase estimates. WaveSpace’s WaveData class provides a structured approach to managing complex datasets, while its plotting helpers facilitate intuitive visualization of spatiotemporal patterns.
+
+## Documentation
+Access latest documentation from [here](https://wavespace.readthedocs.io/en/latest/)
 
 ## Installation
 
@@ -10,11 +13,14 @@ Open a terminal, navigate to the directory you downloaded to and install with
 pip install WaveSpace-1.1.6-py3-none-any.whl
 ```
 
-## Unit testing
-Run tests locally using Python's built-in `unittest` framework from the `UnitTest` folder:
-```bash
-python -m unittest discover UnitTest
-```
+## Testing
+   * Run tests locally using Python's built-in `unittest` framework from the `UnitTest` folder:
+
+     ```bash
+     python -m unittest discover UnitTest
+
+## Contributing
+See https://github.com/kpetras/WaveSpace/blob/main/CONTRIBUTING.md
 
 ## Modules
 ### Decomposition: 
@@ -64,37 +70,3 @@ This class is essential for organizing and processing large-scale neural recordi
 Core module for detecting, characterizing, and quantifying cortical traveling waves using advanced signal processing techniques.
 
 ![overview](JOSS/WaveSpace_overview_smaller.png)
-
-# Example:
-```
-from WaveSpace.Simulation import SimulationFuns
-from WaveSpace.PlottingHelpers import Plotting
-from WaveSpace.Utils import HelperFuns as hf
-
-import numpy as np
-import matplotlib.pyplot as plt
-
-Type =  "PlaneWave" 
-nTrials = 1
-matrixSize = 20
-SampleRate= 128
-SimDuration= 1.0
-
-waveData = SimulationFuns.simulate_signal(
-    Type, 
-    nTrials, 
-    matrixSize, 
-    SampleRate, 
-    SimDuration, 
-    #SimOptions from here on
-    TemporalFrequency = 10,
-    SpatialFrequency = 0.7,
-    WaveDirection = 45,
-    )
-
-hf.squareSpatialPositions(waveData)
-ani = Plotting.animate_grid_data(waveData, DataBucketName="SimulatedData", dataInd=0, 
-                                 probepositions=[(4,7), (8,7), (12,7), (16,7)])
-ani.save('PlaneWave.mp4', writer='ffmpeg', fps=6)
-```
-
