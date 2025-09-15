@@ -2,7 +2,6 @@ import numpy as np
 from numpy.linalg import norm
 from scipy.fftpack.realtransforms import dct, idct
 from WaveSpace.Utils import HelperFuns as hf
-from WaveSpace.Utils import CircStat
 from WaveSpace.Utils import WaveData as wa
 from WaveSpace.SpatialArrangement import SensorLayout as sensors
 import pandas as pd
@@ -173,7 +172,7 @@ def phase_dist_corr(ph, source, pixelSpacing):
     ph[np.isnan(ph)] = None
     D[np.isnan(D)] = None
     cc = np.zeros(2)
-    cc[0], cc[1] = CircStat.circular_linear_correlation(ph,D)
+    cc[0], cc[1] = hf.circular_linear_correlation(ph,D)
     return cc
 
 def phase_gradient_complex_multiplication(complexData, pixel_spacing=1,ifSign=1):
@@ -209,7 +208,7 @@ def find_evaluation_points(complexData, evaluationAngle, tolerance):
     nRows, nColumns, nTimepoints = complexData.shape
     r = np.reshape(complexData, (nRows*nColumns, nTimepoints))
     r = np.nansum(r, 0) / r.shape[0]
-    r = np.abs( CircStat.circular_distance_between_angles(np.angle(r), evaluationAngle))
+    r = np.abs( hf.circular_distance_between_angles(np.angle(r), evaluationAngle))
     dr = (np.where(np.diff(np.sign(np.diff(r)))==2))
     dr= np.array(dr)+1
     ep = dr[0, np.abs(r[dr[0]]) <tolerance]
