@@ -171,7 +171,7 @@ def freqSpecTrialAverageProcessChannel(args):
 
 def parallel_assess_harmonic_criteria(args):
     IPs, IFs, IAs, base_imf = args
-    return assess_harmonic_criteria(IPs.T, IFs.T, IAs.T, base_imf=base_imf, num_segments=10)
+    return emd.imftools.assess_harmonic_criteria(IPs.T, IFs.T, IAs.T, base_imf=base_imf, num_segments=10)
 
 def check_for_harmonics(waveData, IPs, IFs, IAs, base_imf_list):
     currentDimord= waveData.DataBuckets[waveData.ActiveDataBucket].get_dimord()
@@ -189,144 +189,25 @@ def check_for_harmonics(waveData, IPs, IFs, IAs, base_imf_list):
             args[argnum][2] = arg[2][ind][:] 
 
     if platform.system() == 'Linux':
-        # Create a pool of workers
         with multiprocessing.Pool(multiprocessing.cpu_count()) as pool:
-            # Distribute the work among the workers
-            HarmonicInds = pool.map(parallel_assess_harmonic_criteria, args)
+            df = pool.map(parallel_assess_harmonic_criteria, args)    
+            # loop over the IMFs that are not the base
+            condition = (df['Integer IF p-value'] < .01) \
+                & (df['af < 1 p-value'] < .01) \
+                & (df['DistCorr p-value'] < .01)
+            HarmonicInds = df.index.values[condition]
             HarmonicInds = [[HarmonicInds[i * num_channels + j] for j in range(num_channels)] for i in range(num_trials)]
     else:
         # Use joblib for parallelization if not on Linux
-        HarmonicInds = joblib.Parallel(n_jobs=joblib.cpu_count())(joblib.delayed(parallel_assess_harmonic_criteria)(arg) for arg in args)
+        df = joblib.Parallel(n_jobs=joblib.cpu_count())(joblib.delayed(parallel_assess_harmonic_criteria)(arg) for arg in args)
+        # KP added: set some criteria for when to merge IMFs, return indices of IMFs that meet criteria
+        # loop over the IMFs that are not the base
+        condition = (df['Integer IF p-value'] < .01) \
+            & (df['af < 1 p-value'] < .01) \
+            & (df['DistCorr p-value'] < .01)
+        HarmonicInds = df.index.values[condition]
         HarmonicInds = [[HarmonicInds[i * num_channels + j] for j in range(num_channels)] for i in range(num_trials)]
-    
-    return HarmonicInds
-
-def assess_harmonic_criteria(IP, IF, IA, num_segments=None, base_imf=None, print_result=True):
-    """Assess IMFs for potential harmonic relationships.
-
-    This function implements tests for the criteria defining when signals can
-    be considered 'harmonically related' as introduced in [1]_. Broadly,
-    harmonically related signals are defined as having an integer frequency
-    ratio, constant phase relationship, and a well-defined joint instantaneous
-    frequency
-
-    Three criteria are assessed by splitting the time-series into approximately
-    equally sized segments and computing metrics within each segment.
-
-    Parameters
-    ----------
-    IP, IF, IA : ndarray of equal shape
-        Instantaneous Phase, Frequency and Amplitude estimates for a set of
-        IMFs. These are typically the outputs from emd.spectra.frequency_transform.
-    num_segments : int
-        Number of segments to split the time series into to enable statistical assessment.
-    base_inf : int
-        Index of IMF to be considered the potential 'fundamental' oscillation.
-    print_result : bool
-        Flag indicating whether to print a summary table of results.
-
-    Returns
-    -------
-    df
-        Pandas DataFrame containing a range of summary and comparison metrics.
-
-    Notes
-    -----
-    In detail, this function compares each IMF to a 'base' IMF to see if it can
-    be considered a potential harmonic. Each pair of IMFs are assessed for:
-
-    1) An integer frequency ratio. The distribution of frequency ratios across
-    segments is compared to its closest integer value with a 1-sample t-test
-
-    2) Consistent phase relationship. The instantaneous phase time-courses are
-    assessed for temporal dependence using a Distance Correlation t-statistic.
-
-    3) The af ratio is less than 1. The product of the amplitude ratio and
-    frequency ratio of the two IMFs should be less than 1 according to a
-    1-sided 1-sample t-test.
-
-    References
-    ----------
-    .. [1] Fabus, M. S., Woolrich, M. W., Warnaby, C. W., & Quinn, A. J.
-           (2022). Understanding Harmonic Structures Through Instantaneous Frequency.
-           IEEE Open Journal of Signal Processing. doi: 10.1109/OJSP.2022.3198012.
-
-    """
-    # Housekeeping
-    import dcor
-    import pandas as pd
-    from scipy.stats import ttest_1samp
-    IP, IF, IA = emd.imftools.ensure_2d([IP, IF, IA], ['IP', 'IF', 'IA'], 'assess_harmonic_criteria')
-    emd.imftools.ensure_equal_dims((IP, IF, IA), ('IP', 'IF', 'IA'), 'assess_harmonic_criteria')
-
-    if base_imf is None:
-        base_imf = IP.shape[1] - 1
-
-    IP = IP.copy()[:, :base_imf+1]
-    IF = IF.copy()[:, :base_imf+1]
-    IA = IA.copy()[:, :base_imf+1]
-
-    if num_segments is None:
-        num_segments = 20
-    mod = int(len(IP) % num_segments) #KP: check if dividing into num_segments produces a rest, if so, remove those leftover samples from array
-    # the [:-mod or None] expression means return everything except the rest of the division (mod) if mod is zero, return everything
-    IPs = np.array_split(IP[:-mod or None], num_segments, axis=0)
-    IFs = np.array_split(IF[:-mod or None], num_segments, axis=0)
-    IAs = np.array_split(IA[:-mod or None], num_segments, axis=0)
-
-    IFms = [ff.mean(axis=0) for ff in IFs]
-    IAms = [aa.mean(axis=0) for aa in IAs]
-
-    fratios = np.zeros((base_imf, num_segments))
-    a_s = np.zeros((base_imf, num_segments))
-    afs = np.zeros((base_imf, num_segments))
-    dcorrs = np.zeros((base_imf, num_segments))
-    dcor_pvals = np.zeros((base_imf, 2))
-    fratio_pvals = np.zeros(base_imf)
-    af_pvals = np.zeros(base_imf)
-
-    for ii in range(base_imf):
-        # Freq ratios
-        fratios[ii, :] = [ff[ii] / ff[base_imf] for ff in IFms]
-        # Amp ratio
-        a_s[ii, :] = [aa[ii] / aa[base_imf] for aa in IAms]
-        # af value
-        afs[ii, :] = a_s[ii, :] * fratios[ii, :]
-
-        # Test 1: significant Phase-Phase Correlation
-        dcorr = dcor.distance_correlation(IP[:, ii], IP[:, base_imf])
-        p_dcor, _ = dcor.independence.distance_correlation_t_test(IP[:, ii], IP[:, base_imf])
-        dcor_pvals[ii, :] = dcorr, p_dcor
-        for jj in range(num_segments):
-            dcorrs[ii, jj] = dcor.distance_correlation(IPs[jj][:, ii], IPs[jj][:, base_imf])
-
-        # Test 2: frequency ratio not different from nearest integer
-        ftarget = np.round(fratios[ii, :].mean())
-        _, fratio_pvals[ii] = ttest_1samp(fratios[ii, :], ftarget)
-        # Test 3: af < 1
-        _, af_pvals[ii] = ttest_1samp(afs[ii, :], 1, alternative='less')
-
-    info = {'InstFreq Mean': np.array(IFms).mean(axis=0)[:base_imf],
-            'InstFreq StDev': np.array(IFms).std(axis=0)[:base_imf],
-            'InstFreq Ratio': fratios.mean(axis=1),
-            'Integer IF p-value': fratio_pvals,
-            'InstAmp Mean': np.array(IAms).mean(axis=0)[:base_imf],
-            'InstAmp StDev': np.array(IAms).std(axis=0)[:base_imf],
-            'InstAmp Ratio': a_s.mean(axis=1),
-            'af Value': afs.mean(axis=1),
-            'af < 1 p-value': af_pvals,
-            'DistCorr': dcor_pvals[:, 0],
-            'DistCorr p-value': dcor_pvals[:, 1]}
-
-    df = pd.DataFrame.from_dict(info)
-
-    # KP added: set some criteria for when to merge IMFs, return indices of IMFs that meet criteria
-    # loop over the IMFs that are not the base
-    condition = (df['Integer IF p-value'] < .01) \
-        & (df['af < 1 p-value'] < .01) \
-        & (df['DistCorr p-value'] < .01)
-    HarmonicInds = df.index.values[condition]
-    return HarmonicInds
+    return HarmonicInds   
 
 def CombineIMFsIfPositiveJointInstFreq(waveData, potentialHarmonicInds, dataBucketName=""):
     if dataBucketName == "":
@@ -412,7 +293,8 @@ def EMD(waveData, nIMFs=7, dataBucketName="", noiseVar = 0.05, n_noiseChans = 10
         n_noiseChans (int, optional): Defaults to 10. Number of noise channels to add for multivariate siftfun
         noiseVar (float, optional): Defaults to 0.05. Variance of noise to add for multivariate siftfun
         dataBucketName (str, optional):Defaults to ""
-        ndir (int, optional): Defaults to None. Number of signal projections. Should be at least twice the number of data channels. Only for multivariate siftfun
+        Special stuff for multivariate sift:
+        ndir (int, optional): Defaults to None. Number of signal projections. Should be at least twice the number of data channels ("None" will do that). Only for multivariate siftfun
         sd (float, optional): Defaults to 0.075. Only for multivariate siftfun
         sd2 (float, optional): Defaults to 0.75. Only for multivariate siftfun
         tol (float, optional): Defaults to 0.075. Only for multivariate siftfun

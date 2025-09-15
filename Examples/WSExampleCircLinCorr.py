@@ -104,4 +104,4 @@ for condInd, condition in enumerate(conditions):
     fig.colorbar(im, ax=ax)
     plt.show()
 
-
+#%%
