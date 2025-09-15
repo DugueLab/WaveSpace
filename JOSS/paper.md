@@ -33,7 +33,7 @@ affiliations:
     index: 3
 
 
-date: 20 February 2025
+date: 15 September 2025
 bibliography: references.bib
 
 ---
@@ -70,18 +70,15 @@ This project received funding from the European Research Council (ERC) under the
 # Toolbox dependencies
 
 Python (3.9.21)
-
-matplotlib (3.9.2)  
-scipy (1.13.1)  
+mne (1.8.0)
 plotly (5.24.1)  
 pint (0.24.4)  
 pyvista (0.44.2)  
+chaospy(4.3.19)
 pandas (2.2.3)  
 scikit-learn (1.6.1)  
-tvb-gdist (2.21)  
+scikit-image (0.18.1)
+tvb-gdist (2.2.1)  
 emd (0.8.0)
-
-Optional
-mne (0.16.2)
 
 # References

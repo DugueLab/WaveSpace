@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock
 import numpy as np
 from scipy import signal
-from WaveSpace.Decomposition.EMD import  FreqAmpPhaseFromAnalytic, assess_harmonic_criteria, EMD
+from WaveSpace.Decomposition.EMD import  EMD
 import WaveSpace.Utils.WaveData as wd
 
 class EMD_test(unittest.TestCase):

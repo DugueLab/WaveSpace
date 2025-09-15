@@ -12,10 +12,8 @@ setup.py
 ../WaveSpace.egg-info/top_level.txt
 ../WaveSpace/Decomposition/EMD.py
 ../WaveSpace/Decomposition/FFT.py
-../WaveSpace/Decomposition/FrequencyCluster.py
 ../WaveSpace/Decomposition/GenPhase.py
 ../WaveSpace/Decomposition/Hilbert.py
-../WaveSpace/Decomposition/IMFCluster.py
 ../WaveSpace/Decomposition/MEMD_Matlab_translation.py
 ../WaveSpace/Decomposition/Morlet.py
 ../WaveSpace/Decomposition/__init__.py
@@ -29,14 +27,12 @@ setup.py
 ../WaveSpace/SpatialArrangement/__init__.py
 ../WaveSpace/Statistics/NullDistributions.py
 ../WaveSpace/Statistics/__init__.py
-../WaveSpace/Utils/CircStat.py
 ../WaveSpace/Utils/HelperFuns.py
 ../WaveSpace/Utils/ImportHelpers.py
 ../WaveSpace/Utils/WaveData.py
 ../WaveSpace/Utils/WaveResult.py
 ../WaveSpace/Utils/__init__.py
 ../WaveSpace/Utils/generateFromLog.py
-../WaveSpace/Utils/nsmooth.py
 ../WaveSpace/WaveAnalysis/ClusterGradient.py
 ../WaveSpace/WaveAnalysis/DistanceCorrelation.py
 ../WaveSpace/WaveAnalysis/OpticalFlow.py

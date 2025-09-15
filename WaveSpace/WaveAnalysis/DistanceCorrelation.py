@@ -1,8 +1,8 @@
 import numpy as np
+from numpy.linalg import norm
+from scipy.fftpack.realtransforms import dct, idct
 from WaveSpace.Utils import HelperFuns as hf
-from WaveSpace.Utils import CircStat
 from WaveSpace.Utils import WaveData as wa
-from WaveSpace.Utils import nsmooth
 from WaveSpace.SpatialArrangement import SensorLayout as sensors
 import pandas as pd
 from pandas import DataFrame
@@ -172,7 +172,7 @@ def phase_dist_corr(ph, source, pixelSpacing):
     ph[np.isnan(ph)] = None
     D[np.isnan(D)] = None
     cc = np.zeros(2)
-    cc[0], cc[1] = CircStat.circular_linear_correlation(ph,D)
+    cc[0], cc[1] = hf.circular_linear_correlation(ph,D)
     return cc
 
 def phase_gradient_complex_multiplication(complexData, pixel_spacing=1,ifSign=1):
@@ -208,34 +208,19 @@ def find_evaluation_points(complexData, evaluationAngle, tolerance):
     nRows, nColumns, nTimepoints = complexData.shape
     r = np.reshape(complexData, (nRows*nColumns, nTimepoints))
     r = np.nansum(r, 0) / r.shape[0]
-    r = np.abs( CircStat.circular_distance_between_angles(np.angle(r), evaluationAngle))
+    r = np.abs( hf.circular_distance_between_angles(np.angle(r), evaluationAngle))
     dr = (np.where(np.diff(np.sign(np.diff(r)))==2))
     dr= np.array(dr)+1
     ep = dr[0, np.abs(r[dr[0]]) <tolerance]
     return ep
 
 def find_source_points(data, X, Y,evaluationPoints, dx, dy ):
-    # % 
-    # % FIND SOURCE POINTS     find "putative" source points - the most likely
-    # %                          starting point for a wave on the mulichannel
-    # %                          array by locating the arg max of divergence of a
-    # %                          vector field at each evaluation time point
-    # %
-    # % INPUT
-    # % evaluation_points - time points at which to locate sources
-    # % X - x-coordinates for rectangular grid (cf. meshgrid)
-    # % Y - y-coordinates for rectangular grid
-    # % dx - vector field components along x-direction
-    # % dy - vector field components along y-direction
-    #     %
-
     d = np.zeros((data.shape[0], data.shape[1], len(evaluationPoints)))
     d[:,:,:] = np.nan
     for ii, evaluationPoint in enumerate(evaluationPoints):
         d[:,:,ii] = hf.divergence(dx[:,:,evaluationPoint], dy[:,:,evaluationPoint])
-
-    smoothed = nsmooth.smoothn(d,isrobust=True, s=0.2846)
-    d = smoothed[0]
+    
+    d = shortsmooth(d,s=0.2846)
     source = np.zeros(( 2, len(evaluationPoints)))
     source[:,:] = np.nan
     for ii in range(len(evaluationPoints)):
@@ -244,3 +229,54 @@ def find_source_points(data, X, Y,evaluationPoints, dx, dy ):
             source[0, ii] = coordinates[0][0]
             source[1, ii] = coordinates[1][0]
     return source
+
+def shortsmooth(y, s=None):
+  sizy = y.shape
+  W = np.isfinite(y).astype(float)
+  isweighted = not np.all(W == 1)
+
+  # Build Lambda 
+  Lambda = sum( (2 - 2 * np.cos(np.pi * (np.arange(n) / n))).reshape(
+    [n if i == ax else 1 for ax in range(y.ndim)] )
+      for i, n in enumerate(sizy) )
+
+  N = np.sum(np.array(sizy) != 1) # tensor rank
+  y = np.where(np.isfinite(y), y, 0)
+  z = np.zeros_like(y)
+  z0 = np.zeros_like(y)
+  Wtot = W
+
+  # Relaxation factor
+  RF = 1 + 0.75 * isweighted
+  xpost = np.array([np.log10(s)])
+
+  for _ in range(2):
+    isweighted = True 
+    tol, nit = 1, 0 
+    while tol>1e-3 and nit<100:
+        nit = nit+1
+        DCTy = dctND(Wtot*(y-z)+z,f=dct)
+        s = 10**xpost[0]
+        Gamma = 1./(1+(s*abs(Lambda))**2.0)
+        z = RF*dctND(Gamma*DCTy,f=idct) + (1-RF)*z
+        tol = isweighted*norm(z0-z)/norm(z)       
+        z0 = z 
+
+    # average leverage
+    h = np.sqrt(1+16.*s) 
+    h = np.sqrt(1+h)/np.sqrt(2)/h 
+    h = h**N
+    Wtot = W*RobustWeights(y-z, np.isfinite(y),h)
+  return z
+
+def RobustWeights(r,I,h):
+    MAD = np.median(np.abs(r[I]-np.median(r[I]))) # median absolute deviation
+    u = np.abs(r/(1.4826*MAD)/np.sqrt(1-h)) # studentized residuals
+    c = 4.685 
+    W = (1-(u/c)**2)**2.*((u/c)<1) # bisquare weights
+    return np.nan_to_num(W)
+
+def dctND(data, f=dct):
+  for axis in range(data.ndim):
+    data = f(data, norm='ortho', type=2, axis=axis)
+  return data

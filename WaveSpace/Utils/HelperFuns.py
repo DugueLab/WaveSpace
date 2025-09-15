@@ -8,6 +8,19 @@ from scipy.stats import trim_mean
 from scipy.ndimage import median_filter, convolve
 import copy
 import matplotlib.pyplot as plt
+import scipy.stats as stats
+
+def circular_distance_between_angles(angle1, angle2):
+    return np.pi -np.abs(np.pi - np.abs(angle1 - angle2))
+
+def circular_linear_correlation(alpha, x):
+    n = np.size(alpha)
+    rxs = np.corrcoef(x, np.sin(alpha))[0,1]
+    rxc = np.corrcoef(x, np.cos(alpha))[0,1]
+    rcs = np.corrcoef(np.sin(alpha), np.cos(alpha))[0,1]
+    rho = np.sqrt((rxc**2 + rxs**2 - 2*rxc*rxs*rcs)/(1-rcs**2))
+    pval = 1-stats.chi2.cdf(n*rho**2,2)
+    return rho, pval
 
 # Mean 2 like in Matlab
 def mean2(x):
