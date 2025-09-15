@@ -1,14 +1,11 @@
-1. Write Unit test for force dimord function cases:
+- Write Unit test for force dimord function cases:
     - freq_trl_posx_posy_time > trl_chan_time
     - Even more leading dimensions (before posx or chan)
     
-2. Fix animation function to be speedier (plotting.animate_grid_data)
-3. Make Import not start the EMD logger
-4. Fullfield snr ramping onsets and offsets for radial and target waves
-5. Rename rotating waves to spiral waves
-6. Would be nice if rotating/spiral waves would have a center that can be set
-7. Make Nice comments on the entire example
-8. Go through plotting functions, delete and include as necessary
-9. do a race between optical flow functions. (IF the results are the same but one is faster, the other one goes)
-10. Make genphase nice colored figure as seen in  https://camo.githubusercontent.com/48a0f590335430e4053f18045247b33d6db70cd54c9ea25534cdf8ca4da14877/68747470733a2f2f6d756c6c65726c61622e63612f6173736574732f696d672f67702d64656d6f2f67705f64656d6f2e706e67
+- Fix animation function to be speedier (plotting.animate_grid_data)
+- Fullfield snr ramping onsets and offsets for radial and target waves
+- Rename rotating waves to spiral waves
+- Would be nice if rotating/spiral waves would have a center that can be set
+- Make Nice comments on the entire example
+- Go through plotting functions, delete and include as necessary
 

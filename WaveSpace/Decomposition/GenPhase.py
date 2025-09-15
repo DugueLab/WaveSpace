@@ -9,6 +9,7 @@ from WaveSpace.Utils import HelperFuns as hf
 # original matlab code by:
 # Lyle Muller (Western University) and Zac Davis (Salk Institute)
 
+#helper funs:
 def continous_label(arr):
     changes = np.where(arr[:-1] != arr[1:])[0]  
     return changes
@@ -22,7 +23,7 @@ def naninterp(xp):
     nan_indices = np.where(np.isnan(xp))[0]
     return si.pchip_interpolate(nonnan_indices,xp_nonnan,nan_indices)
   	
-   
+# main   
 def generalized_phase(waveData, dataBucketName = ''):
     """
     References

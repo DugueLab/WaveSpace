@@ -10,7 +10,7 @@ import numpy as np
 
 def filter_broadband(waveData,dataBucketName = "", LowCutOff=0, HighCutOff=100,  n_jobs=5):
     import mne
-    '''MNE non-causal filter'''
+    '''wrapper for MNE non-causal filter'''
     if dataBucketName == "":
         dataBucketName = waveData.ActiveDataBucket
     else:
@@ -32,7 +32,7 @@ def filter_broadband(waveData,dataBucketName = "", LowCutOff=0, HighCutOff=100, 
     waveData.log_history(["Broadband Filter", "filt",LowCutOff, HighCutOff])
 
 def filter_notch(waveData, dataBucketName = "", LineNoiseFreq = 50, n_jobs=5):
-    '''MNE non-causal filter'''
+    '''wrapper forMNE non-causal filter'''
     if dataBucketName == "":
         dataBucketName = waveData.ActiveDataBucket
     else:
@@ -55,6 +55,7 @@ def filter_notch(waveData, dataBucketName = "", LineNoiseFreq = 50, n_jobs=5):
         waveData.log_history(["Notch Filter", "notch", LineNoiseFreq])
 
 def bandpass(lowcut, highcut, fs, type="IIR", order=5):
+    '''Design a bandpass filter using either an IIR or FIR approach. Returns filter coefficients and impulse response length.'''
     nyq = 0.5 * fs
     low = lowcut / nyq
     high = highcut / nyq

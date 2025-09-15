@@ -1,6 +1,5 @@
 from . import EMD
 from . import FFT
-from . import FrequencyCluster
 from . import GenPhase 
 from . import Hilbert
 from . import IMFCluster
