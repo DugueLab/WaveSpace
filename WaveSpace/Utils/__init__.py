@@ -1,4 +1,3 @@
-from . import CircStat
 from . import generateFromLog
 from . import HelperFuns
 from . import ImportHelpers

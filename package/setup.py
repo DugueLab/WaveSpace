@@ -5,7 +5,7 @@ with open('../README.md') as f:
 
 setup(
     name='WaveSpace',
-    version='1.1.6',
+    version='1.1.7',
     description='A Python package for the analysis of cortical traveling waves',
     package_dir={'': '../'},
     packages=find_packages(where='../'),
@@ -13,7 +13,7 @@ setup(
     long_description_content_type='text/markdown',
     url='https://github.com/kpetras/WaveSpace',
     author='Kirsten Petras',
-    author_email='kerschden[at]gmail.com',
+    author_email='kirsten.petras[at]u-paris.fr',
     license='GNU General Public License',
     classifiers=[
         'Development Status :: 4 - beta',
