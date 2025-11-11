@@ -101,7 +101,7 @@ def uv_process_trial(trial_data, nframes , maxIter, uInitial, vInitial, kernel, 
         [u, v, iterations] = HS(fn1, fn2, uInitial, vInitial, alpha, kernel, maxIter, is_phase)
         UV[:, :, i] = u + 1j * v
         itersToConverge.append(iterations)
-    print(f"converged in {np.floor(np.mean(itersToConverge))} iterations")
+    #print(f"converged in {np.floor(np.mean(itersToConverge))} iterations")
     return UV
 
 def HS(im1, im2, U,V, alpha, kernel, maxIter, is_phase, tol=1e-6):
