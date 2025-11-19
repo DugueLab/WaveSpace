@@ -1,31 +1,30 @@
 Metadata-Version: 2.2
 Name: WaveSpace
-Version: 1.1.7
+Version: 1.1.8
 Summary: A Python package for the analysis of cortical traveling waves
 Home-page: https://github.com/kpetras/WaveSpace
 Author: Kirsten Petras
-Author-email: kerschden[at]gmail.com
+Author-email: kirsten.petras[at]u-paris.fr
 License: GNU General Public License
 Classifier: Development Status :: 4 - beta
 Classifier: Intended Audience :: Science/Research
 Classifier: License :: OSI Approved :: GNU General Public License v3 (GPLv3)
 Classifier: Programming Language :: Python :: 3.9
 Classifier: Operating System :: OS Independent
-Requires-Python: >=3.9, <3.10
+Requires-Python: >=3.9
 Description-Content-Type: text/markdown
-Requires-Dist: numpy>=1.26.4
-Requires-Dist: matplotlib>=3.9.2
-Requires-Dist: scipy>=1.13.1
-Requires-Dist: plotly>=5.24.1
-Requires-Dist: pint>=0.24.4
-Requires-Dist: pyvista>=0.44.2
-Requires-Dist: chaospy>=4.3.19
-Requires-Dist: pandas>=2.2.3
-Requires-Dist: scikit-learn>=1.6.1
-Requires-Dist: scikit-image>=0.18.1
-Requires-Dist: tvb-gdist>=2.2.1
-Requires-Dist: emd>=0.8.0
-Requires-Dist: mne>=1.8.0
+Requires-Dist: numpy
+Requires-Dist: matplotlib
+Requires-Dist: scipy
+Requires-Dist: plotly
+Requires-Dist: pint
+Requires-Dist: pyvista
+Requires-Dist: pandas
+Requires-Dist: scikit-learn
+Requires-Dist: scikit-image
+Requires-Dist: tvb-gdist
+Requires-Dist: emd
+Requires-Dist: mne
 Dynamic: author
 Dynamic: author-email
 Dynamic: classifier
