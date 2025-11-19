@@ -202,7 +202,7 @@ waveData.save_to_file(os.path.join(output_path, "SimulatedData"))
 #%% Plot an example timeseries (takes long)
 for trl in range(waveData.get_data("SimulatedData").shape[0]):
     ani = Plotting.animate_grid_data(waveData, DataBucketName="SimulatedData", dataInd=trl, probepositions=[(0,15), (5,15), (10,15), (15,15), (19,15), (19,15)])
-    plot_file = output_path + "/SimulationAnimation_{trl}.gif"
+    plot_file = output_path + f"/SimulationAnimation_{trl}.gif"
     ani.save(plot_file)
 
 

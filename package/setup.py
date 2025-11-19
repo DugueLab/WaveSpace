@@ -5,7 +5,7 @@ with open('../README.md') as f:
 
 setup(
     name='WaveSpace',
-    version='1.1.7',
+    version='1.1.8',
     description='A Python package for the analysis of cortical traveling waves',
     package_dir={'': '../'},
     packages=find_packages(where='../'),
@@ -22,20 +22,19 @@ setup(
         'Programming Language :: Python :: 3.9',
         'Operating System :: OS Independent',
     ],
-    python_requires='>=3.9, <3.10',
+    python_requires='>=3.9',
     install_requires=[
-        "numpy>=1.26.4",
-        "matplotlib>=3.9.2",
-        "scipy>=1.13.1",
-        "plotly>=5.24.1",
-        "pint>=0.24.4",
-        "pyvista>=0.44.2",
-        "chaospy>=4.3.19",
-        "pandas>=2.2.3",
-        "scikit-learn>=1.6.1",
-        "scikit-image>=0.18.1",
-        "tvb-gdist>=2.2.1",
-        "emd>=0.8.0",
-        "mne>=1.8.0"
+        "numpy",
+        "matplotlib",
+        "scipy",
+        "plotly",
+        "pint",
+        "pyvista",
+        "pandas",
+        "scikit-learn",
+        "scikit-image",
+        "tvb-gdist",
+        "emd",
+        "mne"
       ]
 )
