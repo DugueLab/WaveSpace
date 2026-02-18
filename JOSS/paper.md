@@ -36,7 +36,8 @@ bibliography: references.bib
 
 ---
 # Summary
-Oscillatory cortical activity has been found to systematically propagate across space, forming traveling waves [@muller_cortical_2018]. WaveSpace is a modular Python toolbox for the simulation and analysis of such spatiotemporal dynamics in the brain. Based on a single, flexible dataclass users can execute, compare and recombine multiple commonly used analysis steps as well as evaluate their performance against simulated benchmarks. 
+Oscillatory cortical activity has been found to systematically propagate across space [@muller_cortical_2018]. Growing evidence links those spatiotemporal patterns, coined cortical traveling waves, to cognitive functions including, but not limited to visual spatial attention [@fakche2024perceptual], memory [@mohan2024direction] and consciousness [@bhattacharya2022propofol]. Detecting and characterising traveling waves in non-invasive multichannel recordings of brain activity requires multiple processing steps, some of which are interchangeable while others can lead to diverging interpretations of the same data.
+WaveSpace is a modular Python toolbox for the simulation and analysis of traveling wave dynamics in multichannel recording arrays. Based on a single, flexible dataclass users can execute, compare and recombine multiple commonly used analysis steps as well as evaluate their performance against simulated benchmarks. 
 
 # Statement of need
 Various approaches to detect and characterize cortical traveling waves have emerged in the literature. Typically, laboratories develop customized pipelines tailored to their experimental requirements and software platform preferences [@alexander_measurement_2006;@muller_stimulus-evoked_2014;@alamia_alpha_2019;@das_how_2022; but see also; @gutzen_modular_2024; for a notable exception].
