@@ -16,8 +16,6 @@ authors:
     orcid: 0000-0001-5865-921X
     affiliation: 1
   - name: Dennis Croonenberg
-    orcid: 0009-0001-4303-9306
-    equal-contrib: false
     affiliation: 2
   - name: Laura Dugué
     orcid: 0000-0003-3085-1458
@@ -27,25 +25,28 @@ authors:
 affiliations:
   - name: Université Paris Cité, INCC UMR 8002, CNRS, F-75006 Paris, France
     index: 1
-  - name: Independent Researcher, The Netherlands
+  - name: Independent researcher, The Netherlands
     index: 2
   - name: Institut Universitaire de France (IUF), Paris, France
     index: 3
 
 
-date: 15 September 2025
+date: 17 February 2026
 bibliography: references.bib
 
 ---
-
+# Summary
+Oscillatory cortical activity has been found to systematically propagate across space, forming traveling waves [@muller_cortical_2018]. WaveSpace is a modular Python toolbox for the simulation and analysis of such spatiotemporal dynamics in the brain. Based on a single, flexible dataclass users can execute, compare and recombine multiple commonly used analysis steps as well as evaluate their performance against simulated benchmarks. 
 
 # Statement of need
+Various approaches to detect and characterize cortical traveling waves have emerged in the literature. Typically, laboratories develop customized pipelines tailored to their experimental requirements and software platform preferences [@alexander_measurement_2006;@muller_stimulus-evoked_2014;@alamia_alpha_2019;@das_how_2022; but see also; @gutzen_modular_2024; for a notable exception].
 
-Oscillatory cortical activity has been found to systematically propagate across space [@muller_cortical_2018]. Various approaches to detect and characterize such spatiotemporal patterns of activity, often referred to as "oscillatory cortical traveling waves (ocTW)," have emerged in the literature. Typically, laboratories develop customized pipelines tailored to their experimental requirements and software platform preferences [@alexander_measurement_2006; @muller_stimulus-evoked_2014; @alamia_alpha_2019;@das_how_2022; but see also @gutzen_modular_2024 for a notable exception].
+The diversity of methods and implementations found in the literature poses challenges for researchers, both in selecting the one most suitable for their own studies and in directly comparing the performance of different pipelines. WaveSpace addresses this gap by integrating commonly used strategies into a single modular framework. This framework ensures that modules for preprocessing, data decomposition, spatial arrangement of sensor positions, wave analysis, and evaluation are interchangeable within the same workflow. Additionally, a simulation module allows for the generation of benchmarking data with desired properties to directly test the accuracy and specificity of planned analysis pipelines in silico. The resulting pipelines are ready-to-use in empirical studies [@petras_locally_2025;@fakche_alpha_2024].   
 
-The diversity of methods and implementations found in the literature poses challenges for researchers, both in selecting the one most suitable for their own studies and in directly comparing the performance of different pipelines. WaveSpace addresses this gap by integrating commonly used strategies into a single modular framework. This framework ensures that modules for preprocessing, data decomposition, spatial arrangement of sensor positions, wave analysis, and evaluation are interchangeable within the same workflow. The resulting pipelines are ready-to-use in empirical studies [@petras_locally_2025;@fakche_alpha_2024].   
+# State of the field
 
-# Functionality
+
+# Functionality and software design
 WaveSpace contains 5 modules (see figure 1 for module overview):
 
 - Decomposition: Provides multiple techniques to decompose broadband data into frequency components, including FFT-based methods (e.g., wavelets, filter-Hilbert), empirical mode decomposition (EMD), and generalized phase analysis.
@@ -58,10 +59,14 @@ WaveSpace contains 5 modules (see figure 1 for module overview):
 
 - Plotting: Contains visualization tools for each analysis option.
 
+All functionality is based on a single data class that enforces conventions for data dimension order and dimension naming. This allows for most processing steps to be interchangeable. 
 The entire framework is comprehensively documented and includes example scripts to facilitate its adoption.
 
 ![WaveSpace Module Overview](WaveSpace_overview.png)
 *Figure 1: Overview of WaveSpace modules.*
+
+# Research impact statement
+WaveSpace has been introduced during the 47th European conference on visual perception (2025) and used in peer reviewed  as well as ongoing work [@petras_locally_2025;@fakche_alpha_2024; Add ECVP abstract, Yue prereg]. Users are invited to contribute to the ongoing package development via github.  
 
 # Funding
 
@@ -69,16 +74,9 @@ This project received funding from the European Research Council (ERC) under the
 
 # Toolbox dependencies
 
-Python (3.9.21)
-mne (1.8.0)
-plotly (5.24.1)  
-pint (0.24.4)  
-pyvista (0.44.2)  
-chaospy(4.3.19)
-pandas (2.2.3)  
-scikit-learn (1.6.1)  
-scikit-image (0.18.1)
-tvb-gdist (2.2.1)  
-emd (0.8.0)
+[Environment file](https://github.com/kpetras/WaveSpace/blob/main/WaveSpaceEnv.yaml)
 
 # References
+
+# AI usage disclosure
+Github copilot has been used in the initial translation of Matlab code to Python. When the resulting code was found to be inaccurate and failed to match the style of the rest of the package, most of it was manually re-written. Single word autocomplete was used throughout for code and comments. 
