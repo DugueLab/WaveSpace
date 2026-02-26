@@ -49,15 +49,15 @@ Several single purpose pipelines for the analysis of cortical traveling waves ex
 
 Table 1. Single‑purpose tools for traveling‑wave analysis.
 
-| Tool | Details |
-|------|--------|
-| wave-matlab | MATLAB · Phase–distance corr. · [Repo](https://github.com/mullerlab/wave-matlab) |
-| TWA (ScaleSymmetry) | Python · SVD phase waves · [Repo](https://github.com/ScaleSymmetry/Traveling-wave-analysis) |
-| travellingWaveEEG | MATLAB · 2D FFT · [Repo](https://github.com/artipago/travellingWaveEEG) |
-| TWA (jacobslab) | MATLAB · Circular–linear corr. · [Repo](https://github.com/jacobslab/Traveling-wave-analysis) |
-| NeuroPattToolbox | MATLAB · Optical flow · [Repo](https://github.com/BrainDynamicsUSYD/NeuroPattToolbox) |
-| cobrawap | Python · Optical flow (Snakemake) · [Repo](https://github.com/NeuralEnsemble/cobrawap) |
-| Phase vs Granger | MATLAB · Phase gradient + Granger · [Repo](https://github.com/artipago/comparing-phase-based-and-Granger-based-analyses) |
+| Tool | Lang | Method | Repo |
+|------|------|--------|------|
+| wave-matlab | MATLAB | Phase–distance correlation | [GitHub](https://github.com/mullerlab/wave-matlab) |
+| TWA (ScaleSymmetry) | Python | SVD phase waves | [GitHub](https://github.com/ScaleSymmetry/Traveling-wave-analysis) |
+| travellingWaveEEG | MATLAB | 2D FFT | [GitHub](https://github.com/artipago/travellingWaveEEG) |
+| TWA (jacobslab) | MATLAB | Circular–linear correlation | [GitHub](https://github.com/jacobslab/Traveling-wave-analysis) |
+| NeuroPattToolbox | MATLAB | Optical flow | [GitHub](https://github.com/BrainDynamicsUSYD/NeuroPattToolbox) |
+| cobrawap | Python | Optical flow (Snakemake) | [GitHub](https://github.com/NeuralEnsemble/cobrawap) |
+| Phase vs Granger | MATLAB | Phase gradient + Granger | [GitHub](https://github.com/artipago/comparing-phase-based-and-Granger-based-analyses) |
 In principle, multi-purpose neurophysiology data analysis packages such as fieldtrip [@oostenveld2011fieldtrip] for Matlab or MNE [@gramfort2014mne] for Python could be extended to include traveling wave analysis methods. Given the wide variety of available approaches and the lack of systematic comparison in the literature, WaveSpace was instead designed as a standalone tool with consistent workflows dedicated exclusively to traveling wave analysis. However, to ensure users can still benefit from the pre-processing, time-frequency decomposition and visualization methods provided by MNE, WaveSpace easily integrates MNE data objects at any stage of processing. 
 
 # Functionality and software design
