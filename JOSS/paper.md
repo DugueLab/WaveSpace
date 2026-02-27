@@ -52,18 +52,19 @@ Table 1. Single‑purpose tools for traveling‑wave analysis.
 | Tool | Lang | Method | Repo |
 |------|------|--------|------|
 | wave-matlab | MATLAB | Phase–distance correlation | [GitHub](https://github.com/mullerlab/wave-matlab) |
-| TWA (ScaleSymmetry) | Python | SVD phase waves | [GitHub](https://github.com/ScaleSymmetry/Traveling-wave-analysis) |
+| Travelling wave analysis (ScaleSymmetry) | Python | SVD phase waves | [GitHub](https://github.com/ScaleSymmetry/Traveling-wave-analysis) |
 | travellingWaveEEG | MATLAB | 2D FFT | [GitHub](https://github.com/artipago/travellingWaveEEG) |
-| TWA (jacobslab) | MATLAB | Circular–linear correlation | [GitHub](https://github.com/jacobslab/Traveling-wave-analysis) |
+| Travelling wave analysis (jacobslab) | MATLAB | Circular–linear correlation | [GitHub](https://github.com/jacobslab/Traveling-wave-analysis) |
 | NeuroPattToolbox | MATLAB | Optical flow | [GitHub](https://github.com/BrainDynamicsUSYD/NeuroPattToolbox) |
 | cobrawap | Python | Optical flow (Snakemake) | [GitHub](https://github.com/NeuralEnsemble/cobrawap) |
 | Phase vs Granger | MATLAB | Phase gradient + Granger | [GitHub](https://github.com/artipago/comparing-phase-based-and-Granger-based-analyses) |
+
 In principle, multi-purpose neurophysiology data analysis packages such as fieldtrip [@oostenveld2011fieldtrip] for Matlab or MNE [@gramfort2014mne] for Python could be extended to include traveling wave analysis methods. Given the wide variety of available approaches and the lack of systematic comparison in the literature, WaveSpace was instead designed as a standalone tool with consistent workflows dedicated exclusively to traveling wave analysis. However, to ensure users can still benefit from the pre-processing, time-frequency decomposition and visualization methods provided by MNE, WaveSpace easily integrates MNE data objects at any stage of processing. 
 
 # Functionality and software design
-WaveSpace has been developed to offer a central location for gathering analysis methods for the detection of cortical traveling waves, primarily in non-invasive electrophysiology data such as electro- or magnetoencephalography. All WaveSpace functionality is based on a single data class, called WaveData, that enforces conventions for data dimension order and dimension naming. This allows for most processing steps to be interchangeable. The WaveData class organizes the in- and output of consecutive processing steps into discrete data-buckets, where each function takes  a data-bucket as input and writes its output to a new data-bucket. 
+WaveSpace has been developed to provide an array of methods for the detection and analysis of cortical traveling waves, primarily in non-invasive electrophysiology data such as electro- or magnetoencephalography. All WaveSpace functionality is based on a single data class, called WaveData, that enforces conventions for data dimension order and dimension naming. This allows for most processing steps to be interchangeable. The WaveData class organizes the in- and output of consecutive processing steps into discrete data-buckets, where each function takes  a data-bucket as input and writes its output to a new data-bucket. 
 
-The entire framework is comprehensively documented and includes example scripts to facilitate its adoption.
+The entire framework is comprehensively documented and includes example scripts to facilitate adoption.
 
 WaveSpace contains 5 core modules (see figure 1 for module overview):
 
@@ -94,4 +95,4 @@ This project received funding from the European Research Council (ERC) under the
 # References
 
 # AI usage disclosure
-Github copilot in "ask" mode has been used in the initial translation of Matlab code to Python. When the resulting code was found to be inaccurate and failed to match the style of the rest of the package, most of it was manually re-written. Single word autocomplete was used throughout for code and comments. Copilot was used for formatting suggestions. No agentic AI was used. 
+Github copilot in "ask" mode has been used in the initial translation of Matlab code to Python. When the resulting code was found to be inaccurate and failed to match the style of the rest of the package, most of it was manually re-written. Single word autocomplete was used throughout for code and comments. Copilot was used for code and formatting suggestions. No agentic AI was used. 
