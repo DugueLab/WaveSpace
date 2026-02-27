@@ -62,11 +62,9 @@ Table 1. Single‑purpose tools for traveling‑wave analysis.
 In principle, multi-purpose neurophysiology data analysis packages such as fieldtrip [@oostenveld2011fieldtrip] for Matlab or MNE [@gramfort2014mne] for Python could be extended to include traveling wave analysis methods. Given the wide variety of available approaches and the lack of systematic comparison in the literature, WaveSpace was instead designed as a standalone tool with consistent workflows dedicated exclusively to traveling wave analysis. However, to ensure users can still benefit from the pre-processing, time-frequency decomposition and visualization methods provided by MNE, WaveSpace easily integrates MNE data objects at any stage of processing. 
 
 # Functionality and software design
-WaveSpace has been developed to provide an array of methods for the detection and analysis of cortical traveling waves, primarily in non-invasive electrophysiology data such as electro- or magnetoencephalography. All WaveSpace functionality is based on a single data class, called WaveData, that enforces conventions for data dimension order and dimension naming. This allows for most processing steps to be interchangeable. The WaveData class organizes the in- and output of consecutive processing steps into discrete data-buckets, where each function takes  a data-bucket as input and writes its output to a new data-bucket. 
+WaveSpace has been developed to provide an array of methods for the detection and analysis of cortical traveling waves, primarily in non-invasive electrophysiology data such as electro- or magnetoencephalography. All WaveSpace functionality is based on a single data class, called WaveData, that enforces conventions for data dimension order and dimension naming. This allows for most processing steps to be interchangeable. The WaveData class organizes the in- and output of consecutive processing steps into discrete data-buckets, while logging progress. The entire framework is comprehensively documented and includes example scripts to facilitate adoption.
 
-The entire framework is comprehensively documented and includes example scripts to facilitate adoption.
-
-WaveSpace contains 5 core modules (see figure 1 for module overview):
+WaveSpace contains 6 core modules (see figure 1 for module overview):
 
 - Decomposition: Provides multiple techniques to decompose broadband data into frequency components, including FFT-based methods (e.g., wavelets, filter-Hilbert), empirical mode decomposition (EMD), and generalized phase analysis.
 
@@ -76,13 +74,15 @@ WaveSpace contains 5 core modules (see figure 1 for module overview):
 
 - Simulation: Functions to simulate traveling and spatially stationary (i.e., standing) waves with both linear and nonlinear properties, as well as incorporate noise.
 
+- Evaluation and statistics: Summarizes wave characteristics. Contains options for wave-scoring. 
+ 
 - Plotting: Contains visualization tools for each analysis option.
 
 ![WaveSpace Module Overview](WaveSpace_overview.png)
 *Figure 1: Overview of WaveSpace modules.*
 
 # Research impact statement
-WaveSpace has been introduced during a workshop at the 47th European conference on visual perception (2025) and used in peer reviewed as well as ongoing work [@petras_locally_2025;@fakche_alpha_2024;PetrasDugue2024ECVP;@kong2025oscillatory]. Users are invited to contribute to the ongoing package development via github.  
+WaveSpace has been publically introduced during a workshop at the 47th European conference on visual perception (2025) and used in peer reviewed as well as ongoing work [@petras_locally_2025;@fakche_alpha_2024;PetrasDugue2024ECVP;@kong2025oscillatory]. Users are invited to contribute to the ongoing package development via github.  
 
 # Funding
 
