@@ -82,7 +82,7 @@ WaveSpace contains 6 core modules (see figure 1 for module overview):
 *Figure 1: Overview of WaveSpace modules.*
 
 # Research impact statement
-WaveSpace has been publically introduced during a workshop at the 47th European conference on visual perception (2025) and used in peer reviewed as well as ongoing work [@petras_locally_2025;@fakche_alpha_2024;PetrasDugue2024ECVP;@kong2025oscillatory]. Users are invited to contribute to the ongoing package development via github.  
+WaveSpace has been publically introduced during a workshop at the 47th European conference on visual perception (2025) and used in peer reviewed as well as ongoing work [@Petrase0089252025;@fakche_alpha_2024;@PetrasDugue2024ECVP;@kong2025oscillatory]. Users are invited to contribute to the ongoing package development via github.  
 
 # Funding
 
