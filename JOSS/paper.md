@@ -85,14 +85,12 @@ WaveSpace contains 6 core modules (see figure 1 for module overview):
 WaveSpace has been publically introduced during a workshop at the 47th European conference on visual perception (2025) and used in peer reviewed as well as ongoing work [@Petrase0089252025;@fakche_alpha_2024;@PetrasDugue2024ECVP;@kong2025oscillatory]. Users are invited to contribute to the ongoing package development via github.  
 
 # Funding
-
 This project received funding from the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation program (grant agreement No. 852139 - Laura Dugué).
 
 # Toolbox dependencies
-
 [Environment file](https://github.com/kpetras/WaveSpace/blob/main/WaveSpaceEnv.yaml)
-
-# References
 
 # AI usage disclosure
 Github copilot in "ask" mode has been used in the initial translation of Matlab code to Python. When the resulting code was found to be inaccurate and failed to match the style of the rest of the package, most of it was manually re-written. Single word autocomplete was used throughout for code and comments. Copilot was used for code and formatting suggestions. No agentic AI was used. 
+
+# References
