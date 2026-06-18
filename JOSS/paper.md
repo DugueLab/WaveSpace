@@ -42,7 +42,7 @@ WaveSpace is a modular Python toolbox for the simulation and analysis of traveli
 # Statement of need
 Various approaches to detect and characterize cortical traveling waves have emerged in the literature. Typically, laboratories develop customized pipelines tailored to their experimental requirements and software platform preferences [@alexander_measurement_2006;@muller_stimulus-evoked_2014;@alamia_alpha_2019;@das_how_2022; but see also @gutzen_modular_2024 for a notable exception].
 
-The diversity of methods and implementations found in the literature poses challenges for researchers, both in selecting the one most suitable for their own studies and in directly comparing the performance of different pipelines. WaveSpace addresses this gap by integrating commonly used strategies into a single modular framework. This framework ensures that modules for preprocessing, data decomposition, spatial arrangement of sensor positions, wave analysis, and evaluation are interchangeable within the same workflow. Additionally, a simulation module allows for the generation of benchmarking data with desired properties to directly test the accuracy and specificity of planned analysis pipelines in silico. The resulting pipelines are ready-to-use in empirical studies [@Petrase0089252025;@fakche_alpha_2024].   
+The diversity of methods and implementations found in the literature poses challenges for researchers, both in selecting the one most suitable for their own studies and in directly comparing the performance of different pipelines. WaveSpace addresses this gap by integrating commonly used strategies into a single modular framework. This framework ensures that modules for preprocessing, data decomposition, spatial arrangement of sensor positions, wave analysis, and evaluation are interchangeable within the same workflow. Additionally, a simulation module allows for the generation of benchmarking data with desired properties to directly test the accuracy and specificity of planned analysis pipelines in silico. The resulting pipelines are ready-to-use in empirical studies [@Petras2025locally;@fakche_alpha_2024].   
 
 # State of the field
 Several single purpose pipelines for the analysis of cortical traveling waves exist. Table 1 shows a non-exhaustive list of openly available analysis code. In most cases, the provided code accompanies, and is tailored towards, a single experimental contribution to the scientific literature on cortical traveling waves.  
@@ -82,7 +82,7 @@ WaveSpace contains 6 core modules (see figure 1 for module overview):
 *Figure 1: Overview of WaveSpace modules.*
 
 # Research impact statement
-WaveSpace has been publically introduced during a workshop at the 47th European conference on visual perception (2025) and used in peer reviewed as well as ongoing work [@Petrase0089252025;@fakche_alpha_2024;@PetrasDugue2024ECVP;@kong2025oscillatory]. Users are invited to contribute to the ongoing package development via github.  
+WaveSpace has been publically introduced during a workshop at the 47th European conference on visual perception (2025) and used in peer reviewed as well as ongoing work [@Petras2025locally;@fakche_alpha_2024;@kong2025oscillatory]. Users are invited to contribute to the ongoing package development via github.  
 
 # Funding
 This project received funding from the European Research Council (ERC) under the European Union’s Horizon 2020 research and innovation program (grant agreement No. 852139 - Laura Dugué).
