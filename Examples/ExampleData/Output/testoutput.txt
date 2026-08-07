@@ -1,1 +1,0 @@
-Current directory is used by examples to create output files such as diagrams and animations

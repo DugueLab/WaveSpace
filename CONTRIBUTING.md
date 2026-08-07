@@ -7,7 +7,7 @@ Repository: [WaveSpace on GitHub](https://github.com/kpetras/WaveSpace)
 ## How to Contribute
 
 1. **Contact**
-   If you have questions or want to discuss potential contributions, please reach out to [Kirsten Petras](https://github.com/KirstenPetras) via GitHub.
+   If you have questions or want to discuss potential contributions, please reach out to [Kirsten Petras](https://github.com/kpetras) via GitHub.
 
 2. **Fork and Branch**
 
@@ -28,11 +28,25 @@ Repository: [WaveSpace on GitHub](https://github.com/kpetras/WaveSpace)
 
    * Ensure that all unit tests pass before submitting.
    * Contributions will only be accepted if the test suite runs successfully.
-   * Run tests locally using Python's built-in `unittest` framework from the `UnitTest` folder:
+   * Run tests locally using Python's built-in `unittest` framework from the
+     repository root:
 
      ```bash
-     python -m unittest discover UnitTest
+     python -m unittest discover -s UnitTest -p "*_test.py"
      ```
+
+   * To run the test suite against every supported Python version (3.9–3.14)
+     locally with [tox](https://tox.wiki), first install the interpreters, e.g.
+     with [uv](https://docs.astral.sh/uv), then install the `dev` dependency
+     group which provides `tox` and `tox-uv`:
+
+     ```bash
+     uv python install 3.9 3.10 3.11 3.12 3.13 3.14
+     uv sync --group dev
+     tox
+     ```
+
+     You can target a single version with `tox -e py314`, for example.
 
 5. **Pull Request**
 
