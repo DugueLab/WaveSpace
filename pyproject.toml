@@ -58,6 +58,7 @@ test = []
 dev = [
     "tox",
     "tox-uv",
+    "sphinx",
 ]
 
 [tool.setuptools.packages.find]

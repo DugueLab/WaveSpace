@@ -5,17 +5,22 @@
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
+import os
+import sys
+
+sys.path.insert(0, os.path.abspath(".."))
 
 project = 'WaveSpace'
 copyright = '2025, Kirsten Petras, Dennis Croonenberg, Laura Dugué'
 author = 'Kirsten Petras, Dennis Croonenberg, Laura Dugué'
-release = '1.1.7'
+release = '1.1.8'
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
+extensions = ["sphinx.ext.autodoc", "sphinx.ext.autosummary"]
 
+autosummary_generate = True
 templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
@@ -25,4 +30,4 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'alabaster'
-html_static_path = ['_static']
+

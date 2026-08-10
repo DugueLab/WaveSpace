@@ -6,19 +6,96 @@ Python tools for the simulation and analysis of cortical traveling waves
 
 .. contents:: Table of Contents
 
-Installation
-------------
+## Statement of Need
 
-Download latest version from [here](https://github.com/kpetras/WaveSpace/tree/main/package/dist)
+Cortical traveling waves are spatiotemporal patterns of neural activity in which patterns of activity propagate across the cortical surface over time. They have been observed in a variety of neural recordings and have been associated with processes including perception, cognition, and large-scale brain dynamics. Analyzing these patterns requires methods that account for both the temporal structure of neural signals and their spatial organization across recording sensors or cortical locations.
+
+**WaveSpace** is a Python toolbox designed to support the simulation, detection, characterization, and analysis of cortical traveling waves. It provides tools for working with multichannel neural recordings, including preprocessing and frequency decomposition, spatial interpolation and sensor organization, wave-specific analyses, statistical procedures, visualization, and the generation of simulated traveling-wave data.
+
+WaveSpace is intended primarily for **researchers and scientists working with electrophysiological and other spatiotemporal neural data**, including users working with EEG, MEG, and simulated neural recordings. It is designed to provide a common workflow for researchers who need to investigate how neural activity varies across both space and time.
+
+The package also aims to facilitate reproducible research by providing a structured representation of neural data, analysis functions, simulation tools, and automated tests that can be used to verify the software's functionality.
 
 
-Open a terminal, navigate to the directory you downloaded to and install with
+## Installation
 
-.. code-block:: console
+WaveSpace requires Python 3.9 or newer. The package is tested with Python 3.9 through Python 3.14.
 
-  pip install WaveSpace-x.x.x-py3-none-any.whl
+### Install from PyPI
 
-replace 'x.x.x' with relevant version number
+The recommended way to install WaveSpace is with `pip`:
+
+```bash
+pip install WaveSpace
+```
+
+This installs WaveSpace together with its required Python dependencies.
+
+To install a specific version of WaveSpace, for example version 1.1.8:
+
+```bash
+pip install WaveSpace==1.1.8
+```
+
+Installing a specific version is recommended when reproducing analyses from a scientific publication, as it ensures that the same software version is used.
+
+### Dependencies
+
+WaveSpace automatically installs the dependencies required for its core functionality. These currently include:
+
+* NumPy
+* Matplotlib
+* SciPy
+* Plotly
+* Pint
+* PyVista
+* pandas
+* scikit-learn
+* scikit-image
+* tvb-gdist
+* EMD
+* MNE
+
+The required dependencies are specified in the package metadata and are installed automatically by `pip`.
+
+### Development installation
+
+To contribute to WaveSpace or work with the source code, clone the repository and install the development dependencies:
+
+```bash
+git clone https://github.com/kpetras/WaveSpace.git
+cd WaveSpace
+uv sync --group dev
+```
+
+The development environment includes the tools required to run the test suite and test WaveSpace across its supported Python versions.
+
+For more information about contributing and testing, see the [Contributing guide](https://github.com/kpetras/WaveSpace/blob/main/CONTRIBUTING.md).
+
+## Examples
+
+WaveSpace includes a set of tutorials demonstrating common workflows for simulation and analysis of cortical traveling waves. The examples progress from creating and manipulating `WaveData` objects through signal decomposition, spatial organization, and wave-specific analyses.
+
+The tutorials include:
+
+* [Creating a WaveData Object](https://wavespace.readthedocs.io/en/latest/source/tutorials/Create_WaveData.html)
+* [Simulating WaveData](https://wavespace.readthedocs.io/en/latest/source/tutorials/Simulate_WaveData.html)
+* [Frequency Decomposition](https://wavespace.readthedocs.io/en/latest/source/tutorials/Frequency_Decomposition.html)
+* [Sensor Layout](https://wavespace.readthedocs.io/en/latest/source/tutorials/Sensor_layout.html)
+* [2D FFT Analysis](https://wavespace.readthedocs.io/en/latest/source/tutorials/2DFFT.html)
+* [Circular-Linear Correlation](https://wavespace.readthedocs.io/en/latest/source/tutorials/CircLinCorr.html)
+* [Wave Basis Functions](https://wavespace.readthedocs.io/en/latest/source/tutorials/Wave_Activity.html)
+* [Optical Flow Analysis](https://wavespace.readthedocs.io/en/latest/source/tutorials/optical_flow.html)
+
+These examples are intended both as introductions to the package and as starting points for applying WaveSpace to real or simulated neural data.
+
+API Reference
+=============
+
+.. toctree::
+   :maxdepth: 2
+
+   source/api
 
 ******************
 Modules
@@ -81,22 +158,4 @@ Key Features
   - Saves objects to files for later retrieval (``save_to_file``).
   - Provides a structured string representation (``__repr__``) for quick dataset summaries.
 
-This class is essential for organizing and processing large-scale neural recordings, offering flexibility in data structuring, preprocessing, and visualization. Let me know if you’d like any refinements!
-
-
-******************
-Examples
-******************
-
-.. toctree::
-   :maxdepth: 4
-   :titlesonly: 
-
-   /source/tutorials/Create_WaveData
-   /source/tutorials/Simulate_WaveData
-   /source/tutorials/Frequency_Decomposition
-   /source/tutorials/Sensor_layout
-   /source/tutorials/2DFFT
-   /source/tutorials/CircLinCorr
-   /source/tutorials/Wave_Activity
-   /source/tutorials/optical_flow
+This class is essential for organizing and processing large-scale neural recordings, offering flexibility in data structuring, preprocessing, and visualization. 

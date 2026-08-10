@@ -30,6 +30,9 @@ uv.lock
 *.pickle
 *.zip
 
+# Documentation build output
+docs/_build/
+
 # Example data outputs (root and Examples/)
 ExampleData/
 Examples/ExampleData/Output/
