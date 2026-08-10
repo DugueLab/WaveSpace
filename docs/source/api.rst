@@ -5,7 +5,7 @@ The API documentation is generated automatically from the WaveSpace
 source code and its docstrings.
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
 
    decomposition
    preprocessing

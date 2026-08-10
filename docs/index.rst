@@ -6,7 +6,8 @@ Python tools for the simulation and analysis of cortical traveling waves
 
 .. contents:: Table of Contents
 
-## Statement of Need
+Statement of Need
+-----------------
 
 Cortical traveling waves are spatiotemporal patterns of neural activity in which patterns of activity propagate across the cortical surface over time. They have been observed in a variety of neural recordings and have been associated with processes including perception, cognition, and large-scale brain dynamics. Analyzing these patterns requires methods that account for both the temporal structure of neural signals and their spatial organization across recording sensors or cortical locations.
 
@@ -17,29 +18,34 @@ WaveSpace is intended primarily for **researchers and scientists working with el
 The package also aims to facilitate reproducible research by providing a structured representation of neural data, analysis functions, simulation tools, and automated tests that can be used to verify the software's functionality.
 
 
-## Installation
+Installation
+------------
 
 WaveSpace requires Python 3.9 or newer. The package is tested with Python 3.9 through Python 3.14.
 
-### Install from PyPI
+Install from PyPI
+~~~~~~~~~~~~~~~~~
 
 The recommended way to install WaveSpace is with `pip`:
 
-```bash
-pip install WaveSpace
-```
+.. code-block:: console
+  
+  $ pip install WaveSpace
+
 
 This installs WaveSpace together with its required Python dependencies.
 
 To install a specific version of WaveSpace, for example version 1.1.8:
 
-```bash
-pip install WaveSpace==1.1.8
-```
+.. code-block:: console
+
+    $ pip install WaveSpace==1.1.8
+
 
 Installing a specific version is recommended when reproducing analyses from a scientific publication, as it ensures that the same software version is used.
 
-### Dependencies
+Dependencies
+~~~~~~~~~~~~
 
 WaveSpace automatically installs the dependencies required for its core functionality. These currently include:
 
@@ -58,21 +64,23 @@ WaveSpace automatically installs the dependencies required for its core function
 
 The required dependencies are specified in the package metadata and are installed automatically by `pip`.
 
-### Development installation
+Development installation
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 To contribute to WaveSpace or work with the source code, clone the repository and install the development dependencies:
 
-```bash
-git clone https://github.com/kpetras/WaveSpace.git
-cd WaveSpace
-uv sync --group dev
-```
+.. code-block:: console
+
+   $ git clone https://github.com/kpetras/WaveSpace.git
+   $ cd WaveSpace
+   $ uv sync --group dev
 
 The development environment includes the tools required to run the test suite and test WaveSpace across its supported Python versions.
 
 For more information about contributing and testing, see the [Contributing guide](https://github.com/kpetras/WaveSpace/blob/main/CONTRIBUTING.md).
 
-## Examples
+Examples
+--------
 
 WaveSpace includes a set of tutorials demonstrating common workflows for simulation and analysis of cortical traveling waves. The examples progress from creating and manipulating `WaveData` objects through signal decomposition, spatial organization, and wave-specific analyses.
 
