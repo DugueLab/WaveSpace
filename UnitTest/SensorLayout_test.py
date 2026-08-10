@@ -38,7 +38,7 @@ class SensorLayout_test(unittest.TestCase):
                                                                     type='channels',
                                                                     num_points=1000)
 
-        sensors.distance_along_surface(self.waveData, surface, tolerance=0.1, get_extent = chanInds, plotting= True)
+        sensors.distance_along_surface(self.waveData, surface, tolerance=0.1, get_extent = chanInds, plotting= False)
         sensors.distmat_to_2d_coordinates_Isomap(self.waveData) #can also use MDS here
 
         grid_x, grid_y, mask =sensors.interpolate_pos_to_grid(
