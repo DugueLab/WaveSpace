@@ -29,7 +29,7 @@ Install from PyPI
 The recommended way to install WaveSpace is with `pip`:
 
 .. code-block:: console
-  
+
   $ pip install WaveSpace
 
 
@@ -105,41 +105,29 @@ API Reference
 
    source/api
 
-******************
-Modules
-******************
+Testing
+=======
 
-Decomposition
--------------
-Implements various frequency decomposition techniques, such as Fourier and wavelet transforms, Empirical Mode Decomposition (EMD).
+WaveSpace includes an automated test suite based on Python's built-in
+``unittest`` framework. The tests are located in the ``UnitTest`` directory.
 
-Preprocessing
--------------
-Provides functions for cleaning, normalizing, and filtering time series data.
+To run the tests locally from the repository root:
 
-Plotting Helpers
-----------------
-Contains utilities for visualizing cortical traveling waves using matplotlib & pyvista, including time-frequency plots, phase maps, and spatial-temporal representations.
+.. code-block:: bash
 
-Simulation
-----------
-Tools for generating synthetic cortical traveling waves, aiding in model validation and hypothesis testing.
+   python -m unittest discover -s UnitTest -p "*_test.py"
 
-Spatial Arrangement
--------------------
-Handles spatial organization of sensor positions. Includes interpolation options.
+The test suite can also be run against all supported Python versions using
+``tox``:
 
-Statistics
-----------
-Offers methods for computing null distributions.
+.. code-block:: bash
 
-Utils
------
-A collection of general-purpose helper functions used throughout the toolbox, including data manipulation and file I/O.
+   tox
 
-Wave Analysis
--------------
-Core module for detecting, characterizing, and quantifying cortical traveling waves using advanced signal processing techniques.
+The project uses GitHub Actions to automatically run the test suite for
+Python 3.9 through 3.14 on pushes to the ``main`` branch and on pull
+requests. This helps ensure that changes remain compatible with the
+supported Python versions.
 
 ******************
 The WaveData Class
@@ -167,3 +155,34 @@ Key Features
   - Provides a structured string representation (``__repr__``) for quick dataset summaries.
 
 This class is essential for organizing and processing large-scale neural recordings, offering flexibility in data structuring, preprocessing, and visualization. 
+
+Community and Support
+=====================
+
+WaveSpace welcomes contributions from researchers and developers interested
+in improving the package.
+
+Contributing
+------------
+
+Contributions should follow the guidelines described in the
+``CONTRIBUTING.md`` file in the GitHub repository. Contributors are encouraged
+to create a separate branch for their changes, add or update tests where
+appropriate, and submit a pull request to the ``main`` branch.
+
+Reporting issues
+----------------
+
+If you encounter a bug or unexpected behaviour, please report it by opening
+an issue on the
+`WaveSpace GitHub issue tracker <https://github.com/kpetras/WaveSpace/issues>`_.
+Please include enough information to reproduce the problem, including the
+WaveSpace version, Python version, operating system, and a minimal example
+where possible.
+
+Feature requests and questions
+------------------------------
+
+Feature requests and questions can also be submitted through the GitHub issue
+tracker. Using public issues allows other users and contributors to benefit
+from previous discussions and solutions.
