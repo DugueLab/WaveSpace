@@ -10,7 +10,7 @@ readme = "README.md"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 authors = [
-    { name = "Kirsten Petras", email = "kirsten.petras@u-paris.fr" }
+    { name = "Kirsten Petras, Dennis Croonenberg, Laura Dugué" }
 ]
 requires-python = ">=3.9"
 keywords = [
