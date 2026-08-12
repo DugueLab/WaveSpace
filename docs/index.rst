@@ -9,10 +9,9 @@ Python tools for the simulation and analysis of cortical traveling waves
 Statement of Need
 -----------------
 
-Cortical traveling waves are spatiotemporal patterns of neural activity in which patterns of activity propagate across the cortical surface over time. They have been observed in a variety of neural recordings and have been associated with processes including perception, cognition, and large-scale brain dynamics. Analyzing these patterns requires methods that account for both the temporal structure of neural signals and their spatial organization across recording sensors or cortical locations.
+Cortical traveling waves are spatiotemporal patterns of neural activity propagating across the cortical surface over time. They have been observed in a variety of neural recordings and have been associated with a range of cognitive processes including perception, memory, and attention. Analyzing these patterns requires methods that account for both the temporal structure of neural signals and their spatial organization across recording sensors or cortical locations.
 
-**WaveSpace** is a Python toolbox designed to support the simulation, detection, characterization, and analysis of cortical traveling waves. It provides tools for working with multichannel neural recordings, including preprocessing and frequency decomposition, spatial interpolation and sensor organization, wave-specific analyses, statistical procedures, visualization, and the generation of simulated traveling-wave data.
-
+**WaveSpace** is a Python toolbox designed to support the simulation, detection and analysis of cortical traveling waves. 
 WaveSpace is intended primarily for **researchers and scientists working with electrophysiological and other spatiotemporal neural data**, including users working with EEG, MEG, and simulated neural recordings. It is designed to provide a common workflow for researchers who need to investigate how neural activity varies across both space and time.
 
 The package also aims to facilitate reproducible research by providing a structured representation of neural data, analysis functions, simulation tools, and automated tests that can be used to verify the software's functionality.
