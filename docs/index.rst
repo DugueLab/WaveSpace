@@ -29,7 +29,7 @@ The recommended way to install WaveSpace is with `pip`:
 
 .. code-block:: console
 
-  $ pip install WaveSpace
+  $ pip install wavespace
 
 
 This installs WaveSpace together with its required Python dependencies.
@@ -38,7 +38,7 @@ To install a specific version of WaveSpace, for example version 1.1.8:
 
 .. code-block:: console
 
-    $ pip install WaveSpace==1.1.8
+    $ pip install wavespace==1.1.8
 
 
 Installing a specific version is recommended when reproducing analyses from a scientific publication, as it ensures that the same software version is used.
