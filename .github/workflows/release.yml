@@ -12,10 +12,10 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: "3.x"
 
@@ -29,7 +29,7 @@ jobs:
         run: python -m pip install --upgrade twine && twine check dist/*
 
       - name: Upload distributions
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: python-package-distributions
           path: dist/
@@ -48,10 +48,37 @@ jobs:
 
     steps:
       - name: Download distributions
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: python-package-distributions
           path: dist/
 
       - name: Publish distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+
+  docs:
+    name: Activate and build Read the Docs
+    needs: publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Activate tagged version on Read the Docs
+        env:
+          RTD_TOKEN: ${{ secrets.RTD_API_TOKEN }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          curl -sS -X PATCH \
+            -H "Authorization: Token ${RTD_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d '{"active": true, "hidden": false}' \
+            "https://readthedocs.org/api/v3/projects/wavespace/versions/${TAG}/"
+
+      - name: Trigger Read the Docs build
+        env:
+          RTD_TOKEN: ${{ secrets.RTD_API_TOKEN }}
+        run: |
+          curl -sS -X POST \
+            -H "Authorization: Token ${RTD_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d '{"commit_sha": "${{ github.sha }}"}' \
+            "https://readthedocs.org/api/v3/projects/wavespace/builds/"

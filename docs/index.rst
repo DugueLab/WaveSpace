@@ -76,7 +76,7 @@ To contribute to WaveSpace or work with the source code, clone the repository an
 
 The development environment includes the tools required to run the test suite and test WaveSpace across its supported Python versions.
 
-For more information about contributing and testing, see the [Contributing guide](https://github.com/kpetras/WaveSpace/blob/main/CONTRIBUTING.md).
+For more information about contributing and testing, see the `Contributing guide <https://github.com/kpetras/WaveSpace/blob/main/CONTRIBUTING.md>`_.
 
 Examples
 --------
@@ -85,14 +85,14 @@ WaveSpace includes a set of tutorials demonstrating common workflows for simulat
 
 The tutorials include:
 
-* [Creating a WaveData Object](https://wavespace.readthedocs.io/en/latest/source/tutorials/Create_WaveData.html)
-* [Simulating WaveData](https://wavespace.readthedocs.io/en/latest/source/tutorials/Simulate_WaveData.html)
-* [Frequency Decomposition](https://wavespace.readthedocs.io/en/latest/source/tutorials/Frequency_Decomposition.html)
-* [Sensor Layout](https://wavespace.readthedocs.io/en/latest/source/tutorials/Sensor_layout.html)
-* [2D FFT Analysis](https://wavespace.readthedocs.io/en/latest/source/tutorials/2DFFT.html)
-* [Circular-Linear Correlation](https://wavespace.readthedocs.io/en/latest/source/tutorials/CircLinCorr.html)
-* [Wave Basis Functions](https://wavespace.readthedocs.io/en/latest/source/tutorials/Wave_Activity.html)
-* [Optical Flow Analysis](https://wavespace.readthedocs.io/en/latest/source/tutorials/optical_flow.html)
+* `Creating a WaveData Object <https://wavespace.readthedocs.io/en/latest/source/tutorials/Create_WaveData.html>`_
+* `Simulating WaveData <https://wavespace.readthedocs.io/en/latest/source/tutorials/Simulate_WaveData.html>`_
+* `Frequency Decomposition <https://wavespace.readthedocs.io/en/latest/source/tutorials/Frequency_Decomposition.html>`_
+* `Sensor Layout <https://wavespace.readthedocs.io/en/latest/source/tutorials/Sensor_layout.html>`_
+* `2D FFT Analysis <https://wavespace.readthedocs.io/en/latest/source/tutorials/2DFFT.html>`_
+* `Circular-Linear Correlation <https://wavespace.readthedocs.io/en/latest/source/tutorials/CircLinCorr.html>`_
+* `Wave Basis Functions <https://wavespace.readthedocs.io/en/latest/source/tutorials/Wave_Activity.html>`_
+* `Optical Flow Analysis <https://wavespace.readthedocs.io/en/latest/source/tutorials/optical_flow.html>`_
 
 These examples are intended both as introductions to the package and as starting points for applying WaveSpace to real or simulated neural data.
 
