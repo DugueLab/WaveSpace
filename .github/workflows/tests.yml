@@ -2,9 +2,9 @@ name: Tests
 
 on:
   push:
-    branches: [publication-prep]
+    branches: [main]
   pull_request:
-    branches: [publication-prep]
+    branches: [main]
 
 jobs:
   test:
