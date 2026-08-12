@@ -6,44 +6,63 @@ Repository: [WaveSpace on GitHub](https://github.com/kpetras/WaveSpace)
 
 ## How to Contribute
 
-1. **Contact**
-   If you have questions or want to discuss potential contributions, please reach out to [Kirsten Petras](https://github.com/KirstenPetras) via GitHub.
+### Questions, Bug Reports, and Feature Requests
 
-2. **Fork and Branch**
+For questions, bug reports, or feature requests, please open an [issue on GitHub](https://github.com/kpetras/WaveSpace/issues). This allows the community and project contributors to see and discuss questions and issues openly.
 
-   * Fork the repository to your own GitHub account.
-   * Create a new branch for your feature or bugfix:
+### Fork and Branch
 
-     ```bash
-     git checkout -b feature/your-feature-name
-     ```
+1. Fork the repository to your own GitHub account.
+2. Create a new branch for your feature or bugfix:
 
-3. **Make Your Changes**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
 
-   * Keep changes focused and concise.
-   * Follow existing code style and structure where possible.
-   * Add or update documentation as needed.
+### Make Your Changes
 
-4. **Testing**
+* Keep changes focused and concise.
+* Follow the existing code style and structure where possible.
+* Add or update documentation as needed.
+* Add or update tests when changing or adding functionality.
 
-   * Ensure that all unit tests pass before submitting.
-   * Contributions will only be accepted if the test suite runs successfully.
-   * Run tests locally using Python's built-in `unittest` framework from the `UnitTest` folder:
+### Testing
 
-     ```bash
-     python -m unittest discover UnitTest
-     ```
+Please ensure that the test suite passes before submitting a pull request.
 
-5. **Pull Request**
+For a quick local test run using Python's built-in `unittest` framework, run the following from the repository root:
 
-   * Push your branch to your forked repository.
-   * Open a pull request (PR) to the main branch of WaveSpace.
-   * Clearly describe your changes and reference related issues if applicable.
+```bash
+python -m unittest discover -s UnitTest -p "*_test.py"
+```
+
+To run the test suite against all supported Python versions (3.9–3.14) locally, use `tox`. First install the required Python versions, for example with [uv](https://docs.astral.sh/uv), and then install the development dependencies:
+
+```bash
+uv python install 3.9 3.10 3.11 3.12 3.13 3.14
+uv sync --group dev
+tox
+```
+
+You can also target a single Python version, for example:
+
+```bash
+tox -e py314
+```
+
+Pull requests to the `main` branch are automatically tested using the project's GitHub Actions workflow.
+
+### Pull Requests
+
+1. Push your branch to your forked repository.
+2. Open a pull request to the `main` branch of WaveSpace.
+3. Clearly describe your changes and reference related issues where applicable.
 
 ## Contribution Guidelines
 
 * Be respectful and collaborative in discussions.
 * Write clean, well-documented code.
-* Small, focused contributions are preferred over large, unfocused changes.
+* Keep contributions focused and manageable.
+* Include appropriate tests and documentation for new or modified functionality.
 
 We appreciate your efforts to help improve **WaveSpace**!

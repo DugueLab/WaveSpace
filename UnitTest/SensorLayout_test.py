@@ -1,7 +1,10 @@
+import os
 import unittest
 import numpy as np
 import WaveSpace.Utils.WaveData as wd
 import WaveSpace.SpatialArrangement.SensorLayout as sensors
+
+TESTDATA_DIR = os.path.join(os.path.dirname(__file__), 'TestData')
 
 class SensorLayout_test(unittest.TestCase):
     def setUp(self):
@@ -10,7 +13,7 @@ class SensorLayout_test(unittest.TestCase):
         self.nTimepoints = 500
         self.mock_data = np.zeros((self.nTrials,self.nChannels,self.nTimepoints))  
         self.waveData = wd.WaveData()
-        chanpos = np.load('UnitTest/TestData/exampleChanpos.npy')
+        chanpos = np.load(os.path.join(TESTDATA_DIR, 'exampleChanpos.npy'))
         self.waveData.set_channel_positions(chanpos)
 
         # create values between 0 and 1 based on y distance
@@ -35,7 +38,7 @@ class SensorLayout_test(unittest.TestCase):
                                                                     type='channels',
                                                                     num_points=1000)
 
-        sensors.distance_along_surface(self.waveData, surface, tolerance=0.1, get_extent = chanInds, plotting= True)
+        sensors.distance_along_surface(self.waveData, surface, tolerance=0.1, get_extent = chanInds, plotting= False)
         sensors.distmat_to_2d_coordinates_Isomap(self.waveData) #can also use MDS here
 
         grid_x, grid_y, mask =sensors.interpolate_pos_to_grid(

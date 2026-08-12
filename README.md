@@ -1,4 +1,4 @@
-# WaveSpace version 1.1.8
+# WaveSpace
 WaveSpace is a Python toolbox for simulating, detecting, and analyzing spatiotemporal traveling waves in neural sensor array data. It provides  tools for generating synthetic datasets, and applying a range of wave analysis techniques such as optical flow, 2D FFT, circular-linear correlation and singular value decomposition. In addition, it contains pipelines to decompose multi-dimensional timeseries data into its frequency components to derive robust phase estimates. WaveSpace’s WaveData class provides a structured approach to managing complex datasets, while its plotting helpers facilitate intuitive visualization of spatiotemporal patterns.
 
 ## Documentation
@@ -10,7 +10,7 @@ Download latest version from [here](https://github.com/kpetras/WaveSpace/tree/ma
 
 Open a terminal, navigate to the directory you downloaded to and install with
 ```
-pip install WaveSpace-1.1.8-py3-none-any.whl
+pip install wavespace
 ```
 
 ## Testing
