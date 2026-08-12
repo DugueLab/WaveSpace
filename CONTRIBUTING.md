@@ -10,8 +10,6 @@ Repository: [WaveSpace on GitHub](https://github.com/kpetras/WaveSpace)
 
 For questions, bug reports, or feature requests, please open an [issue on GitHub](https://github.com/kpetras/WaveSpace/issues). This allows the community and project contributors to see and discuss questions and issues openly.
 
-For questions specifically related to potential contributions, you may also contact [Kirsten Petras](https://github.com/kpetras) via GitHub.
-
 ### Fork and Branch
 
 1. Fork the repository to your own GitHub account.
