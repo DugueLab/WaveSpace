@@ -26,6 +26,10 @@ For questions, bug reports, or feature requests, please open an [issue on GitHub
 * Add or update documentation as needed.
 * Add or update tests when changing or adding functionality.
 
+### Code Style
+
+WaveSpace does not currently enforce a formatter or linter. Please follow the style of the surrounding code: keep functions focused, prefer descriptive names, and avoid unrelated formatting changes mixed into the same pull request.
+
 ### Testing
 
 Please ensure that the test suite passes before submitting a pull request.

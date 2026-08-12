@@ -423,7 +423,7 @@ def animate_grid_data(gridData,DataBucketName = "", dataInd = None, probepositio
                     origin='lower', vmin=vmin, vmax=vmax, cmap="copper")
 
     cbar = plt.colorbar(img)
-    cbar.set_label('$\mu$V')
+    cbar.set_label(r'$\mu$V')
     nFrames = dataToPlot.shape[-1]  
     lengthOfMatrix =  dataToPlot.shape[0] * dataToPlot.shape[1]
     # make all black
@@ -674,7 +674,7 @@ def plot_optical_flow(waveData, PlottingDataBucketName = None, UVBucketName = No
         ax2.set_xticklabels(radian_labels)
     else:
         cbar = plt.colorbar(img)
-        cbar.set_label('$\mu$V')
+        cbar.set_label(r'$\mu$V')
 
     ani = animation.FuncAnimation(plt.gcf(),
                                 AnimateFullStatus, fargs=(plotData, timevec),
