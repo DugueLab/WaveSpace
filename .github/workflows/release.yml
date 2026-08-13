@@ -67,18 +67,17 @@ jobs:
           RTD_TOKEN: ${{ secrets.RTD_API_TOKEN }}
           TAG: ${{ github.ref_name }}
         run: |
-          curl -sS -X PATCH \
+          curl --fail-with-body --silent --show-error -X PATCH \
             -H "Authorization: Token ${RTD_TOKEN}" \
             -H "Content-Type: application/json" \
             -d '{"active": true, "hidden": false}' \
-            "https://readthedocs.org/api/v3/projects/wavespace/versions/${TAG}/"
+            https://app.readthedocs.org/api/v3/projects/wavespace/versions/${TAG}/
 
       - name: Trigger Read the Docs build
         env:
           RTD_TOKEN: ${{ secrets.RTD_API_TOKEN }}
+          TAG: ${{ github.ref_name }}
         run: |
-          curl -sS -X POST \
+          curl --fail-with-body --silent --show-error -X POST \
             -H "Authorization: Token ${RTD_TOKEN}" \
-            -H "Content-Type: application/json" \
-            -d '{"commit_sha": "${{ github.sha }}"}' \
-            "https://readthedocs.org/api/v3/projects/wavespace/builds/"
+            https://app.readthedocs.org/api/v3/projects/wavespace/versions/${TAG}/builds/
