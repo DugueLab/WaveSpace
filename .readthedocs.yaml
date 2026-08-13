@@ -1,27 +1,25 @@
-# Read the Docs configuration file
-# See https://docs.readthedocs.io/en/stable/config-file/v2.html for details
+name: Update Read the Docs
 
-# Required
-version: 2
+on:
+  push:
+    branches:
+      - main
 
-# Set the OS, Python version, and other tools you might need
-build:
-  os: ubuntu-24.04
-  tools:
-    python: "3.13"
+jobs:
+  build-docs:
+    name: Trigger Read the Docs build
+    runs-on: ubuntu-latest
 
-# Build documentation in the "docs/" directory with Sphinx
-sphinx:
-   configuration: docs/conf.py
-
-# Optionally, but recommended,
-# declare the Python requirements required to build your documentation
-# See https://docs.readthedocs.io/en/stable/guides/reproducible-builds.html
-python:
-   install:
-     - method: pip
-       path: .
-       extra_requirements:
-         - docs
+    steps:
+      - name: Trigger Read the Docs build
+        env:
+          RTD_TOKEN: ${{ secrets.RTD_API_TOKEN }}
+          COMMIT_SHA: ${{ github.sha }}
+        run: |
+          curl --fail-with-body --silent --show-error -X POST \
+            -H "Authorization: Token ${RTD_TOKEN}" \
+            -H "Content-Type: application/json" \
+            -d "{\"commit_sha\": \"${COMMIT_SHA}\"}" \
+            "https://readthedocs.org/api/v3/projects/wavespace/builds/"
         
 
