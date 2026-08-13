@@ -20,6 +20,23 @@ def load_channel_positions(filename):
     return chanPos
 
 def load_wavedata_object(filename):
+    """Load a serialized :class:`WaveData` object from a pickle file.
+
+    Parameters
+    ----------
+    filename : str or path-like
+        Path to a file created with :func:`save_wavedata_object`.
+
+    Returns
+    -------
+    WaveSpace.Utils.WaveData.WaveData
+        The deserialized WaveData object.
+
+    Notes
+    -----
+    Pickle files may execute arbitrary code when loaded. Only load files from
+    trusted sources.
+    """
     with open(filename,'rb') as f:
         waveData = pickle.load(f)
     return waveData

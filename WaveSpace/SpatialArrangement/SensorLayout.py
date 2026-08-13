@@ -22,7 +22,25 @@ import multiprocessing
 #%%
 
 #Sensor spatial arrangement_____________________________
-def regularGrid(waveData):    
+def regularGrid(waveData):
+    """Compute distance matrix for sensors arranged on a two-dimensional grid.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing two-dimensional sensor coordinates. When
+        they are absent, the first two channel-position coordinates are used.
+
+    Returns
+    -------
+    None
+        The function updates ``waveData`` in place.
+
+    Notes
+    -----
+    Sets the distance matrix for WaveData object, updates ``HasRegularLayout`` according to
+    :func:`is_regular_grid_2d`, and records the operation in the history log.
+    """
     if len(waveData.get_2d_coordinates()) > 0:
         pos = waveData.get_2d_coordinates()
     else:
@@ -34,13 +52,33 @@ def regularGrid(waveData):
     waveData.log_history(["Distance matrix", "distmattype","regularGrid"])
 
 def create_surface_from_points(data, type = 'channels', num_points=1000, plotting = False):
-    '''Makes a surface from the electrode positions. 
-    If type is 'channels', the surface is made from the convex hull of the electrode positions. 
-    If type is 'sphere', the surface is made from the convex hull of the electrode positions projected onto a sphere. 
-    If type is 'headshape', the surface is made from the headshape points. #Todo: Implement!
-    Originally, the surface looked weird and the bottom was flat. the geodesic distances were likely wrong.
-    To fix that, I added some points below the electrodes to make a proper bottom. Probaly not the most elegant solution, 
-    but it works for now. Keep in mind that this means the surface has more vertices than there are electrodes.'''
+    """Construct a triangulated surface from three-dimensional channel positions.
+
+    Parameters
+    ----------
+    data : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing three-dimensional channel positions.
+    type : {"channels", "sphere"}, default="channels"
+        Surface construction method. ``"channels"`` uses channel positions;
+        ``"sphere"`` augments them with points on an enclosing sphere.
+    num_points : int, default=1000
+        Number of sphere points added when ``type="sphere"``.
+    plotting : bool, default=False
+        Display the generated surface, channel positions, and surface vertices.
+
+    Returns
+    -------
+    Surface : list of numpy.ndarray
+        Surface geometry as ``[vertices, faces]``, suitable for
+        :func:`distance_along_surface`.
+    PolySurface : vtk.vtkPolyData
+        VTK representation of the generated surface.
+
+    Notes
+    -----
+    For the channel method, extra points below the channel cloud are added to
+    avoid a flat convex-hull base when estimating geodesic distances.
+    """
     
     positions = data.get_channel_positions()
     centroid = np.mean(positions, axis=0)
@@ -172,18 +210,34 @@ def create_surface_from_points(data, type = 'channels', num_points=1000, plottin
     return Surface, PolySurface
     
 def distance_along_surface(data, Surface, tolerance = 0.01, get_extent = False, plotting = False):
-    """    Calculate the distance between contacts along a cortical surface.
-    Parameters:
-    data: waveData object
-    Surface (tuple): A tuple containing the vertices and faces of the surface.
-    tolerance (float, optional): The maximum distance a channel can be from a vertex to be considered a match. Defaults to 0.01.
-    get_extent (bool or list of tuples, optional): If True, calculate the maximum extent along the x and y directions. Check the plot to make sure the correct channels are used!
-     Alternatively, provide the indices of the channels to use (the most frontal one, most posterior one, most left, most right). Defaults to False.
-    plotting (bool, optional): If True, create a 3D scatter plot of the channel positions. Defaults to False. Only makes sense when get_extent is True. 
-    Look at the plot though, because I am not certain this will always work... Might have to specify indices of the channels to use for extent
-        
-    This calculates the geodesic distance between each pair of channels along the cortical surface using tvb-gdist.
-    If `get_extent` is True, also adds extentGeodesic to the waveData (get is with waveData.get_extentGeodesic). Useful to calculate propagation speeds    
+    """Calculate geodesic distances between channels along a surface.
+
+    Parameters
+    ----------
+    data : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing three-dimensional channel positions.
+    Surface : list of numpy.ndarray
+        ``[vertices, faces]`` geometry, for example returned by
+        :func:`create_surface_from_points`.
+    tolerance : float, default=0.01
+        Maximum distance for matching a channel position to a surface vertex
+        when exact matching is unavailable.
+    get_extent : bool or list of tuple of int, default=False
+        Calculate geodesic extents along x and y. Supply two index pairs to
+        select the channel pairs for the x and y extents explicitly.
+    plotting : bool, default=False
+        Display channel positions and, when extents are calculated, their
+        selected endpoint pairs.
+
+    Returns
+    -------
+    None
+        Updates ``data`` in place with the geodesic distance matrix and marks
+        the layout as irregular. When requested, also stores geodesic extents.
+
+    Notes
+    -----
+    Distances are calculated with ``gdist.distance_matrix_of_selected_points``.
     """
     #some very un-elegant changing of data types because the original ones do not work
     channel_positions = np.array(data.get_channel_positions())
@@ -479,6 +533,26 @@ def calculate_Euclidean_distance(waveData):
     return dist_matrix
 
 def distmat_to_2d_coordinates_MDS(waveData):
+    """Embed pairwise sensor distances with metric multidimensional scaling.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object with a sensor distance matrix and channel positions.
+
+    Returns
+    -------
+    None
+        Stores MDS coordinates in ``waveData`` and records the operation in its
+        history.
+
+    Notes
+    -----
+    MDS directly minimizes disagreement between the supplied sensor distance
+    matrix and Euclidean distances in the two-dimensional embedding. The
+    result is rotated to align with the first two channel-position dimensions
+    and scaled by the maximum sensor distance.
+    """
     #Do multidimensional scaling to translate distMat into 2D (arbitrary) cartesian coordinates, while preserving relative distances
     mds = MDS(random_state=0, dissimilarity='precomputed')
     # Get the embeddings
@@ -508,6 +582,26 @@ def distmat_to_2d_coordinates_MDS(waveData):
     waveData.log_history(["distmat_to_2d_coordinates", "projectionmethod","MDS"])
 
 def distmat_to_2d_coordinates_Isomap(waveData):
+    """Embed sensor distances with a nonlinear Isomap manifold projection.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object with a sensor distance matrix and channel positions.
+
+    Returns
+    -------
+    None
+        Stores Isomap coordinates in ``waveData`` and records the operation in
+        its history.
+
+    Notes
+    -----
+    Isomap applies its neighborhood-graph manifold embedding to the supplied
+    precomputed distances, which can better preserve nonlinear geometry than
+    a direct metric embedding. The result is rotated to align with the first
+    two channel-position dimensions.
+    """
     # Do Isomap to translate distMat into 2D (arbitrary) cartesian coordinates, while preserving relative distances
     iso = Isomap(n_components=2, metric='precomputed')
     # Get the embeddings
@@ -555,18 +649,35 @@ def interpolate_pos_to_grid_process_trial(k, data, indices,distances, grid_x_sha
     return grid_z.reshape((grid_x_shape[0], grid_x_shape[1], data.shape[-1]))
 
 def interpolate_pos_to_grid(waveData, numGridBins=10, dataBucketName = "", return_mask= False, mask_stretching = False):
-    '''Interpolate positions to a regular grid
-    Parameters 
+    """Interpolate sensor data from irregular positions onto a square grid.
+
+    Parameters
     ----------
-    waveData : WaveData object
-    numGridBins : int
-        how many bins to tile the space along the x-coordinate (y-coordinate is scaled accordingly)
- 
-        Returns
-        -------
-        new_positions : array
-        adds a new data bucket to waveData called InterpolatedData.
-        InterpolatedData is the original data, interpolated to the regular grid xy'''
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object with two-dimensional sensor coordinates.
+    numGridBins : int, default=10
+        Number of grid positions along each spatial axis.
+    dataBucketName : str, default=""
+        Name of the input data bucket. By default, the active data bucket is
+        used.
+    return_mask : bool, default=False
+        Return a boolean mask of grid positions inside the sensor-position
+        convex hull.
+    mask_stretching : bool, default=False
+        Expand the convex-hull mask by two grid steps.
+
+    Returns
+    -------
+    grid_x, grid_y : numpy.ndarray
+        Two-dimensional arrays of interpolated grid coordinates.
+    mask : numpy.ndarray, optional
+        Boolean convex-hull mask, returned only when ``return_mask=True``.
+
+    Notes
+    -----
+    Adds an inverse-distance-weighted interpolation to ``waveData`` as
+    ``<dataBucketName>Interpolated``.
+    """
 
 
     if dataBucketName == "":

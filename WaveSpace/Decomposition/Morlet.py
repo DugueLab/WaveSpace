@@ -6,23 +6,35 @@ from scipy.optimize import curve_fit
 from numpy.lib.stride_tricks import sliding_window_view
 
 def wavelet_convolution(waveData, frequencies, n_cycles=3, dataBucketName=None):
-    """
-    Morlet-based wavelet transform with a tapered Gaussian window. Does convolution in the time domain. This approach is computationally more expensive 
-    than the freq_domain_wavelet, but can improve accuracy, especially at lower frequencies, by explicitly accounting for the finite length of the wavelets.
-    N_cycles is the number of cycles in the Morlet wavelet; typically 2 in Alexander et al.    
-    https://doi.org/10.1371/journal.pone.0148413
-    https://doi.org/10.1371/journal.pcbi.1007316
+    """Compute a tapered-Gaussian Morlet transform in the time domain.
 
     Parameters
     ----------
-    data : ndarray
-        Time series data of shape (cases, time, sensors).
-    n_cycles : int
-        Number of cycles in the Morlet wavelet.
-    frequencies : array-like
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing the time series to transform.
+    frequencies : array-like of float
         Center frequencies of the wavelets.
-   dataBucketName (default: None) : string
-        Name of databucket to process, defaults to active databucket
+    n_cycles : int, default=3
+        Number of cycles in each Morlet wavelet.
+    dataBucketName : str, default=None
+        Name of the input data bucket. By default, the active data bucket is
+        used.
+
+    Returns
+    -------
+    None
+        Adds complex wavelet coefficients to ``waveData`` as the
+        ``complexData`` bucket with a leading ``freq`` dimension.
+
+    Notes
+    -----
+    Edge samples are removed according to the lowest requested frequency, so
+    the output time axis is shorter than the input time axis.
+
+    References
+    ----------
+    https://doi.org/10.1371/journal.pone.0148413
+    https://doi.org/10.1371/journal.pcbi.1007316
     """
     if not dataBucketName:
         dataBucketName = waveData.ActiveDataBucket

@@ -13,10 +13,40 @@ def init():
      plt.style.use("settings.mplstyle")
 
 def getProbeColor(index, totalProbes, cmap = plt.cm.ocean):
-    #cmap = plt.cm.hsv
-    return cmap(index/totalProbes) 
+    """Return a colormap color for a selected probe.
+
+    Parameters
+    ----------
+    index : int
+        Zero-based index of the probe.
+    totalProbes : int
+        Total number of probes used to distribute colors across the colormap.
+    cmap : matplotlib.colors.Colormap, default=matplotlib.pyplot.cm.ocean
+        Colormap from which to select the color.
+
+    Returns
+    -------
+    tuple of float
+        RGBA color for the requested probe.
+    """
+    return cmap(index/totalProbes)
 
 def get_color_grid_from_probes(gridsize, probes):
+    """Create an RGBA grid that marks selected spatial probe positions.
+
+    Parameters
+    ----------
+    gridsize : int or tuple of int
+        Square grid size or ``(rows, columns)`` grid shape.
+    probes : sequence of tuple of int
+        ``(row, column)`` grid positions to color. Positions not in this list
+        are grey.
+
+    Returns
+    -------
+    numpy.ndarray
+        RGBA color array with shape ``(rows, columns, 4)``.
+    """
     if isinstance(gridsize, int):
         rows, cols = gridsize, gridsize
     else:
@@ -36,14 +66,24 @@ def get_color_grid_from_probes(gridsize, probes):
     return color_grid
 
 def add_color_grid_legend(ax, color_grid, position=[0.8, 0.8, 2.0, 2.0], border=True):
-    """
-    Add a grid of colored squares using imshow, embedded as an inset into a matplotlib Axes.
+    """Add a color-grid legend as an inset in a Matplotlib axes.
 
-    Parameters:
-    - ax: The matplotlib Axes to embed the grid into.
-    - color_grid: 2D array of colors (str or RGB/RGBA tuples), shape (rows, cols).
-    - position: List of [left, bottom, width, height] in Axes fraction coordinates.
-    - border: Whether to show a border around the inset.
+    Parameters
+    ----------
+    ax : matplotlib.axes.Axes
+        Axes that receive the inset legend.
+    color_grid : numpy.ndarray
+        RGB or RGBA color array with grid dimensions first.
+    position : sequence of float, default=[0.8, 0.8, 2.0, 2.0]
+        Inset left and bottom positions in axes coordinates, followed by its
+        width and height.
+    border : bool, default=True
+        Show the inset axes border.
+
+    Returns
+    -------
+    matplotlib.axes.Axes
+        The inset axes containing the color grid.
     """
     # Ensure the grid is in shape (rows, cols, 4)
     rows, cols = color_grid.shape[:2]
@@ -65,6 +105,30 @@ def add_color_grid_legend(ax, color_grid, position=[0.8, 0.8, 2.0, 2.0], border=
     return inset_ax
  
 def plotfft_zoomed(fft_abs, sfreq, minFreq, maxFreq, title, scale='linear'):    
+    """Plot selected temporal frequencies from a spatial-temporal FFT.
+
+    Parameters
+    ----------
+    fft_abs : numpy.ndarray
+        Two-dimensional FFT power array ordered as spatial frequency by
+        temporal frequency.
+    sfreq : float
+        Sampling frequency in Hz.
+    minFreq : float
+        Lower temporal-frequency display bound in Hz.
+    maxFreq : float
+        Upper temporal-frequency display bound in Hz.
+    title : str
+        Title prefix for the plot.
+    scale : {"linear", "log"}, default="linear"
+        Power display scale. ``"log"`` applies log10 scaling and normalizes
+        the plotted values.
+
+    Returns
+    -------
+    module
+        The ``matplotlib.pyplot`` module containing the created plot.
+    """
     nChan, nTimepoints = fft_abs.shape
     spatialFreqAxis = nChan/2 * np.linspace(-1, 1, nChan)
     tempFreqAxis = np.arange(-sfreq/2, sfreq/2, 1/(nTimepoints/sfreq))
@@ -82,15 +146,23 @@ def plotfft_zoomed(fft_abs, sfreq, minFreq, maxFreq, title, scale='linear'):
     return plt  
 
 def plot_imfs(waveData, dataInds = (0), IMFofInterest = 1):
-    """Plots the imfs and phase of the IMF of interest
+    """Plot intrinsic mode functions and the phase of one selected IMF.
+
     Parameters
     ----------
-    imfs : array
-        The imfs to plot. Needs shape (nTimepoints, nIMFs)
-    IMFofInterest : int
-        The index of the IMF to plot the phase of
-    time : array
-        The time vector for the imfs
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing EMD output in its ``complexData`` bucket.
+    dataInds : tuple, default=(0,)
+        Indices selecting one IMF-by-time series from ``complexData``.
+    IMFofInterest : int, default=1
+        Zero-based IMF index whose phase is shown in the second figure.
+
+    Returns
+    -------
+    imf_figure : matplotlib.figure.Figure
+        Figure produced by ``emd.plotting.plot_imfs``.
+    phase_figure : matplotlib.figure.Figure
+        Figure showing the selected IMF phase over time.
     """
     import emd
     time = waveData.get_time()
@@ -114,18 +186,32 @@ def plot_imfs(waveData, dataInds = (0), IMFofInterest = 1):
     #plt.subplots_adjust(left=0.4, right=0.99)
 
 def plot_interpolated_data(waveData, original_data_bucket, interpolated_data_bucket, grid_x, grid_y, OrigInd, InterpInd, type = ""):
-    """Plots comparison between original and interpolated data. 
-       OrigInd is the index into the original dataBucket to plot (usually something like (trl,:,timepoint)), 
-       InterpInd is the index into the interpolated dataBucket to plot (usually something like (trl,:,:,timepoint))
-    Args:
-        waveData: WaveData object
-        original_data_bucket: str with name of original data bucket
-        interpolated_data_bucket: str with name of interpolated data bucket
-        grid_x : interpolated 2d channel x-coordinates
-        grid_y : interpolated 2d channel y-coordinates
-        trial_idx: which trial to plot. Defaults to 0.
-        time_point: which timepoint to plot. Defaults to 500.
-        type: "" (default) just plots the data. Options: "phase"/"angle" or "power"/"abs" if data is complex 
+    """Compare original sensor data with an interpolated grid.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing original and interpolated data buckets.
+    original_data_bucket : str
+        Name of the original sensor-data bucket.
+    interpolated_data_bucket : str
+        Name of the interpolated grid-data bucket.
+    grid_x, grid_y : numpy.ndarray
+        Two-dimensional coordinate arrays returned by
+        :func:`interpolate_pos_to_grid`.
+    OrigInd : tuple
+        Indices selecting a channel-value vector from the original bucket.
+    InterpInd : tuple
+        Indices selecting a spatial grid from the interpolated bucket.
+    type : {"phase", "angle", "power", "abs"}, default=""
+        Display transformation. The default displays raw values; phase and
+        power modes display complex angle and magnitude, respectively.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        Figure containing original three-dimensional positions, projected
+        two-dimensional positions, and interpolated-grid values.
     """
     original_data = waveData.get_data(original_data_bucket)[OrigInd]
     interpolated_data = waveData.get_data(interpolated_data_bucket)[InterpInd].ravel()
@@ -611,12 +697,31 @@ def plot_topomap(waveData, dataBucketName=None, dataInds=None,timeInds= None, tr
     plt.colorbar(img)
 
 def plot_optical_flow(waveData, PlottingDataBucketName = None, UVBucketName = None, dataInds = None,plotangle = False, normVectorLength=False):
-    """Plots the optical flow data
-    Args:
-        waveData: WaveData object
-        PlottingDataBucketName: name of the data bucket to plot. No default. Needs to be set to the data used to calculate the optical flow
-        UVBucketName: name of the data bucket with the uv data. Defaults to active data bucket
-        dataInds: tuple with indices of data to plot e.g.:(freqbin,trial, None, None). Channels and time need to be None
+    """Animate optical-flow vectors over the data used to compute them.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing the source data and complex optical-flow
+        vectors.
+    PlottingDataBucketName : str, default=None
+        Name of the data bucket shown as the image background. This must be
+        supplied.
+    UVBucketName : str, default=None
+        Name of the optical-flow bucket. By default, the active data bucket is
+        used.
+    dataInds : tuple, default=None
+        Indices selecting a single spatial map over time from both buckets.
+    plotangle : bool, default=False
+        Plot phase angle with a cyclic colormap instead of the real component.
+    normVectorLength : bool, default=False
+        Normalize each optical-flow vector to unit magnitude before plotting.
+
+    Returns
+    -------
+    matplotlib.animation.FuncAnimation
+        Animation displaying background data with overlaid optical-flow
+        vectors.
     """
     if UVBucketName is None:
         UVBucketName = waveData.ActiveDataBucket

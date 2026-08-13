@@ -33,6 +33,42 @@ def assertCorrectWaveSettings(Type, ntrials, waveSettings):
 
 #%%
 def simulate_signal(Type, ntrials, MatrixSize, SampleRate, SimDuration, SimLayout= "channels",time=[], **waveSettings):
+    """Generate simulated wave or noise data as a WaveData object.
+
+    Parameters
+    ----------
+    Type : str
+        Simulation type. Supported values include ``"PlaneWave"``,
+        ``"TargetWave"``, ``"RotatingWave"``, ``"LocalOscillation"``,
+        ``"SpatialPinkNoise"``, ``"WhiteNoise"``, ``"StationaryPulse"``,
+        ``"FrequencyGradient"``.
+    ntrials : int
+        Number of trials to simulate.
+    MatrixSize : int
+        Width and height of the square simulated sensor grid.
+    SampleRate : float
+        Sampling frequency in Hz.
+    SimDuration : float
+        Duration of each trial in seconds.
+    SimLayout : {"channels", "grid"}, default="channels"
+        Spatial representation of the returned data. ``"grid"`` preserves the
+        two-dimensional spatial layout; other values use flattened channels.
+    time : array-like, default=[]
+        Explicit time values for the generated data. By default, time is
+        derived from ``SampleRate`` and ``SimDuration``.
+    **waveSettings
+        Type-specific simulation settings. Required settings are validated for
+        plane, target, rotating, and local-oscillation waves. Scalar values
+        apply to all trials; two-item tuples are sampled uniformly per trial;
+        arrays and lists must contain one value per trial.
+
+    Returns
+    -------
+    WaveSpace.Utils.WaveData.WaveData
+        Simulated data in a ``SimulatedData`` bucket, with sensor positions and
+        simulation settings attached. A ``Mask`` bucket is added when onset,
+        duration, or oscillator-proportion settings are supplied.
+    """
     assertCorrectWaveSettings(Type, ntrials, waveSettings)
     #InitializeDataCubes
     fullData = np.zeros((ntrials,MatrixSize,MatrixSize,int(np.floor(SampleRate*SimDuration))))
@@ -378,6 +414,30 @@ def create_pink_noise( MatrixSize, SampleRate, SimDuration):
     return signalCube
 
 def SNRMix(SignalWaveData, NoiseWaveData, SNR, Mask=None, SimLayout="channels"):
+    """Mix simulated signal and noise data at a specified signal-to-noise ratio.
+
+    Parameters
+    ----------
+    SignalWaveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing the simulated signal. Its first data bucket
+        is used as the signal input.
+    NoiseWaveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing noise in its active data bucket.
+    SNR : float, int, or numpy.ndarray
+        Signal weighting. A scalar applies to all samples; arrays may match the
+        signal shape or provide one value per trial.
+    Mask : numpy.ndarray, default=None
+        Mask that suppresses the signal contribution where its value is one.
+        When omitted, the ``Mask`` bucket in ``SignalWaveData`` is used when
+        available.
+    SimLayout : str, default="channels"
+        Spatial layout passed to the returned simulated WaveData object.
+
+    Returns
+    -------
+    WaveSpace.Utils.WaveData.WaveData
+        New WaveData object containing ``(noise + signal * SNR) / (1 + SNR)``.
+    """
     if Mask is not None and np.any(Mask):
         SNR = SNR * (1-Mask)
     elif "Mask" in SignalWaveData.DataBuckets.keys():
@@ -486,15 +546,27 @@ def abreu2010(f, nonlin_deg, nonlin_phi, sample_rate, seconds):
     return factor * (num / denom)
 
 def combine_SimData(SimDataList, dimension = 'trl', SimCondList = None, dataBucketNames = None):
-    """combine multiple SimData objects into one    
+    """Combine compatible simulated WaveData objects by trial or time.
 
-    Args:
-        SimDataList (list): list of SimData objects
-        dimension (str, optional): dimension to concatenate along. Options are 'trl' and 'time'. Defaults to 'trl'.
-        SimCondList (list, optional): list of condition names. Defaults to None.
+    Parameters
+    ----------
+    SimDataList : sequence of WaveSpace.Utils.WaveData.WaveData
+        At least two simulated WaveData objects to combine.
+    dimension : {"trl", "time"}, default="trl"
+        Concatenation dimension. Trial concatenation requires matching time
+        vectors; time concatenation requires matching trial counts.
+    SimCondList : sequence of str, default=None
+        Condition labels assigned to the combined simulation metadata. By
+        default, sequential ``"Condition_<index>"`` labels are used.
+    dataBucketNames : sequence of str, default=None
+        Data buckets to combine. By default, all buckets in the first object
+        are combined.
 
-    Returns:
-        WaveData: WaveData object containing the combined data
+    Returns
+    -------
+    WaveSpace.Utils.WaveData.WaveData
+        New WaveData object containing combined buckets, metadata, channel
+        information, and trial labels.
     """
     # Check if there are at least two datasets
     assert len(SimDataList) >= 2, "At least two datasets are required"

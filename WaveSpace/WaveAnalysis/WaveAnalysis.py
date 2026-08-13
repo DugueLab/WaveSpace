@@ -6,6 +6,38 @@ from WaveSpace.Utils import WaveData as wd
 import pandas as pd
 
 def FFT_2D(waveData, channelIndices, lowerBound, upperBound, DataBucketName = ""):
+    """Calculate a two-dimensional spatial-temporal Fourier transform.
+
+    The transform identifies peak power at positive and negative spatial
+    frequencies within the requested temporal-frequency interval, representing
+    reverse and along-channel propagation respectively.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object with active data ordered as trials, channels, and time.
+    channelIndices : sequence of int or sequence of tuple of int
+        Channels to include. Use integer indices for one-dimensional channel
+        data and ``(row, column)`` indices for two-dimensional spatial data.
+    lowerBound : float
+        Inclusive lower temporal-frequency bound in Hz.
+    upperBound : float
+        Inclusive upper temporal-frequency bound in Hz.
+    DataBucketName : str, default=""
+        Name of the input data bucket to use for calculation.
+        By default, the current active bucket is used.
+
+    Returns
+    -------
+    None
+        Results are added to ``waveData`` in place as ``FFT_ABS`` and
+        ``Result`` data buckets.
+
+    Notes
+    -----
+    ``Result`` contains per-trial peak power and the temporal and spatial
+    frequencies at each along and reverse peak.
+    """
     #code is adapted from publicly available Matlab code written by Andrea Alamia (available here: https://github.com/artipago/travellingWaveEEG)
     #corresponding publication: https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3000487
     # 'Along' is the max value in the upper right quadrant of the 2D FFT trimmed to lower and upper bound

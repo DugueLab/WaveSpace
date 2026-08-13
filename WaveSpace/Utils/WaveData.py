@@ -6,6 +6,29 @@ import pickle
 
 class DataBucket:
     def __init__(self, data, description, dimord, chanNames, sampleRate=1000, time=[], unit=""):
+        """Store one named data array and its metadata.
+
+        Parameters
+        ----------
+        data : numpy.ndarray or pandas.DataFrame
+            Data stored in the bucket.
+        description : str
+            Unique bucket name used when adding the bucket to a WaveData
+            object.
+        dimord : str
+            Underscore-separated dimension order, such as ``"trl_chan_time"``
+            or ``"trl_posx_posy_time"``.
+        chanNames : sequence of str
+            Channel names corresponding to the channel or spatial dimensions.
+        sampleRate : float, default=1000
+            Sampling frequency in Hz used to generate a time vector when
+            ``time`` is not supplied.
+        time : array-like, default=[]
+            Explicit time vector. When omitted and ``dimord`` has a time
+            dimension, it is generated from ``sampleRate``.
+        unit : str, default=""
+            Physical unit of the stored data.
+        """
         self._data = data
         self._description = description
         self._dimord = dimord
@@ -75,15 +98,25 @@ class DataBucket:
 
 class WaveData():
     def __init__(self, chanpos=[], coords2D=[], time = [], sampleRate=0.0):
-        """WaveData Generator
+        """Create an empty container for WaveSpace data buckets and metadata.
 
-        Args:
-            filename(str, optional): Full path to datafile. 
-            dataSource (str, optional): data source. Options: "MNE", "Simulation"
-            chanpos (list, optional): Nx3 Description of channel positions. 
-            time (list, optional): Start- and End-time in seconds or a vector of times in seconds
-            sampleRate (float, optional): Sampling rate in Hz. 
-            dimord (str, optional): Dimension order, string of the format: trl_chan_time; trl_chan_freq_time etc. 
+        Parameters
+        ----------
+        chanpos : array-like, default=[]
+            Initial channel positions, conventionally an array with one row per
+            channel and three spatial coordinates.
+        coords2D : array-like, default=[]
+            Reserved argument for initial two-dimensional coordinates.
+        time : array-like, default=[]
+            Reserved argument for initial time values. Time is normally stored
+            on individual DataBucket objects.
+        sampleRate : float, default=0.0
+            Sampling frequency in Hz for the data collection.
+
+        Notes
+        -----
+        Add data through :meth:`add_data_bucket`. The latest added bucket
+        becomes the active data bucket.
         """
         self.DataBuckets= {}
         self.ActiveDataBucket = ""
@@ -115,12 +148,35 @@ class WaveData():
         self._simInfo += wavedata.get_SimInfo()
 
     def get_data(self, name):
+        """Return data from a named bucket.
+
+        Parameters
+        ----------
+        name : str
+            Name of the data bucket.
+
+        Returns
+        -------
+        numpy.ndarray or pandas.DataFrame
+            Data stored in the requested bucket.
+        """
         return self.DataBuckets[name].get_data()
 
     def get_active_data(self):
         return self.DataBuckets[self.ActiveDataBucket].get_data()
 
     def add_data_bucket(self, dataBucketName):
+        """Add a DataBucket and make it the active data bucket.
+
+        Parameters
+        ----------
+        dataBucketName : DataBucket
+            Bucket to store, using its description as the dictionary key.
+
+        Returns
+        -------
+        None
+        """
         if (self.has_data_bucket(dataBucketName)):
             Warning(f"DataBucket {dataBucketName} already exists, overwriting it")
         name = dataBucketName.get_description()
@@ -128,6 +184,22 @@ class WaveData():
         self.DataBuckets[name] = (dataBucketName)
 
     def delete_data_bucket(self, dataBucketName):
+        """Remove a named data bucket.
+
+        Parameters
+        ----------
+        dataBucketName : str
+            Name of the bucket to remove.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        NameError
+            If no bucket has the requested name.
+        """
         if dataBucketName in self.DataBuckets.keys():
             del self.DataBuckets[dataBucketName]
         else:
@@ -181,6 +253,18 @@ class WaveData():
             self._history.append(log)       
     
     def set_channel_positions(self, chanpos):
+        """Set three-dimensional channel positions.
+
+        Parameters
+        ----------
+        chanpos : numpy.ndarray or str
+            Channel-position array or path to a serialized channel-position
+            file.
+
+        Returns
+        -------
+        None
+        """
         if (type(chanpos) == np.ndarray):
             self._chanpos = chanpos
         elif type(chanpos) == str:
@@ -189,6 +273,19 @@ class WaveData():
             raise Exception("Incorrect format for channel positions. Supply ND-array or filepath")
         
     def set_time(self, time, dataBucketName = ""):
+        """Set the time vector for a data bucket.
+
+        Parameters
+        ----------
+        time : array-like
+            Time values to assign.
+        dataBucketName : str, default=""
+            Bucket to update. By default, the active data bucket is used.
+
+        Returns
+        -------
+        None
+        """
         if dataBucketName == "":
             dataBucketName = self.ActiveDataBucket
         self.DataBuckets[dataBucketName].set_time(time)
@@ -197,14 +294,52 @@ class WaveData():
         self._channames = ch_names
 
     def set_active_dataBucket(self, name):
+        """Select the active data bucket.
+
+        Parameters
+        ----------
+        name : str
+            Name of an existing data bucket.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        Exception
+            If no bucket has the requested name.
+        """
         if not (name in self.DataBuckets.keys()):
             raise Exception(f"DataBucket {name} does not exist, can not set as active databucket")
         self.ActiveDataBucket = name
 
     def set_sample_rate(self, sampleRate):
+        """Set the sampling frequency.
+
+        Parameters
+        ----------
+        sampleRate : float
+            Sampling frequency in Hz.
+
+        Returns
+        -------
+        None
+        """
         self._sampleRate = sampleRate
 
     def set_distMat(self, distMat):
+        """Set the channel distance matrix.
+
+        Parameters
+        ----------
+        distMat : numpy.ndarray
+            Square matrix of pairwise channel distances.
+
+        Returns
+        -------
+        None
+        """
         self._distMat = distMat
 
     def set_2D_coordinates(self, coords):
@@ -214,9 +349,31 @@ class WaveData():
         self._simInfo = simInfo
 
     def set_trialInfo(self, trialInfo):
+        """Set trial-level labels or metadata.
+
+        Parameters
+        ----------
+        trialInfo : sequence
+            One label or metadata item per trial.
+
+        Returns
+        -------
+        None
+        """
         self._trialInfo = trialInfo
 
     def save_to_file(self, filename=""):
+        """Serialize this WaveData object to a pickle file.
+
+        Parameters
+        ----------
+        filename : str or path-like, default=""
+            Output path. By default, a name is generated from the history log.
+
+        Returns
+        -------
+        None
+        """
         if filename=="":
             filename = "WaveData_" + '_'.join([element[1] for element in self._history])
         
@@ -228,23 +385,39 @@ class WaveData():
         return self._simInfo
 
     def get_time(self, dataBucketName=""):
+        """Return a data bucket's time vector.
+
+        Parameters
+        ----------
+        dataBucketName : str, default=""
+            Name of the bucket. By default, the active data bucket is used.
+
+        Returns
+        -------
+        array-like
+            Time values stored in the selected bucket.
+        """
         if dataBucketName == "":
             return self.DataBuckets[self.ActiveDataBucket].get_time()
         return self.DataBuckets[dataBucketName].get_time()
 
     def get_sample_rate(self):
+        """Return the sampling frequency in Hz."""
         return self._sampleRate
 
     def get_channel_positions(self):
+        """Return a copy of the channel-position array."""
         return np.copy(self._chanpos)
 
     def get_distMat(self):
+        """Return the channel distance matrix."""
         return self._distMat
     
     def get_extentGeodesic(self):
         return self._extentGeodesic
 
     def get_2d_coordinates(self):
+        """Return the two-dimensional channel coordinates."""
         return self._coords2D
 
     def get_log_history(self):
@@ -254,4 +427,5 @@ class WaveData():
         return self._channames
 
     def get_trialInfo(self):
+        """Return the trial-level labels or metadata."""
         return self._trialInfo

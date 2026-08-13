@@ -25,9 +25,28 @@ def naninterp(xp):
   	
 # main   
 def generalized_phase(waveData, dataBucketName = ''):
-    """
+    """Estimate generalized phase from a broadband signal.
+
+    The algorithm forms an analytic signal using a single-sided Fourier
+    representation, detects negative-frequency intervals, and interpolates
+    phase across those intervals.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing broadband data.
+    dataBucketName : str, default=""
+        Name of the input data bucket. By default, the active data bucket is
+        used.
+
+    Returns
+    -------
+    None
+        Adds generalized-phase complex data to ``waveData`` as the
+        ``complexData`` bucket.
+
     References
-    -----
+    ----------
     Davis, *Muller, Martinez-Trujillo, Sejnowski, Reynolds. Spontaneous travelling cortical waves gate perception in behaving primates. Nature, 2020 (*equal contribution) 
     """
     reshape = False

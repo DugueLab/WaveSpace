@@ -11,6 +11,31 @@ from multiprocessing import Pool, cpu_count
 from joblib import Parallel, delayed
 
 def calculate_distance_correlation(waveData, dataBucketName = "", sourcePoints = [], pixelSpacing= 1):
+    """Calculate circular-linear phase-distance correlations from source points.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing complex phase data on a two-dimensional
+        spatial layout.
+    dataBucketName : str, default=""
+        Name of the complex input data bucket. By default, the active bucket is
+        used.
+    sourcePoints : sequence of tuple of int, default=[]
+        ``(x, y)`` indices of spatial source points to evaluate.
+    pixelSpacing : float, default=1
+        Distance between adjacent spatial positions.
+
+    Returns
+    -------
+    None
+        Adds a ``PhaseDistanceCorrelation`` DataFrame bucket to ``waveData``.
+
+    Notes
+    -----
+    The result stores a correlation coefficient and p-value for every trial,
+    source point, and time point.
+    """
     if  dataBucketName == "":
         dataBucketName =  waveData.ActiveDataBucket
     else:
@@ -51,24 +76,32 @@ def phase_dist_corr_task(args):
     return df
 
 def calculate_distance_correlation_GP(waveData, dataBucketName = "", evaluationAngle=np.pi, tolerance=0.2):
-    """
-    Calculate the distance correlation for wave data.
+    """Calculate phase-distance correlation using generalized-phase crossings.
 
     Python implementation of: https://github.com/mullerlab/generalized-phase.git
 
     Parameters
     ----------
-    waveData : WaveData object
-    dataBucketName : str, optional
-        Name of the data bucket to use (defaults to the active data bucket). Data in Bucket needs to be complex.
-    evaluationAngle : float, optional
-        Phase angle (in radians) that triggers the evaluation point (default: np.pi).
-    tolerance : float, optional
-        Numerical tolerance for phase angle matching (default: 0.2).
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object with complex phase data on a regular spatial layout.
+    dataBucketName : str, default=""
+        Name of the complex input data bucket. By default, the active bucket is
+        used.
+    evaluationAngle : float, default=numpy.pi
+        Mean phase angle in radians used to select evaluation time points.
+    tolerance : float, default=0.2
+        Numerical tolerance in radians for selecting phase crossings.
+
+    Returns
+    -------
+    None
+        Adds a ``PhaseDistanceCorrelation`` DataFrame bucket containing the
+        correlation coefficient, p-value, source point, and evaluation time.
     
     Notes
     -----
-    Needs a distance matrix to be defined in the WaveData object. See SpatialArrangement if not already there.  
+    A regular sensor distance matrix must be defined in ``waveData``. See
+    :mod:`WaveSpace.SpatialArrangement.SensorLayout`.
     
     References
     -----

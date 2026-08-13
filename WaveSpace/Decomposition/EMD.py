@@ -280,29 +280,49 @@ def find_nearest_to_FOI(waveData, IF, FOI, start_time=None, end_time=None):
 #main EMD funs
 def EMD(waveData, nIMFs=7, dataBucketName="", noiseVar = 0.05, n_noiseChans = 10, siftType = 'regular',
         ndir=None, stp_crit ='stop', sd=0.075, sd2=0.75, tol=0.075,stp_cnt=2):
-    """Empirical mode decomposition. Wrapper function for emd.sift.** from emd package.
-    Note that. to speed things up a little, this function uses multiprocessing with numpy arrays. The number of intrinsic
-    mode functions that are actually found in the data may be less than the number of IMFs requested for any given timeseries.
-    Those rows of the output array will be filled with NaNs. If you have a better idea for how to do this, please let me know.
+    """Decompose each time series into intrinsic mode functions (IMFs).
 
-    Args:
-        waveData (waveData object)
-        nIMFs (int): max number of IMFs to extract. Defaults to 7.
-        type (str, optional): Defaults to "regular".Options are masked_sift, iterated_masked_sift, ensemble_sift, multivariate_sift
-            for more info, check out the excellent documentation at https://emd.readthedocs.io/en/stable/index.html
-        n_noiseChans (int, optional): Defaults to 10. Number of noise channels to add for multivariate siftfun
-        noiseVar (float, optional): Defaults to 0.05. Variance of noise to add for multivariate siftfun
-        dataBucketName (str, optional):Defaults to ""
-        Special stuff for multivariate sift:
-        ndir (int, optional): Defaults to None. Number of signal projections. Should be at least twice the number of data channels ("None" will do that). Only for multivariate siftfun
-        sd (float, optional): Defaults to 0.075. Only for multivariate siftfun
-        sd2 (float, optional): Defaults to 0.75. Only for multivariate siftfun
-        tol (float, optional): Defaults to 0.075. Only for multivariate siftfun
-        stp_crit (str, optional): Defaults to 'stop'. Only for multivariate siftfun. Options are 'stop', 'fix_h'
-        stp_cnt (int, optional): Defaults to 2. Only for multivariate siftfun and only of stp_crit is 'fix_h'
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing the data to decompose.
+    nIMFs : int, default=7
+        Maximum number of IMFs to extract per time series.
+    dataBucketName : str, default=""
+        Name of the input data bucket. By default, the active data bucket is
+        used.
+    noiseVar : float, default=0.05
+        Proportion of noise added for ``"multivariate_sift"``.
+    n_noiseChans : int, default=10
+        Number of auxiliary noise channels for ``"multivariate_sift"``.
+    siftType : {"regular", "masked_sift", "iterated_masked_sift", "ensemble_sift", "multivariate_sift"}, default="regular"
+        Sifting algorithm used to extract IMFs.
+    ndir : int or None, default=None
+        Number of projection directions for multivariate sifting. When None,
+        twice the channel count is used.
+    stp_crit : {"stop", "fix_h"}, default="stop"
+        Multivariate-sift stopping criterion.
+    sd : float, default=0.075
+        Multivariate-sift first stopping threshold.
+    sd2 : float, default=0.75
+        Multivariate-sift second stopping threshold.
+    tol : float, default=0.075
+        Multivariate-sift tolerance.
+    stp_cnt : int, default=2
+        Consecutive stopping-condition count for ``stp_crit="fix_h"``.
 
+    Returns
+    -------
+    None
+        Adds complex analytic IMFs to ``waveData`` as the ``complexData``
+        bucket, with an ``IMF`` dimension prepended to the input dimension
+        order.
 
-    Returns: changes the waveData object in place. Adds a new data bucket called "AnalysticSignal" 
+    Notes
+    -----
+    Fewer IMFs than requested may be found for individual time series; missing
+    output rows are filled with NaNs. Processing is parallelized by trial and
+    channel except for multivariate sifting.
     """
 
     # ensure proper bookkeeping of data dimensions

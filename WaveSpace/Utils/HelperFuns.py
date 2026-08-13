@@ -835,26 +835,45 @@ def cosine_similarity_complex(a, b):
     return np.abs(np.vdot(a, b)) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 def find_wave_motifs(waveData, dataBucketName=None, oscillationThresholdDataBucket = None, oscillationThresholdFlag = False, baselinePeriod = None, threshold = .7, nTimepointsEdge = 50, mergeThreshold =.6, minFrames = 10, pixelThreshold = .3, magnitudeThreshold = .1, dataInds = None, Mask = None):
-    """
-    Identifies reocurring motifs in UV maps.
+    """Identify recurring, spatially similar motifs in optical-flow maps.
 
-    Parameters:
-    waveData (WaveData): waveData object
-    dataBucketName (str, optional): name of the data bucket to use. If None, active data bucket is used. Defaults to None.
-    powerDataBucketName (str, optional): Name of the power data bucket to use. If None, takes abs of active dataBucket. Defaults to None.
-    threshold (float, optional): The threshold for the cosine similarity between frames to consider them part of the same motif. Defaults to 0.7.
-    mergeThreshold (float, optional): The threshold for the cosine similarity between motifs to consider them the same and merge them. Defaults to 0.6.
-    minFrames (int, optional): The minimum number of frames a sequence must have to be considered a motif. Should be at least 1 cycle of the freq of interest. Defaults to 10.
-    pixelThreshold (float, optional): The minimum proportion of pixels that must meet the threshold for a frame to be considered part of a motif. Defaults to 1.
-    magnitudeThreshold (float, optional): minimum vector magnitude flow vectors must have to be considered. Defaults to 0.1.
-    nTimepointsEdge(int, optional): The number of timepoints to exclude from the beginning and end of the trial to avoid edge-artifacts due to filtering.  Defaults to 50.
-    powerThresholdFlag (bool, optional): If True, uses power thresholding. Defaults to False.
-    baselinePeriod (tuple, optional): A tuple representing the start and end times of the baseline period. If None, the entire time period is used. Defaults to None.
-    dataInds (list, optional): A list of indices to use when indexing into the data. If an index is slice(None), all elements along that dimension are used. Defaults to None.
-    Mask: (np.ndarray, optional): A mask to apply to the data. If None, no mask is applied. If True looks for a Mask dataBucket. Defaults to None.
-    Returns:
-    list: A list of dictionaries representing the identified motifs. Each dictionary contains the average frame of the motif, the trials and frames in which the motif occurs, and the total number of frames in the motif.
-    
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing complex optical-flow vectors.
+    dataBucketName : str, default=None
+        Name of the input flow bucket. By default, the active data bucket is
+        used.
+    oscillationThresholdDataBucket : str, default=None
+        Name of a data bucket used for optional oscillation-power thresholding.
+    oscillationThresholdFlag : bool, default=False
+        Enable oscillation-power thresholding.
+    baselinePeriod : tuple of int, default=None
+        Start and stop sample indices defining the threshold baseline.
+    threshold : float, default=0.7
+        Minimum cosine similarity for consecutive frames in one motif.
+    nTimepointsEdge : int, default=50
+        Number of samples excluded from the beginning and end of each trial.
+    mergeThreshold : float, default=0.6
+        Minimum cosine similarity required to merge candidate motifs.
+    minFrames : int, default=10
+        Minimum consecutive-frame duration of a motif.
+    pixelThreshold : float, default=0.3
+        Minimum proportion of spatial positions satisfying the relevant
+        threshold.
+    magnitudeThreshold : float, default=0.1
+        Minimum optical-flow vector magnitude.
+    dataInds : tuple, default=None
+        Indices selecting data to analyse. By default, all data are used.
+    Mask : numpy.ndarray or bool, default=None
+        Spatial mask. ``True`` uses the ``Mask`` data bucket; by default, all
+        spatial positions are included.
+
+    Returns
+    -------
+    list of dict
+        Identified motifs. Each dictionary includes the average flow map, the
+        trials and frame ranges where it occurs, and its frame count.
     """
     if dataBucketName is None:
         dataBucketName = waveData.ActiveDataBucket

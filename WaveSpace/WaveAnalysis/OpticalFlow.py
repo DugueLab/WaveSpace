@@ -12,25 +12,43 @@ import os
 from functools import partial
 
 def create_uv(waveData, applyGaussianBlur=False, type = "real", Sigma=1, alpha = 2, maxIter = 100, is_phase = False, dataBucketName = ''): 
-    '''Calculate optical Flow using Horn-Schunck method. Not the fasted pony in the barn....
-    
-    code partially based on https://github.com/BrainDynamicsUSYD/NeuroPattToolbox (Matlab)
-       
-    Most of the logic comes from:
-    Townsend, R. G., & Gong, P. (2018). 
-    Detection and analysis of spatiotemporal patterns in brain 867 activity. 
-    PLoS Computational Biology, 14(12), e1006643.
+    """Estimate optical-flow vectors with the Horn-Schunck method.
 
-    applyGaussianBlur: if True, apply Gaussian blur to images before calculating optical flow
-    Sigma: standard deviation of Gaussian blur kernel
-    nIter: number of iterations for Horn-Schunck optical flow calculation
-    alpha: smoothness weighting parameter, +alpha => smoother optical flow (typically 0<ALPHA<5) 
-    BETA: nonlinear penalty parameter. Beta close to zero will be more accurate, but slow (ToDo: implement!)
-    type: 'angle', 'abs' or 'real' (default: 'real') which basis to use for optical flow calculation
-    !!careful!!: function expects complex data 
-    If you already have angles you want to use, choose type='real' and pass the angles as data, 
-    but set is_phase=True!!!
-    '''
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object with data arranged over two spatial dimensions and
+        time. Complex input can be transformed to phase, magnitude, or real
+        values before estimating flow.
+    applyGaussianBlur : bool, default=False
+        Apply Gaussian smoothing to each frame before flow estimation.
+    type : {"angle", "abs", "real"}, default="real"
+        Component of complex input used to calculate flow.
+    Sigma : float, default=1
+        Standard deviation of the Gaussian smoothing kernel.
+    alpha : float, default=2
+        Horn-Schunck smoothness weight. Larger values produce smoother flow.
+    maxIter : int, default=100
+        Maximum Horn-Schunck iterations per pair of frames.
+    is_phase : bool, default=False
+        Treat real-valued input as circular phase data.
+    dataBucketName : str, default=""
+        Name of the input data bucket. By default, the active data bucket is
+        used.
+
+    Returns
+    -------
+    None
+        Adds complex flow vectors to ``waveData`` as the ``UV`` bucket. The
+        real and imaginary components are the horizontal and vertical vectors,
+        respectively, and the time axis is one sample shorter than the input.
+
+    References
+    ----------
+    Townsend, R. G., & Gong, P. (2018). Detection and analysis of
+    spatiotemporal patterns in brain activity. PLOS Computational Biology,
+    14(12), e1006643.
+    """
     if dataBucketName == "":
         dataBucketName = waveData.ActiveDataBucket
     else:

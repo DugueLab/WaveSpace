@@ -5,6 +5,7 @@ WaveSpace
 Python tools for the simulation and analysis of cortical traveling waves
 
 .. contents:: Table of Contents
+  :depth: 2
 
 Statement of Need
 -----------------
@@ -97,7 +98,7 @@ The tutorials include:
 These examples are intended both as introductions to the package and as starting points for applying WaveSpace to real or simulated neural data.
 
 API Reference
-=============
+-------------
 
 .. toctree::
    :maxdepth: 2
@@ -105,7 +106,7 @@ API Reference
    source/api
 
 Testing
-=======
+-------
 
 WaveSpace includes an automated test suite based on Python's built-in
 ``unittest`` framework. The tests are located in the ``UnitTest`` directory.
@@ -128,9 +129,8 @@ Python 3.9 through 3.14 on pushes to the ``main`` branch and on pull
 requests. This helps ensure that changes remain compatible with the
 supported Python versions.
 
-******************
 The WaveData Class
-******************
+------------------
 
 The ``WaveData`` class serves as a container for time-series data related to cortical traveling waves. It provides functionalities for data storage, manipulation, and analysis, ensuring a structured workflow for handling multi-channel neural recordings.
 
@@ -156,7 +156,7 @@ Key Features
 This class is essential for organizing and processing large-scale neural recordings, offering flexibility in data structuring, preprocessing, and visualization. 
 
 Community and Support
-=====================
+---------------------
 
 WaveSpace welcomes contributions from researchers and developers interested
 in improving the package.
