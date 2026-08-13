@@ -1,0 +1,20 @@
+name: Update Read the Docs
+
+"on":
+  push:
+    branches:
+      - main
+
+jobs:
+  build-docs:
+    name: Build latest documentation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Read the Docs build
+        env:
+          RTD_TOKEN: ${{ secrets.RTD_API_TOKEN }}
+        run: |
+          curl --fail-with-body --silent --show-error -X POST \
+            -H "Authorization: Token ${RTD_TOKEN}" \
+            https://app.readthedocs.org/api/v3/projects/wavespace/versions/latest/builds/
