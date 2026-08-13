@@ -1,15 +1,15 @@
+import numpy as np
 from joblib import Parallel, delayed
+
 import WaveSpace.Utils.HelperFuns as hf
 import WaveSpace.Utils.WaveData as wd
-import numpy as np
 
 
 def perform_cluster_gradient(waveData, dataBucket="FrequencyCluster"):
     waveData.set_active_data_bucket(dataBucket)
     hf.assure_consistency(waveData)
     ClusterContacts = waveData.get_data(dataBucket)
-    sampleRate = waveData.get_sample_rate()
-    nTrials, nChannels, nTime = ClusterContacts.shape()
+    nTrials, _nChannels, _nTime = ClusterContacts.shape()
 
     complexData_FreqCluster = waveData.get_data(dataBucket)
     chanpos2D = chanpos[:,:2]
@@ -50,7 +50,13 @@ def getClusterGradient(ClusterPhase, chanpos2D):
     return local_angle, local_sf, local_corr, local_offset
 
 def circ_lin_regress(phases, coords, theta_r, params):
-    import pycircstat
+    try:
+        import pycircstat
+    except ImportError as e:
+        raise ImportError(
+            "pycircstat is required for circular-linear regression. "
+            "Install it with: pip install wavespace[cluster]"
+        ) from e
     """
     Performs 2D circular linear regression.
     This is from https://github.com/john-myers-github/INSULA_RS, and was originally ported from Honghui's matlab code.
@@ -74,7 +80,7 @@ def circ_lin_regress(phases, coords, theta_r, params):
     # for each time and event, find the parameters with the smallest -R
     min_vals = theta_r[np.argmin(Rs, axis=1)]
 
-    sl = min_vals[:, 1] * np.array([np.cos(min_vals[:, 0]), np.sin((min_vals[:, 0]))])
+    sl = min_vals[:, 1] * np.array([np.cos(min_vals[:, 0]), np.sin(min_vals[:, 0])])
     offs = np.arctan2(np.sum(np.sin(phases.T - sl[0, :] * pos_x - sl[1, :] * pos_y), axis=0),
                       np.sum(np.cos(phases.T - sl[0, :] * pos_x - sl[1, :] * pos_y), axis=0))
     pos_circ = np.mod(sl[0, :] * pos_x + sl[1, :] * pos_y + offs, 2 * np.pi)

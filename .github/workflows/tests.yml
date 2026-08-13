@@ -27,3 +27,21 @@ jobs:
 
       - name: Run tests
         run: uv run --only-group dev tox -e py
+
+      - name: Lint dependencies with deptry
+        if: matrix.python-version == '3.13'
+        run: uv run --only-group dev deptry .
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv and set up Python 3.13
+        uses: astral-sh/setup-uv@v10.0.0
+        with:
+          python-version: "3.13"
+          enable-cache: true
+
+      - name: Ruff check
+        run: uv run --only-group dev ruff check .

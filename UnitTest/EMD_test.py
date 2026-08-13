@@ -1,9 +1,10 @@
 import unittest
-from unittest.mock import MagicMock
+
 import numpy as np
-from scipy import signal
-from WaveSpace.Decomposition.EMD import  EMD
+
 import WaveSpace.Utils.WaveData as wd
+from WaveSpace.Decomposition.EMD import EMD
+
 
 class EMD_test(unittest.TestCase):
     def setUp(self):
@@ -52,7 +53,7 @@ class EMD_test(unittest.TestCase):
     def test_EMD(self):
         """Test the main EMD wrapper function"""
 
-        siftTypes = ["regular", "masked_sift", "iterated_masked_sift","ensemble_sift","multivariate_sift"]
+        #siftTypes = ["regular", "masked_sift", "iterated_masked_sift","ensemble_sift","multivariate_sift"]
         #for siftType in siftTypes:
         # Test with regular sift
         EMD(self.wave, nIMFs=self.n_imfs, dataBucketName="test_bucket", siftType="regular")

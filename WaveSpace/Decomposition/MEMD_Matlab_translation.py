@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Acknowledgment: All of this code is based on the multivariate EMD code, publicly available from
                 http://www.commsp.ee.ic.ac.uk/~mandic/research/emd.htm.
@@ -16,15 +15,13 @@ Acknowledgment: All of this code is based on the multivariate EMD code, publicly
      Proceedings of the Royal Society A, Vol. 459, pp. 2317-2345, 2003
 
 """
-
-import numpy as np
-from scipy.interpolate import interp1d,CubicSpline
-from math import pi,sqrt,sin,cos
-import warnings
 import sys
-import numba
-import chaospy
+import warnings
 
+import chaospy
+import numba
+import numpy as np
+from scipy.interpolate import CubicSpline
 
 
 def zero_crossings(signal):
@@ -211,7 +208,7 @@ def envelope_mean(signal, time, seq, numDirs, numSamples, numDims): #new
 #Stopping criterion
 def stop(mode, time, sd, sd2, tol, seq, nDirs, nSamples, nDims):
     try:
-        envelopeMean, nExtrema, numZeroCrossings, amplitude = envelope_mean(
+        envelopeMean, nExtrema, _numZeroCrossings, amplitude = envelope_mean(
             mode, time, seq, nDirs, nSamples, nDims
         )
         sx = np.sqrt(np.sum(np.power(envelopeMean, 2), axis=1))
@@ -233,7 +230,7 @@ def stop(mode, time, sd, sd2, tol, seq, nDirs, nSamples, nDims):
     
 def fix(mode, time, seq, nDirs, stopCount, counter, nSamples, nDims):
     try:
-        envelopeMean, numExtrema, numZeroCrossings, amplitude = envelope_mean(
+        envelopeMean, numExtrema, numZeroCrossings, _amplitude = envelope_mean(
             mode, time, seq, nDirs, nSamples, nDims
         )
 
@@ -297,7 +294,7 @@ def stop_emd(r,seq,ndir,N_dim):
     ner = np.zeros((ndir,1))
     dir_vec = np.zeros((N_dim,1))
     
-    for it in range(0,ndir):
+    for it in range(ndir):
         dir_vec = make_dir_vectors(seq,it,N_dim,dir_vec)    
         # Projection of input signal on nth (out of total ndir) direction
         # vectors
@@ -360,9 +357,8 @@ def memd(x, ndir, maxnIMF=None, stp_crit ='stop', sd=0.075, sd2=0.75, tol=0.075,
         q.append(m.transpose())
         
         n_imf = n_imf+1
-        if maxnIMF != None:
-            if n_imf >= maxnIMF:
-                break
+        if maxnIMF is not None and n_imf >= maxnIMF:
+            break
         r = r - m
         nbit = 0
         

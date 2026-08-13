@@ -1,7 +1,9 @@
 import unittest
-from unittest.mock import MagicMock
+
 import numpy as np
+
 import WaveSpace.Utils.WaveData as wd
+
 
 class wavedata_test(unittest.TestCase):
     def setUp(self):
@@ -67,9 +69,9 @@ class wavedata_test(unittest.TestCase):
         #supplies a non-matchning timevector when creating databucket and sees if error is raised
         try:
             timeVector = np.arange(0,20,1)
-            testDataBucket = wd.DataBucket(self.mock_data, "test_bucket", "trl_chan_time", time=timeVector, sampleRate=500, chanNames= self.channelNames)
+            wd.DataBucket(self.mock_data, "test_bucket", "trl_chan_time", time=timeVector, sampleRate=500, chanNames= self.channelNames)
             self.assertTrue(False, "databucket does not catch illegal timevectors")
-        except:
+        except Exception:
             self.assertTrue(True)
 
     def test_exception_on_setting_non_existent_databucket(self):

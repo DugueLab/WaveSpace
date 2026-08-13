@@ -1,7 +1,9 @@
 import unittest
+
 import numpy as np
+
 import WaveSpace.Utils.HelperFuns as hf
-import WaveSpace.Utils.WaveData as wd
+
 
 # Mocking posxy_to_chan if it's from another module
 def posxy_to_chan(data):
