@@ -345,43 +345,43 @@ def shortsmooth(y, s=None):
     -------
     numpy.ndarray
     """
-  sizy = y.shape
-  W = np.isfinite(y).astype(float)
-  isweighted = not np.all(W == 1)
+    sizy = y.shape
+    W = np.isfinite(y).astype(float)
+    isweighted = not np.all(W == 1)
 
-  # Build Lambda 
-  Lambda = sum( (2 - 2 * np.cos(np.pi * (np.arange(n) / n))).reshape(
-    [n if i == ax else 1 for ax in range(y.ndim)] )
-      for i, n in enumerate(sizy) )
+    # Build Lambda 
+    Lambda = sum( (2 - 2 * np.cos(np.pi * (np.arange(n) / n))).reshape(
+        [n if i == ax else 1 for ax in range(y.ndim)] )
+        for i, n in enumerate(sizy) )
 
-  N = np.sum(np.array(sizy) != 1) # tensor rank
-  y = np.where(np.isfinite(y), y, 0)
-  z = np.zeros_like(y)
-  z0 = np.zeros_like(y)
-  Wtot = W
+    N = np.sum(np.array(sizy) != 1) # tensor rank
+    y = np.where(np.isfinite(y), y, 0)
+    z = np.zeros_like(y)
+    z0 = np.zeros_like(y)
+    Wtot = W
 
-  # Relaxation factor
-  RF = 1 + 0.75 * isweighted
-  xpost = np.array([np.log10(s)])
+    # Relaxation factor
+    RF = 1 + 0.75 * isweighted
+    xpost = np.array([np.log10(s)])
 
-  for _ in range(2):
-    isweighted = True 
-    tol, nit = 1, 0 
-    while tol>1e-3 and nit<100:
-        nit = nit+1
-        DCTy = dctND(Wtot*(y-z)+z,f=dct)
-        s = 10**xpost[0]
-        Gamma = 1./(1+(s*abs(Lambda))**2.0)
-        z = RF*dctND(Gamma*DCTy,f=idct) + (1-RF)*z
-        tol = isweighted*norm(z0-z)/norm(z)       
-        z0 = z 
+    for _ in range(2):
+        isweighted = True 
+        tol, nit = 1, 0 
+        while tol>1e-3 and nit<100:
+            nit = nit+1
+            DCTy = dctND(Wtot*(y-z)+z,f=dct)
+            s = 10**xpost[0]
+            Gamma = 1./(1+(s*abs(Lambda))**2.0)
+            z = RF*dctND(Gamma*DCTy,f=idct) + (1-RF)*z
+            tol = isweighted*norm(z0-z)/norm(z)       
+            z0 = z 
 
-    # average leverage
-    h = np.sqrt(1+16.*s) 
-    h = np.sqrt(1+h)/np.sqrt(2)/h 
-    h = h**N
-    Wtot = W*RobustWeights(y-z, np.isfinite(y),h)
-  return z
+        # average leverage
+        h = np.sqrt(1+16.*s) 
+        h = np.sqrt(1+h)/np.sqrt(2)/h 
+        h = h**N
+        Wtot = W*RobustWeights(y-z, np.isfinite(y),h)
+    return z
 
 def RobustWeights(r,I,h):
     """
@@ -412,6 +412,6 @@ def dctND(data, f=dct):
     -------
     numpy.ndarray
     """
-  for axis in range(data.ndim):
-    data = f(data, norm='ortho', type=2, axis=axis)
-  return data
+    for axis in range(data.ndim):
+        data = f(data, norm='ortho', type=2, axis=axis)
+    return data
