@@ -1,6 +1,5 @@
 import re
 
-
 log = [['Datatype: Simulation'], ['Broadband Filter', 10, 12]]
 
 
@@ -27,14 +26,14 @@ def existingImports(content):
 
 def manageImports(content, imports, log):
     add = []
-    for l in log:
+    for log_item in log:
         exist = False
         for i in imports:
-            if l[1] in i:
+            if log_item[1] in i:
                 exist = True
                 break
         if not exist:
-            add.append(l[1])
+            add.append(log_item[1])
     for elt in add:
         content = 'import ' + elt + '\n' + content
     return content
@@ -57,7 +56,6 @@ def jsonfilename(filename):
 
 def generateJson(logger, filename='data.json'):
     filename = jsonfilename(filename)
-    file = open(filename, "w+")
     content = '{\n'
     tabs = 1
     datatype = __getdatatype(logger[0][0])
@@ -88,6 +86,6 @@ def generateJson(logger, filename='data.json'):
         content += '\n'
 
     content += '}'
-    file.write(content)
+    with open(filename, "w+") as file:
+        file.write(content)
     print("The new json file named "+ filename + " is ready.")
-    file.close()

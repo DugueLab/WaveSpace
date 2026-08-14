@@ -1,16 +1,21 @@
-import numpy as np
-from numpy.linalg import norm
-from scipy.fftpack.realtransforms import dct, idct
-from WaveSpace.Utils import HelperFuns as hf
-from WaveSpace.Utils import WaveData as wa
-from WaveSpace.SpatialArrangement import SensorLayout as sensors
-import pandas as pd
-from pandas import DataFrame
 import os
 from multiprocessing import Pool, cpu_count
-from joblib import Parallel, delayed
 
-def calculate_distance_correlation(waveData, dataBucketName = "", sourcePoints = [], pixelSpacing= 1):
+import numpy as np
+import pandas as pd
+from joblib import Parallel, delayed
+from numpy.linalg import norm
+from pandas import DataFrame
+from scipy.fftpack.realtransforms import dct, idct
+
+from WaveSpace.SpatialArrangement import SensorLayout as sensors
+from WaveSpace.Utils import HelperFuns as hf
+from WaveSpace.Utils import WaveData as wa
+
+
+def calculate_distance_correlation(waveData, dataBucketName = "", sourcePoints = None, pixelSpacing= 1):
+    if sourcePoints is None:
+        sourcePoints = []
     if  dataBucketName == "":
         dataBucketName =  waveData.ActiveDataBucket
     else:
@@ -35,7 +40,7 @@ def calculate_distance_correlation(waveData, dataBucketName = "", sourcePoints =
         origDimordList = str.split(origDimord, '_')
         groupDims  = [dim for dim in origDimordList if not (dim == "posx" or dim =="posy" or dim == "time")]
         groupDimSizes = origShape[:len(groupDims)]
-        multi_indices  = np.array(np.unravel_index(np.arange(complexData.shape[0]), groupDimSizes)).T
+        np.array(np.unravel_index(np.arange(complexData.shape[0]), groupDimSizes)).T
           
     phaseCorrBucket = wa.DataBucket(df, "PhaseDistanceCorrelation", "DataFrame", sampleRate=waveData.get_sample_rate() ,chanNames= waveData.get_channel_names())
     waveData.add_data_bucket(phaseCorrBucket)
@@ -101,13 +106,13 @@ def calculate_distance_correlation_GP(waveData, dataBucketName = "", evaluationA
     else:
         raise RuntimeError("Distance Matrix not found or not regular")
 
-    nTrials, nXpos, nYpos, nTime = complexData.shape
+    nTrials, _nXpos, _nYpos, _nTime = complexData.shape
     if not np.any(waveData.get_channel_positions()):
         sensors.distmat_to_2d_coordinates_MDS(waveData)
     X = waveData.get_channel_positions()[:, 0]
     Y = waveData.get_channel_positions()[:, 1]
     pixelspacing = distMat[0, 1]
-    output = list()
+    output = []
 
     if os.name == 'posix':  # Unix 
         pool = Pool(cpu_count())
@@ -141,7 +146,7 @@ def distcorr_process_trial(args):
     ii, complexData, evaluationAngle, tolerance, X, Y, pixelspacing = args
     complexDataCube = complexData[ii, :, :, :]
     ep = find_evaluation_points(complexDataCube, evaluationAngle, tolerance)
-    pm, pd, dx, dy = phase_gradient_complex_multiplication(complexDataCube, pixelspacing)
+    _pm, _pd, dx, dy = phase_gradient_complex_multiplication(complexDataCube, pixelspacing)
     source = find_source_points(complexDataCube, X, Y, ep, dx, dy)
     rho = np.zeros((len(ep), 2))
     for idx, thispoint in enumerate(ep):
@@ -269,7 +274,7 @@ def shortsmooth(y, s=None):
     Wtot = W*RobustWeights(y-z, np.isfinite(y),h)
   return z
 
-def RobustWeights(r,I,h):
+def RobustWeights(r, I ,h):
     MAD = np.median(np.abs(r[I]-np.median(r[I]))) # median absolute deviation
     u = np.abs(r/(1.4826*MAD)/np.sqrt(1-h)) # studentized residuals
     c = 4.685 

@@ -1,12 +1,10 @@
-from WaveSpace.Utils import WaveData as wd
-from WaveSpace.Utils import HelperFuns as hf
-
-import matplotlib.pyplot as plt
-from scipy.signal import butter, filtfilt
-from scipy.signal import detrend
-from scipy.signal import impulse
-from scipy.signal import firwin
+import mne
 import numpy as np
+from scipy.signal import butter, detrend, filtfilt, firwin, impulse, lfilter
+
+from WaveSpace.Utils import HelperFuns as hf
+from WaveSpace.Utils import WaveData as wd
+
 
 def filter_broadband(waveData,dataBucketName = "", LowCutOff=0, HighCutOff=100,  n_jobs=5):
     import mne
@@ -62,7 +60,7 @@ def bandpass(lowcut, highcut, fs, type="IIR", order=5):
     if type == "IIR":
         b, a = butter(order, [low, high], btype='band')
         # Calculate the impulse response
-        t, h = impulse((b, a))
+        _t, h = impulse((b, a))
     elif type == "FIR":
         print("CAUTION!!! Make sure your filter order is correct!\n"
             "For FIR filters, a reasonable order is about 20 times\n"
@@ -81,8 +79,6 @@ def bandpass(lowcut, highcut, fs, type="IIR", order=5):
     
     return b, a, impulse_response_length
 
-
-from scipy.signal import lfilter
 
 def filter_narrowband(waveData, dataBucketName = "", LowCutOff=0, HighCutOff=120, type= "IIR", order=5, causal=True):
     '''Scipy zero-phase bandpass filter. Detrends before narrowband filtering.'''

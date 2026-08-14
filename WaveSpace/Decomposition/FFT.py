@@ -1,17 +1,23 @@
 #%%
-from WaveSpace.Utils import WaveData as wd
-from WaveSpace.Utils import HelperFuns as hf
 import numpy as np
 from scipy.fftpack import fft, fftfreq
-from scipy.signal.windows import hann	
+from scipy.signal.windows import hann
+
+from WaveSpace.Utils import HelperFuns as hf
+from WaveSpace.Utils import WaveData as wd
+
 
 #%%
-def hann_fft(waveData, dataBucketName = "", timeStart = [], timeEnd = [], timeStep = 1, freqStart = 0, freqEnd = -1):
+def hann_fft(waveData, dataBucketName = "", timeStart = None, timeEnd = None, timeStep = 1, freqStart = 0, freqEnd = -1):
     """
     Computes the fft of the data in the active data bucket.
     The fft is computed along the time dimension of the data array.
     """
     #set defaults
+    if timeEnd is None:
+        timeEnd = []
+    if timeStart is None:
+        timeStart = []
     if timeStart == []:
         timeStart = waveData.get_time()[0]
     if timeEnd == []:

@@ -1,15 +1,18 @@
-from __future__ import division
+
+import multiprocessing
+import os
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from joblib import Parallel, delayed
 from matplotlib import path
 from scipy.ndimage import convolve as filter2
 from scipy.ndimage import gaussian_filter, generic_filter
-import numpy as np
-from WaveSpace.Utils import WaveData as wd, HelperFuns as hf
-import pandas as pd
-import multiprocessing
-from joblib import Parallel, delayed
-import os
-from functools import partial
+
+from WaveSpace.Utils import HelperFuns as hf
+from WaveSpace.Utils import WaveData as wd
+
 
 def create_uv(waveData, applyGaussianBlur=False, type = "real", Sigma=1, alpha = 2, maxIter = 100, is_phase = False, dataBucketName = ''): 
     '''Calculate optical Flow using Horn-Schunck method. Not the fasted pony in the barn....
@@ -42,7 +45,7 @@ def create_uv(waveData, applyGaussianBlur=False, type = "real", Sigma=1, alpha =
     oldshape = currentData.shape
     hasBeenReshaped, currentData =  hf.force_dimord(currentData, currentDimord , "trl_posx_posy_time")
 
-    nObs,posx,posy,nframes = currentData.shape
+    _nObs,posx,posy,nframes = currentData.shape
     if type=='angle' and np.iscomplexobj(currentData):
         currentData = np.angle(currentData)
         is_phase = True
@@ -187,8 +190,8 @@ def poincare_index(uv):
 
 def P_index1(D):
     D = np.reshape(D, (2, 2))
-    s = np.zeros((4))
-    tap = np.zeros((4))
+    s = np.zeros(4)
+    tap = np.zeros(4)
 
     s[0] = D[1, 0]
     s[1] = D[1, 1]
@@ -227,8 +230,8 @@ def SourceSinkSaddle(delta, tau):
     return type, 0
 
 def makeContours(u, v, Nmin, Lmin_source, Lmax_sink):
-    [uy, ux] = np.gradient(u)
-    [vy, vx] = np.gradient(v)
+    [_uy, ux] = np.gradient(u)
+    [vy, _vx] = np.gradient(v)
 
     div1 = ux + vy  # Divergence
     sourceContours = []
@@ -348,8 +351,6 @@ def source_sink_process_trial(thistrialInd, trial_data):
     Nmin = 2  # minimum number of points as the contour size
     Lmin_source = 0.05  # minimum source level
     Lmax_sink = -0.05  # maximum sink level
-    Nnested_source = 2  # minimum number of nested sources to verify the most interior source
-    Nnested_sink = 2  # minimum number of nested sources to verify the most interior sink
 
     for it in range(timepoints):
         u = np.real(trial_data[:, :, it])
@@ -421,7 +422,7 @@ def find_sources_sinks(waveData, dataBucketName = ""):
     currentDimord = waveData.DataBuckets[dataBucketName].get_dimord()
     oldShape = UV.shape
     hasBeenReshaped, UV =  hf.force_dimord(UV, currentDimord , "trl_posx_posy_time")
-    trial, sizeX, sizeY, timepoints = UV.shape
+    _trial, _sizeX, _sizeY, _timepoints = UV.shape
 
     if os.name == 'posix':  # Linux
         pool = multiprocessing.Pool(multiprocessing.cpu_count())
@@ -443,7 +444,7 @@ def find_sources_sinks(waveData, dataBucketName = ""):
 
     if hasBeenReshaped:
         def get_original_indices_from_flat(item, oldShape):
-            x, y = oldShape
+            _x, y = oldShape
             x_original = item // y
             y_original = item % y
             return x_original, y_original

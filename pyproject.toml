@@ -24,7 +24,6 @@ keywords = [
     "neural-oscillations",
 ]
 classifiers = [
-    "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.9",
@@ -47,6 +46,8 @@ dependencies = [
     "tvb-gdist",
     "emd",
     "mne",
+    "joblib",
+    "vtk",
 ]
 
 [project.urls]
@@ -56,18 +57,49 @@ Issues = "https://github.com/kpetras/WaveSpace/issues"
 Documentation = "https://wavespace.readthedocs.io"
 
 [project.optional-dependencies]
-docs = [
-    "sphinx",
-    "pydata-sphinx-theme",
+memd = [
+    "chaospy",
+    "numba",
+]
+cluster = [
+    "pycircstat",
 ]
 
 [dependency-groups]
 dev = [
+    "ruff",
     "tox",
     "tox-uv",
+    "pytest>=8.4.2",
+    "deptry",
+]
+docs = [
     "sphinx",
     "pydata-sphinx-theme",
+    "sphinx-gallery",
 ]
 
 [tool.setuptools.packages.find]
 include = ["WaveSpace*"]
+
+[tool.deptry]
+ignore = ["DEP002"]
+
+[tool.deptry.package_module_name_map]
+sklearn = "scikit-learn"
+skimage = "scikit-image"
+gdist = "tvb-gdist"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+extend-select = ["I"]
+ignore = [    
+    "N999",    # invalid-module-name
+    "TRY002",  # raise-vanilla-class
+    "BLE001",  # blind-except
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["WaveSpace"]

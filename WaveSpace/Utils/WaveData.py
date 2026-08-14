@@ -1,11 +1,16 @@
-from . import ImportHelpers
-import numpy as np
-from . import HelperFuns as hf
-import re
 import pickle
+import re
+
+import numpy as np
+
+from . import HelperFuns as hf
+from . import ImportHelpers
+
 
 class DataBucket:
-    def __init__(self, data, description, dimord, chanNames, sampleRate=1000, time=[], unit=""):
+    def __init__(self, data, description, dimord, chanNames, sampleRate=1000, time=None, unit=""):
+        if time is None:
+            time = []
         self._data = data
         self._description = description
         self._dimord = dimord
@@ -14,7 +19,7 @@ class DataBucket:
         self._unit = unit
         self._reservedNames = ["time", "chan", "posx", "posy", "trl"]
         if len(time) == 0:
-            if not("time" in dimord):
+            if "time" not in dimord:
                 print(f"Warning: no time dimension in databucket: {self._description} \n timevector will be empty")
                 self._time = []
             else:
@@ -73,8 +78,8 @@ class DataBucket:
     def assure_consistency():
         return None
 
-class WaveData():
-    def __init__(self, chanpos=[], coords2D=[], time = [], sampleRate=0.0):
+class WaveData:
+    def __init__(self, chanpos=None, coords2D=None, time = None, sampleRate=0.0):
         """WaveData Generator
 
         Args:
@@ -85,6 +90,12 @@ class WaveData():
             sampleRate (float, optional): Sampling rate in Hz. 
             dimord (str, optional): Dimension order, string of the format: trl_chan_time; trl_chan_freq_time etc. 
         """
+        if time is None:
+            time = []
+        if coords2D is None:
+            coords2D = []
+        if chanpos is None:
+            chanpos = []
         self.DataBuckets= {}
         self.ActiveDataBucket = ""
         self.HasRegularLayout = False
@@ -102,10 +113,10 @@ class WaveData():
     def __repr__(self):
         out= ""
         for key, dataBucket in self.DataBuckets.items():
-            out += "DataBuckets[\"%s\"]| %s | %s \n" % (key , dataBucket.get_dimord(),dataBucket.get_data().shape )
-        out += "%s | %s(Hz) \n" % ("Sampling Rate", self._sampleRate)
+            out += f"DataBuckets[\"{key}\"]| {dataBucket.get_dimord()} | {dataBucket.get_data().shape} \n"
+        out += "{} | {}(Hz) \n".format("Sampling Rate", self._sampleRate)
         if len(self.get_time()>1):
-            out += "%s | %s(S) - %s(S) \n" % ("Time", self.get_time()[0], self.get_time()[-1])
+            out += "{} | {}(S) - {}(S) \n".format("Time", self.get_time()[0], self.get_time()[-1])
         return out  
     
     def append_dataset(self, wavedata, dataBucketName):
@@ -122,13 +133,13 @@ class WaveData():
 
     def add_data_bucket(self, dataBucketName):
         if (self.has_data_bucket(dataBucketName)):
-            Warning(f"DataBucket {dataBucketName} already exists, overwriting it")
+            raise Warning(f"DataBucket {dataBucketName} already exists, overwriting it")
         name = dataBucketName.get_description()
         self.ActiveDataBucket = name
         self.DataBuckets[name] = (dataBucketName)
 
     def delete_data_bucket(self, dataBucketName):
-        if dataBucketName in self.DataBuckets.keys():
+        if dataBucketName in self.DataBuckets:
             del self.DataBuckets[dataBucketName]
         else:
             raise NameError("DataBucket does not exist")
@@ -181,12 +192,12 @@ class WaveData():
             self._history.append(log)       
     
     def set_channel_positions(self, chanpos):
-        if (type(chanpos) == np.ndarray):
+        if isinstance(chanpos, np.ndarray):
             self._chanpos = chanpos
-        elif type(chanpos) == str:
+        elif isinstance(chanpos, str):
             self._chanpos= ImportHelpers.load_channel_positions(chanpos)
         else:
-            raise Exception("Incorrect format for channel positions. Supply ND-array or filepath")
+            raise TypeError("Incorrect format for channel positions. Supply ND-array or filepath")
         
     def set_time(self, time, dataBucketName = ""):
         if dataBucketName == "":
@@ -197,7 +208,7 @@ class WaveData():
         self._channames = ch_names
 
     def set_active_dataBucket(self, name):
-        if not (name in self.DataBuckets.keys()):
+        if name not in self.DataBuckets:
             raise Exception(f"DataBucket {name} does not exist, can not set as active databucket")
         self.ActiveDataBucket = name
 
@@ -219,10 +230,8 @@ class WaveData():
     def save_to_file(self, filename=""):
         if filename=="":
             filename = "WaveData_" + '_'.join([element[1] for element in self._history])
-        
-        f = open(filename, 'wb')
-        pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
-        f.close()
+        with open(filename, 'wb') as f:
+            pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
         
     def get_SimInfo(self):
         return self._simInfo

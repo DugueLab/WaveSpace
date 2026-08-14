@@ -1,5 +1,7 @@
-import scipy.io as io 
 import pickle
+
+from scipy import io
+
 
 def load_MNE_data(filename):
     import mne
@@ -25,10 +27,8 @@ def load_wavedata_object(filename):
     return waveData
 
 def save_wavedata_object(waveData, filename):
-    f = open(filename, 'wb')
-    pickle.dump(waveData, f, pickle.HIGHEST_PROTOCOL)
-    f.close()
+    with open(filename, 'wb') as f:
+        pickle.dump(waveData, f, pickle.HIGHEST_PROTOCOL)
 
 def load_mat_file(filename):
-    
     return io.loadmat(filename)

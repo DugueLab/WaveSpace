@@ -1,13 +1,14 @@
-import WaveSpace.Utils.HelperFuns as hf
 import matplotlib.pyplot as plt
-import matplotlib.animation as animation
-from matplotlib import colors
-from scipy.interpolate import griddata
 import numpy as np
-from plotly.subplots import make_subplots
 import plotly.graph_objects as go
 import pyvista as pv
+from matplotlib import animation, colors
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+from plotly.subplots import make_subplots
+from scipy.interpolate import griddata
+
+import WaveSpace.Utils.HelperFuns as hf
+
 
 def init():
      plt.style.use("settings.mplstyle")
@@ -21,7 +22,7 @@ def get_color_grid_from_probes(gridsize, probes):
         rows, cols = gridsize, gridsize
     else:
         rows, cols = gridsize
-    total_cells = rows * cols
+    rows * cols
     total_probes = len(probes)
 
     # Fill the grid row-wise with probe colors, repeating or truncating as needed
@@ -35,7 +36,7 @@ def get_color_grid_from_probes(gridsize, probes):
             color_grid[i, j] = color
     return color_grid
 
-def add_color_grid_legend(ax, color_grid, position=[0.8, 0.8, 2.0, 2.0], border=True):
+def add_color_grid_legend(ax, color_grid, position=None, border=True):
     """
     Add a grid of colored squares using imshow, embedded as an inset into a matplotlib Axes.
 
@@ -46,7 +47,9 @@ def add_color_grid_legend(ax, color_grid, position=[0.8, 0.8, 2.0, 2.0], border=
     - border: Whether to show a border around the inset.
     """
     # Ensure the grid is in shape (rows, cols, 4)
-    rows, cols = color_grid.shape[:2]
+    if position is None:
+         position = [0.8, 0.8, 2.0, 2.0]
+    _rows, _cols = color_grid.shape[:2]
 
     # Create an inset axis
     inset_ax = inset_axes(ax, width=position[2], height=position[3],
@@ -75,7 +78,7 @@ def plotfft_zoomed(fft_abs, sfreq, minFreq, maxFreq, title, scale='linear'):
 
     plt.imshow(fft_abs[:, plotrange[0]], aspect="auto", extent=[tempFreqAxis[plotrange[0]][0], tempFreqAxis[plotrange[0]][-1], spatialFreqAxis[0], spatialFreqAxis[-1]])
     plt.colorbar(label="Power (dB)" if scale == "log" else "Power")
-    plt.title("{title} Spatial Freq over Temporal Freq".format(title=title))
+    plt.title(f"{title} Spatial Freq over Temporal Freq")
     plt.xlabel("Temporal Frequency (Hz)")
     plt.ylabel("Spatial Frequency (channels/Hz)")
     #plt.show()
@@ -145,7 +148,6 @@ def plot_interpolated_data(waveData, original_data_bucket, interpolated_data_buc
     pos_2d = waveData.get_2d_coordinates() 
 
     #create scatter plot of original 3d channel positions
-    from mpl_toolkits.mplot3d import Axes3D
 
     fig = plt.figure(figsize=(15, 5))
 
@@ -209,7 +211,7 @@ def plot_timeseries_on_surface(Surface, waveData, dataBucketName = " ", indices 
     waveData.set_active_dataBucket(dataBucketName)
     hf.assure_consistency(waveData)
     dimord= waveData.DataBuckets[waveData.ActiveDataBucket].get_dimord()
-    dimlist = dimord.split("_")
+    dimord.split("_")
     data = waveData.DataBuckets[waveData.ActiveDataBucket].get_data()
 
     faces = Surface[1]
@@ -237,8 +239,8 @@ def plot_timeseries_on_surface(Surface, waveData, dataBucketName = " ", indices 
     elif plottype == "phase":
         channel_data = np.angle(channel_data)
     clim = [np.min(channel_data), np.max(channel_data)]
-    for timepoint in range(len(time)):
-        channel_data_snapshot = channel_data[:, timepoint]
+    for timepoint_ in range(len(time)):
+        channel_data_snapshot = channel_data[:, timepoint_]
         # Add a trace for the surface
         fig.add_trace(
             go.Mesh3d(
@@ -261,10 +263,10 @@ def plot_timeseries_on_surface(Surface, waveData, dataBucketName = " ", indices 
                 y=channel_positions[:, 1],
                 z=channel_positions[:, 2],
                 mode='markers',
-                marker=dict(size=10, color=channel_data_snapshot, 
-                            cmin= clim[0], cmax=clim[1],
-                            colorscale='RdBu_r', 
-                            colorbar=dict(title=plottype, x=-0.07, len=0.7)),
+                marker={"size": 10, "color": channel_data_snapshot, 
+                            "cmin": clim[0], "cmax": clim[1],
+                            "colorscale": 'RdBu_r', 
+                            "colorbar": {"title": plottype, "x": -0.07, "len": 0.7}},
                 visible=False
             ),
             row=1, col=1
@@ -277,11 +279,11 @@ def plot_timeseries_on_surface(Surface, waveData, dataBucketName = " ", indices 
                 y=[channel_positions[chan_to_highlight, 1]],
                 z=[channel_positions[chan_to_highlight, 2]],
                 mode='markers',
-                marker=dict(
-                    size=12, 
-                    color='rgba(0,0,0,0)',  # transparent fill
-                    line=dict(color='red', width=5)  # black border
-                ),
+                marker={
+                    "size": 12, 
+                    "color": 'rgba(0,0,0,0)',  # transparent fill
+                    "line": {"color": 'red', "width": 5}  # black border
+                },
                 visible=False
             ),
             row=1, col=1
@@ -294,7 +296,7 @@ def plot_timeseries_on_surface(Surface, waveData, dataBucketName = " ", indices 
             x=time,
             y=channel_data[chan_to_highlight, :],
             mode='lines',
-            line=dict(color='black', width=2),
+            line={"color": 'black', "width": 2},
             visible=True
         ),
         row=2, col=1
@@ -303,11 +305,11 @@ def plot_timeseries_on_surface(Surface, waveData, dataBucketName = " ", indices 
     # Create and add slider
     steps = []
     for i in range(0, len(fig.data)-1, 3):  
-        step = dict(
-            method="update",
-            args=[{"visible": [False] * len(fig.data)},  # Start by making all traces invisible
+        step = {
+            "method": "update",
+            "args": [{"visible": [False] * len(fig.data)},  # Start by making all traces invisible
                 {"title": "Time: " + str(time[i//3])}],  # layout attribute
-        )
+        }
         # Make the current 3D traces visible
         if i < len(step["args"][0]["visible"]):
             step["args"][0]["visible"][i] = True
@@ -321,61 +323,62 @@ def plot_timeseries_on_surface(Surface, waveData, dataBucketName = " ", indices 
 
         # Update the position of the vertical line with the slider
         step["args"].append({"shapes": [
-            dict(
-                type="line",
-                xref="x",
-                yref="paper",
-                x0=time[i//3],
-                y0=0,
-                x1=time[i//3],
-                y1=1,
-                line=dict(
-                    color="Red",
-                    width=3
-                )
-            )
+            {
+                "type": "line",
+                "xref": "x",
+                "yref": "paper",
+                "x0": time[i//3],
+                "y0": 0,
+                "x1": time[i//3],
+                "y1": 1,
+                "line": {
+                    "color": "Red",
+                    "width": 3
+                }
+            }
         ]})
 
         steps.append(step)
 
-    sliders = [dict(
-        active=0,
-        currentvalue={"prefix": "Time: "},
-        pad={"t": 50},
-        steps=steps
-    )]
+    sliders = [{
+        "active": 0,
+        "currentvalue": {"prefix": "Time: "},
+        "pad": {"t": 50},
+        "steps": steps
+    }]
 
     fig.update_layout(
         sliders=sliders,
-        scene=dict(
-            xaxis=dict(nticks=4, range=[np.min(Surface[0]),np.max(Surface[0])],),
-            yaxis=dict(nticks=4, range=[np.min(Surface[0]),np.max(Surface[0])],),
-            zaxis=dict(nticks=4, range=[np.min(Surface[0]),np.max(Surface[0])],),
-            aspectmode='cube',
-            domain=dict(y=[0.3, 1])  # Adjust the size of the 3D subplot
-        ),
-        xaxis=dict(domain=[0, 1], anchor='y2'),  # Adjust the size of the 2D subplot
-        yaxis=dict(domain=[0, 0.25], anchor='x2'),  # Adjust the size of the 2D subplot
+        scene={
+            "xaxis": {"nticks": 4, "range": [np.min(Surface[0]),np.max(Surface[0])],},
+            "yaxis": {"nticks": 4, "range": [np.min(Surface[0]),np.max(Surface[0])],},
+            "zaxis": {"nticks": 4, "range": [np.min(Surface[0]),np.max(Surface[0])],},
+            "aspectmode": 'cube',
+            "domain": {"y": [0.3, 1]}  # Adjust the size of the 3D subplot
+        },
+        xaxis={"domain": [0, 1], "anchor": 'y2'},  # Adjust the size of the 2D subplot
+        yaxis={"domain": [0, 0.25], "anchor": 'x2'},  # Adjust the size of the 2D subplot
         width=700,
-        margin=dict(r=20, l=10, b=10, t=10)
+        margin={"r": 20, "l": 10, "b": 10, "t": 10}
     )
     fig.show()
     return fig
-#
-def animate_grid_data(gridData,DataBucketName = "", dataInd = None, probepositions=[(0,0)], plottype = "real"):
+def animate_grid_data(gridData,DataBucketName = "", dataInd = None, probepositions=None, plottype = "real"):
     """Plots gridData over time. 
         gridData: waveData object.  
         dataInd: Needs to point to a single trial with shape posx_posy_time, it is either a single int or a tuple. Time ranges can be indicated as
         eg. (0, 0, slice(None), slice(None), [491, 492, 493, 494, 495, 496, 497, 498, 499, ...]) to index some point
 
     """
+    if probepositions is None:
+         probepositions = [(0, 0)]
     if DataBucketName == "":
         DataBucketName = gridData.ActiveDataBucket
     timevec = gridData.get_time()    
 
     plotGridSize = (1,2)
     plt.rcParams["figure.autolayout"] = True
-    fig = plt.figure(figsize=(plotGridSize[1]*8, plotGridSize[0]*8))
+    plt.figure(figsize=(plotGridSize[1]*8, plotGridSize[0]*8))
 
     #IMSHOW grid
     ax1 = plt.subplot2grid(plotGridSize, (0, 0), colspan=1, rowspan=1)
@@ -406,7 +409,7 @@ def animate_grid_data(gridData,DataBucketName = "", dataInd = None, probepositio
         else:
             raise ValueError("dataToPlot does not have the right shape.")
     else:
-        raise ValueError("dataToPlot should have 3 dimensions after indexing, but got {}".format(dataToPlot.ndim))
+        raise ValueError(f"dataToPlot should have 3 dimensions after indexing, but got {dataToPlot.ndim}")
 
 
     if plottype== 'real':
@@ -424,11 +427,11 @@ def animate_grid_data(gridData,DataBucketName = "", dataInd = None, probepositio
 
     cbar = plt.colorbar(img)
     cbar.set_label(r'$\mu$V')
-    nFrames = dataToPlot.shape[-1]  
+    dataToPlot.shape[-1]  
     lengthOfMatrix =  dataToPlot.shape[0] * dataToPlot.shape[1]
     # make all black
     probecolors = []
-    allEdgeColors = [(0.0, 0.0, 0.0)for i in range(lengthOfMatrix)]
+    [(0.0, 0.0, 0.0)for i in range(lengthOfMatrix)]
     for ind, probe in enumerate(probepositions):
         currentColor = getProbeColor(ind, len(probepositions))
         currentRect = plt.Rectangle((probe[1]-0.5, probe[0]-0.5), 1, 1, facecolor='none',edgecolor=currentColor,lw=2)
@@ -517,7 +520,7 @@ def plot_geodesic_distance_on_surface(vertices, faces, sensor_positions, path, c
         y=path_coords[:, 1],
         z=path_coords[:, 2],
         mode='lines',
-        line=dict(color='red', width=4),
+        line={"color": 'red', "width": 4},
         name='Geodesic Path'
     )
 
@@ -527,7 +530,7 @@ def plot_geodesic_distance_on_surface(vertices, faces, sensor_positions, path, c
         y=[vertices[chanInds[0], 1], vertices[chanInds[1], 1]],
         z=[vertices[chanInds[0], 2], vertices[chanInds[1], 2]],
         mode='markers+text',
-        marker=dict(size=8, color=['blue', 'green'], symbol='circle'),
+        marker={"size": 8, "color": ['blue', 'green'], "symbol": 'circle'},
         text=[str(chanInds[0]), str(chanInds[1])],
         textposition='top center',
         name='Start/End Points'
@@ -539,7 +542,7 @@ def plot_geodesic_distance_on_surface(vertices, faces, sensor_positions, path, c
         y=vertices[:, 1],
         z=vertices[:, 2],
         mode='markers+text',
-        marker=dict(size=5, color='black'),
+        marker={"size": 5, "color": 'black'},
         text=[str(i) for i in range(len(vertices))],
         textposition='top center',
         name='Vertices'
@@ -551,11 +554,11 @@ def plot_geodesic_distance_on_surface(vertices, faces, sensor_positions, path, c
     # Layout
     layout = go.Layout(
         title=f'Geodesic Path on Surface (Distance: {distance:.2f})',
-        scene=dict(
-            xaxis_title='X',
-            yaxis_title='Y',
-            zaxis_title='Z',
-        ),
+        scene={
+            "xaxis_title": 'X',
+            "yaxis_title": 'Y',
+            "zaxis_title": 'Z',
+        },
         showlegend=True,
         width=900,
         height=900
@@ -633,10 +636,10 @@ def plot_optical_flow(waveData, PlottingDataBucketName = None, UVBucketName = No
     if normVectorLength:
         UV = UV/ np.abs(UV)
     if plotangle:
-        plotData = np.squeeze((np.angle(waveData.get_data(PlottingDataBucketName))[dataInds]))
+        plotData = np.squeeze(np.angle(waveData.get_data(PlottingDataBucketName))[dataInds])
         cmap = 'twilight'
     else:
-        plotData = np.squeeze((np.real(waveData.get_data(PlottingDataBucketName))[dataInds]))
+        plotData = np.squeeze(np.real(waveData.get_data(PlottingDataBucketName))[dataInds])
         cmap = 'copper'
 
     nFrames = plotData.shape[-1]  # time is the last dimension
@@ -645,7 +648,7 @@ def plot_optical_flow(waveData, PlottingDataBucketName = None, UVBucketName = No
     def AnimateFullStatus(frameNR, fullstatus,timevec):
         img.set_data(fullstatus[ :, :, frameNR])
         #update time stamp in title
-        ax1.set_title('Time =  ' + "{:.2f}".format(timevec[frameNR]))
+        ax1.set_title('Time =  ' + f"{timevec[frameNR]:.2f}")
         barbs.set_UVC(-np.real(UV[ :, :, frameNR]), -np.imag(
             UV[ :, :, frameNR]))
 
@@ -790,7 +793,7 @@ def plot_streamlines(UV, seedpoints):
     mesh['vectors'] = vectors
     #create plotters
     pv.set_plot_theme("document")
-    pdata = pv.vector_poly_data(mesh.points, vectors)
+    pv.vector_poly_data(mesh.points, vectors)
     sourcepoints = mesh.points[seedpoints.T.ravel()]
     wrappedPoints = pv.wrap(sourcepoints)
     stream = mesh.streamlines_from_source(
@@ -799,10 +802,9 @@ def plot_streamlines(UV, seedpoints):
         interpolator_type="cell")
 
     for cellID in range(stream.n_cells):
-        points = stream.get_cell(cellID).points
+        stream.get_cell(cellID).points
 
     # plotting vectors
-    cpos = 'xy'
     # pdata.glyph(orient='vectors', scale='mag').plot()
     # pdata.glyph(orient='vectors', scale=False).plot()
     #pl.add_mesh(pdata)

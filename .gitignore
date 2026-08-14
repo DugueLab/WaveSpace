@@ -32,9 +32,11 @@ uv.lock
 
 # Documentation build output
 docs/_build/
+docs/auto_examples/
+docs/sg_execution_times.rst
 
-# Example data outputs (root and Examples/)
-ExampleData/
+# Example data output
+/ExampleData/
 Examples/ExampleData/Output/
 
 # Editor / OS

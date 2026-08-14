@@ -1,7 +1,9 @@
+import numpy as np
+from scipy.signal import hilbert
+
 import WaveSpace.Utils.HelperFuns as hf
 import WaveSpace.Utils.WaveData as wd
-from scipy.signal import hilbert
-import numpy as np
+
 
 def apply_hilbert(waveData, dataBucketName =None ):
     """
@@ -14,7 +16,7 @@ def apply_hilbert(waveData, dataBucketName =None ):
     else:
         waveData.set_active_dataBucket(dataBucketName)
     #check if any filtereing has been done before, if so, warn that it will be overwritten
-    if not (dataBucketName == "NBFiltered"):
+    if dataBucketName != "NBFiltered":
         print("Hilbert Transform to get analytic signal: Make sure data has been filtered to a sufficiently narrow frequency bandwith before applying hilbert")
 
     hf.assure_consistency(waveData)
