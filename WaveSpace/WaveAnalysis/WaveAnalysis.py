@@ -133,6 +133,20 @@ from joblib import Parallel, delayed
 import multiprocessing
 
 def FFT_2D_shuffle_and_average(waveData, channelIndices, lowerBound, upperBound,num_iterations = 100, DataBucketName = ""):
+    """
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+    channelIndices : sequence of int or tuple of int
+    lowerBound : float
+    upperBound : float
+    num_iterations : int, default=100
+    DataBucketName : str, default=""
+
+    Returns
+    -------
+    None
+    """
     if not DataBucketName == "":
         waveData.set_active_dataBucket(DataBucketName)
     HelperFuns.assure_consistency(waveData)
@@ -182,6 +196,19 @@ def FFT_2D_shuffle_and_average(waveData, channelIndices, lowerBound, upperBound,
     waveData.add_data_bucket(resultBucket_shuffled)
 
 def run_fft_shuffle(waveData, channelIndices, lowerBound, upperBound):
+    """
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+    channelIndices : sequence of int or tuple of int
+    lowerBound : float
+    upperBound : float
+
+    Returns
+    -------
+    pandas.DataFrame
+    numpy.ndarray
+    """
     np.random.shuffle(channelIndices)  # Shuffle channel indices
     # Call the original FFT_2D function
     FFT_2D(waveData, channelIndices, lowerBound, upperBound)

@@ -90,9 +90,30 @@ def wavelet_convolution(waveData, frequencies, n_cycles=3, dataBucketName=None):
     waveData.add_data_bucket(complexDataBucket)
 
 def gaussian(x, a, x0, sigma):
+    """
+    Parameters
+    ----------
+    x : numpy.ndarray
+    a : float
+    x0 : float
+    sigma : float
+
+    Returns
+    -------
+    numpy.ndarray
+    """
     return a * np.exp(-(x - x0) ** 2 / (2 * sigma ** 2))
 
 def tapered_gaussian(n):
+    """
+    Parameters
+    ----------
+    n : int
+
+    Returns
+    -------
+    numpy.ndarray
+    """
     x = np.arange(n)
     taper = 0.5 * (1.0 - np.cos(2 * np.pi * x / (n - 1)))
     mean = np.sum(x * taper) / n

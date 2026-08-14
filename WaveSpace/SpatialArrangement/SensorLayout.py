@@ -351,17 +351,28 @@ def distance_along_surface(data, Surface, tolerance = 0.01, get_extent = False, 
 
 
 def find_midline_channels(channel_positions, tolerance=0.1):
-    """
-    Finds the midline channels in a given set of channel positions.
-    Parameters:
-    channel_positions (numpy.ndarray): A 2D array or 3D of channel positions (only 2dimensions are actually used)
-    tolerance (float, optional): maximum distance a channel can be from the midline to be considered a midline channel. Defaults to 0.1.
-    Returns:
-    tuple: Two numpy arrays containing the indices of the sagittal and coronal midline channels respectively.
+    """Find channels near the sagittal and coronal midlines.
 
-    Function mirrors the channel positions over the y-axis and x-axis, then uses a KDTree to find the plane of symmetry.
-    Channels close to the midlines (within the given tolerance) are then returned.
-    Plots for sanity check. Make sure you look at the plot because I am not certain this will always work...
+    Parameters
+    ----------
+    channel_positions : numpy.ndarray
+        Channel coordinates with at least two spatial dimensions.
+    tolerance : float, default=0.1
+        Maximum distance from an estimated midline for a channel to be
+        included.
+
+    Returns
+    -------
+    sagittal_channels : numpy.ndarray
+        Indices of channels near the sagittal midline.
+    coronal_channels : numpy.ndarray
+        Indices of channels near the coronal midline.
+
+    Notes
+    -----
+    Midlines are estimated by mirroring the channel coordinates across each
+    axis and matching the reflected positions with a KD-tree. A diagnostic
+    plot is displayed.
     """
     # Mirror the sensor positions over the y-axis and x-axis
     mirrored_positions_y = channel_positions.copy()
@@ -393,7 +404,18 @@ def find_midline_channels(channel_positions, tolerance=0.1):
     return sagittal_channels, coronal_channels
 
 def plot_distance_along_surface(waveData):
-    """Plot the distance matrix on the surface with distance as color"""
+    """Plot sensor-pair distances on a three-dimensional layout.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object with channel positions and a distance matrix.
+
+    Returns
+    -------
+    None
+        Displays an interactive Plotly figure.
+    """
 
     DistMat = waveData.get_distMat()
     channel_positions = np.array(waveData.get_channel_positions())  # The 3D positions of the channels
@@ -484,16 +506,26 @@ def plot_distance_along_surface(waveData):
     fig.show()
 
 def project_to_sphere(sensor_positions, radius=1, plot=True):
-    """
-    Project the 3D sensor positions onto a sphere of a given radius and optionally plot the result.
+    """Project three-dimensional sensor positions onto a sphere.
 
-    Parameters:
-    sensor_positions (np.array): An array of sensor positions in 3D space.
-    radius (float): The radius of the sphere onto which the sensors will be projected.
-    plot (bool): If True, plot the projected positions.
+    Parameters
+    ----------
+    sensor_positions : numpy.ndarray
+        Array of three-dimensional sensor coordinates.
+    radius : float, default=1
+        Target sphere radius.
+    plot : bool, default=True
+        Whether to display the original and projected positions.
 
-    Returns:
-    np.array: An array of projected sensor positions on the sphere.
+    Returns
+    -------
+    numpy.ndarray
+        Sensor coordinates projected to the sphere.
+
+    Notes
+    -----
+    Positions at the origin remain unchanged because their projection is
+    undefined.
     """
     projected_positions = np.zeros_like(sensor_positions)
 
@@ -524,6 +556,15 @@ def project_to_sphere(sensor_positions, radius=1, plot=True):
     return projected_positions
 
 def calculate_Euclidean_distance(waveData):
+    """
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+
+    Returns
+    -------
+    numpy.ndarray
+    """
     # Get the 2D coordinates
     coords = waveData.get_2d_coordinates()
 
@@ -621,13 +662,19 @@ def distmat_to_2d_coordinates_Isomap(waveData):
     waveData.log_history(["distmat_to_2d_coordinates", "projectionmethod","Isomap"])
 
 def is_regular_grid_2d(distMat, tolerance = 0.001):
-    """
-    Check if a grid of positions is regular.
-    Parameters:
-        grid (list of tuples): a grid of positions
-        Tolerance : relative to distance
-    Returns:
-        bool: True if the grid is regular, False otherwise
+    """Check whether a two-dimensional distance matrix represents a regular grid.
+
+    Parameters
+    ----------
+    distMat : numpy.ndarray
+        Square pairwise distance matrix.
+    tolerance : float, default=0.001
+        Relative tolerance for comparing adjacent distances.
+
+    Returns
+    -------
+    bool
+        True when the matrix has equal adjacent distances; otherwise False.
     """
     # Get the number of rows and columns in the grid
     if len(distMat) != len(distMat[0]):
@@ -642,6 +689,20 @@ def is_regular_grid_2d(distMat, tolerance = 0.001):
     return True
 
 def interpolate_pos_to_grid_process_trial(k, data, indices,distances, grid_x_shape, idw_power):
+    """
+    Parameters
+    ----------
+    k : int
+    data : numpy.ndarray
+    indices : numpy.ndarray
+    distances : numpy.ndarray
+    grid_x_shape : tuple of int
+    idw_power : float
+
+    Returns
+    -------
+    numpy.ndarray
+    """
     grid_z = np.empty((grid_x_shape[0] * grid_x_shape[1], data.shape[-1]), dtype=data.dtype)
     for j in range(data.shape[-1]):
         z = data[k, indices, j]
@@ -784,6 +845,17 @@ def interpolate_pos_to_grid(waveData, numGridBins=10, dataBucketName = "", retur
         return grid_x, grid_y
 
 def idw_interpolation(z, distances, idw_power=2):
+    """
+    Parameters
+    ----------
+    z : numpy.ndarray
+    distances : numpy.ndarray
+    idw_power : float, default=2
+
+    Returns
+    -------
+    numpy.ndarray
+    """
     # Calculate weights using the distances and normalize them
     weights = 1.0 / distances**idw_power
     weights /= weights.sum(axis=1, keepdims=True)
@@ -796,6 +868,15 @@ def idw_interpolation(z, distances, idw_power=2):
     return interpolated_z
 
 def best_fit_sphere(coord_3d):
+    """
+    Parameters
+    ----------
+    coord_3d : numpy.ndarray
+
+    Returns
+    -------
+    tuple of numpy.ndarray and float
+    """
     A = np.hstack((2 * coord_3d, np.ones((coord_3d.shape[0], 1))))
     f = np.sum(coord_3d ** 2, axis=1)
     C, residuals, rank, singval = np.linalg.lstsq(A, f, rcond=None)
@@ -807,7 +888,34 @@ def best_fit_sphere(coord_3d):
     return center, radius
 
 def apply_mask(waveData, mask, dataBucketName, overwrite = True, maskValue = 0., storeMask = False):
-    ''' Apply a spatial mask to the data in a data bucket. Sets all values outside the mask to maskValue'''
+    """Apply a spatial mask to a WaveData data bucket.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing the input data bucket.
+    mask : numpy.ndarray
+        Boolean spatial mask.
+    dataBucketName : str
+        Name of the data bucket to mask. An empty string uses the active
+        bucket.
+    overwrite : bool, default=True
+        Whether to replace the input bucket rather than add a masked bucket.
+    maskValue : float, default=0.0
+        Value assigned outside the mask.
+    storeMask : bool, default=False
+        Whether to add the mask as a ``Mask`` data bucket.
+
+    Returns
+    -------
+    None
+        Updates ``waveData`` in place.
+
+    Notes
+    -----
+    When ``overwrite=False``, the masked data are stored in
+    ``<dataBucketName>Masked``.
+    """
     if dataBucketName == "":
         dataBucketName = waveData.ActiveDataBucket
     else:
@@ -840,22 +948,35 @@ def apply_mask(waveData, mask, dataBucketName, overwrite = True, maskValue = 0.,
     waveData.set_active_dataBucket(dataBucketName)#just to make sure that mask does not become the active dataBucket
 
 def interpolate_spherical_spline_2d(waveData, resolution=10, scalePos=1000, function='multiquadric', n_jobs=-1, dataBucketName=""):
-    '''
-    [KP] Something doesn't seem quite right about this. Fix it later.
-    Interpolate positions to a regular grid using spherical spline interpolation, and
-    return data on a 2D grid. 
-    Parameters 
+    """Interpolate sensor data onto a spherical-coordinate grid.
+
+    Parameters
     ----------
-    waveData : WaveData object
-    scalePos : float
-        scaling factor to convert from whatever unit pos has to mm (default assumes pos is in meters)
-    resolution : int
-        the resolution of the grid in mm
-    function : str
-        the radial basis function, multiquadric by default
-    n_jobs : int
-        the number of jobs to run in parallel. -1 means using all processors.
-    '''
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object with three-dimensional channel positions.
+    resolution : int, default=10
+        Angular grid resolution in degrees.
+    scalePos : float, default=1000
+        Scaling factor applied to channel positions before interpolation.
+    function : str, default="multiquadric"
+        Radial basis function passed to :class:`scipy.interpolate.Rbf`.
+    n_jobs : int, default=-1
+        Number of parallel interpolation workers. ``-1`` uses all available
+        processors.
+    dataBucketName : str, default=""
+        Name of the input data bucket. An empty string uses the active bucket.
+
+    Returns
+    -------
+    None
+        Adds interpolated data to ``waveData`` as the
+        ``InterpolatedDataSphere`` bucket.
+
+    Notes
+    -----
+    The interpolation uses a best-fit sphere and radial basis functions over
+    the resulting Cartesian grid.
+    """
     if dataBucketName == "":
         dataBucketName = waveData.ActiveDataBucket
     else:
@@ -892,10 +1013,34 @@ def interpolate_spherical_spline_2d(waveData, resolution=10, scalePos=1000, func
     waveData.add_data_bucket(InterpolatedData)
 
 def interpolate_time_point(pos_3d, data_point, function, grid_x, grid_y, grid_z):
+    """
+    Parameters
+    ----------
+    pos_3d : numpy.ndarray
+    data_point : numpy.ndarray
+    function : str
+    grid_x : numpy.ndarray
+    grid_y : numpy.ndarray
+    grid_z : numpy.ndarray
+
+    Returns
+    -------
+    numpy.ndarray
+    """
     rbf = Rbf(pos_3d[:,0], pos_3d[:,1], pos_3d[:,2], data_point, function=function)
     return rbf(grid_x, grid_y, grid_z)
 
 def fake_grid(waveData, surface):
+    """
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+    surface : vtk.vtkPolyData
+
+    Returns
+    -------
+    list of numpy.ndarray
+    """
     import vtk
     import numpy as np
 
@@ -938,22 +1083,40 @@ def fake_grid(waveData, surface):
 #some helper functions 
    
 def cart2sph(x, y, z):
-    '''
-    Convert Cartesian coordinates to spherical coordinates.
-    Assumes that x, y, z are all arrays of the same length.
-    Returns three arrays: azimuthal angle, polar angle, and radius.
-    '''
+    """Convert Cartesian coordinates to spherical coordinates.
+
+    Parameters
+    ----------
+    x, y, z : numpy.ndarray
+        Cartesian coordinate components with matching shapes. x, y, z are all arrays of the same length
+
+    Returns
+    -------
+    azimuth : numpy.ndarray
+        Azimuthal angles in radians.
+    radius : numpy.ndarray
+        Distances from the origin.
+    polar : numpy.ndarray
+        Polar angles in radians.
+    """
     azimuth = np.arctan2(y, x)
     radius = np.sqrt(x**2 + y**2 + z**2)
     polar = np.arccos(z / radius)
     return azimuth, polar, radius
 
 def sph2cart(azimuth, polar, radius):
-    '''
-    Convert spherical coordinates to Cartesian coordinates.
-    Assumes that azimuth, polar, radius are all arrays of the same length.
-    Returns three arrays: x, y, z.
-    '''
+    """Convert spherical coordinates to Cartesian coordinates.
+
+    Parameters
+    ----------
+    azimuth, polar, radius : numpy.ndarray
+        Spherical coordinate components with matching shapes. x, y, z are all arrays of the same length
+
+    Returns
+    -------
+    x, y, z : numpy.ndarray
+        Cartesian coordinate components.
+    """
     x = radius * np.sin(polar) * np.cos(azimuth)
     y = radius * np.sin(polar) * np.sin(azimuth)
     z = radius * np.cos(polar)

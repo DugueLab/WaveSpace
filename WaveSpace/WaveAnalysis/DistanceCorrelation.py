@@ -66,6 +66,15 @@ def calculate_distance_correlation(waveData, dataBucketName = "", sourcePoints =
     waveData.add_data_bucket(phaseCorrBucket)
 
 def phase_dist_corr_task(args):
+    """
+    Parameters
+    ----------
+    args : tuple
+
+    Returns
+    -------
+    pandas.DataFrame
+    """
     data, ii, sourcePoints, pixelSpacing, = args
     nTimePoints = data.shape[-1]
     df = DataFrame(columns=['trialInd', 'sourcePointX', 'sourcePointY', 'evaluationPoint', 'rho', 'p'])
@@ -171,6 +180,15 @@ def calculate_distance_correlation_GP(waveData, dataBucketName = "", evaluationA
     
 
 def distcorr_process_trial(args):
+    """
+    Parameters
+    ----------
+    args : tuple
+
+    Returns
+    -------
+    pandas.DataFrame
+    """
     ii, complexData, evaluationAngle, tolerance, X, Y, pixelspacing = args
     complexDataCube = complexData[ii, :, :, :]
     ep = find_evaluation_points(complexDataCube, evaluationAngle, tolerance)
@@ -186,15 +204,27 @@ def distcorr_process_trial(args):
     return df
 
 def phase_dist_corr(ph, source, pixelSpacing):
-    """correlation of phase with distance
-    (circular-linear), given an input phase map
-    INPUT
-    ph - phase map (r,c)
-    source - source point (sc)
-    pixelSpacing - pixel spacing (sc)
-    OUTPUT
-    cc - circular-linear correlation coefficient, phase correlation w/ distance
-    pv - p-value of the correlation (H0: rho == 0, H1: rho != 0)"""
+    """Calculate circular-linear correlation between phase and source distance.
+
+    Parameters
+    ----------
+    ph : numpy.ndarray
+        Two-dimensional phase map in radians.
+    source : tuple of int
+        Row and column indices of the source location.
+    pixelSpacing : float
+        Distance between adjacent spatial samples.
+
+    Returns
+    -------
+    numpy.ndarray
+        Correlation coefficient and two-sided p-value.
+
+    Notes
+    -----
+    Distances are calculated from ``source`` to every spatial position and
+    flattened before calculating the circular-linear correlation.
+    """
     
     nRows, nColumns = ph.shape
     X = np.meshgrid(np.arange(0,nColumns)-source[1], np.arange(0,nRows)-source[0], indexing='xy')
@@ -209,6 +239,20 @@ def phase_dist_corr(ph, source, pixelSpacing):
     return cc
 
 def phase_gradient_complex_multiplication(complexData, pixel_spacing=1,ifSign=1):
+    """
+    Parameters
+    ----------
+    complexData : numpy.ndarray
+    pixel_spacing : float, default=1
+    ifSign : int, default=1
+
+    Returns
+    -------
+    pm : numpy.ndarray
+    pd : numpy.ndarray
+    dx : numpy.ndarray
+    dy : numpy.ndarray
+    """
     nXpos, nYpos, nTime = complexData.shape
     dx = np.zeros((nXpos,nYpos,nTime)) 
     dy = np.zeros((nXpos,nYpos,nTime)) 
@@ -232,12 +276,27 @@ def phase_gradient_complex_multiplication(complexData, pixel_spacing=1,ifSign=1)
     return pm, pd, dx, dy
 
 def find_evaluation_points(complexData, evaluationAngle, tolerance):
-    """ep = find_evaluation_points( r, evaluation_angle, tol )**
-    estPhase = [ rows X columns X timepoints] complex double of (generalized) phase
-    evaluation_angle - angle to evaluate phase crossing [rad]
-    tol - numerical tolerance [rad]
-    OUTPUT: points at which the phase distribution over channels passes
-    a specified angle (within numerical tolerance "tol")"""   
+    """Find time points at which mean phase crosses a target angle.
+
+    Parameters
+    ----------
+    complexData : numpy.ndarray
+        Complex phase data ordered as rows, columns, and time.
+    evaluationAngle : float
+        Target phase angle in radians.
+    tolerance : float
+        Maximum angular difference from the target angle.
+
+    Returns
+    -------
+    numpy.ndarray
+        Indices of qualifying phase-crossing time points.
+
+    Notes
+    -----
+    The mean complex phase is computed across spatial positions before local
+    extrema near ``evaluationAngle`` are selected.
+    """
     nRows, nColumns, nTimepoints = complexData.shape
     r = np.reshape(complexData, (nRows*nColumns, nTimepoints))
     r = np.nansum(r, 0) / r.shape[0]
@@ -248,6 +307,18 @@ def find_evaluation_points(complexData, evaluationAngle, tolerance):
     return ep
 
 def find_source_points(data, X, Y,evaluationPoints, dx, dy ):
+    """
+    Parameters
+    ----------
+    data : numpy.ndarray
+    X, Y : numpy.ndarray
+    evaluationPoints : numpy.ndarray
+    dx, dy : numpy.ndarray
+
+    Returns
+    -------
+    numpy.ndarray
+    """
     d = np.zeros((data.shape[0], data.shape[1], len(evaluationPoints)))
     d[:,:,:] = np.nan
     for ii, evaluationPoint in enumerate(evaluationPoints):
@@ -264,6 +335,16 @@ def find_source_points(data, X, Y,evaluationPoints, dx, dy ):
     return source
 
 def shortsmooth(y, s=None):
+    """
+    Parameters
+    ----------
+    y : numpy.ndarray
+    s : float or None, default=None
+
+    Returns
+    -------
+    numpy.ndarray
+    """
   sizy = y.shape
   W = np.isfinite(y).astype(float)
   isweighted = not np.all(W == 1)
@@ -303,6 +384,17 @@ def shortsmooth(y, s=None):
   return z
 
 def RobustWeights(r,I,h):
+    """
+    Parameters
+    ----------
+    r : numpy.ndarray
+    I : numpy.ndarray
+    h : float
+
+    Returns
+    -------
+    numpy.ndarray
+    """
     MAD = np.median(np.abs(r[I]-np.median(r[I]))) # median absolute deviation
     u = np.abs(r/(1.4826*MAD)/np.sqrt(1-h)) # studentized residuals
     c = 4.685 
@@ -310,6 +402,16 @@ def RobustWeights(r,I,h):
     return np.nan_to_num(W)
 
 def dctND(data, f=dct):
+    """
+    Parameters
+    ----------
+    data : numpy.ndarray
+    f : callable, default=scipy.fftpack.realtransforms.dct
+
+    Returns
+    -------
+    numpy.ndarray
+    """
   for axis in range(data.ndim):
     data = f(data, norm='ortho', type=2, axis=axis)
   return data

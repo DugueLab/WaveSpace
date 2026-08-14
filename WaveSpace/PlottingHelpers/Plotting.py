@@ -10,7 +10,12 @@ import pyvista as pv
 from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 
 def init():
-     plt.style.use("settings.mplstyle")
+    """
+    Returns
+    -------
+    None
+    """
+    plt.style.use("settings.mplstyle")
 
 def getProbeColor(index, totalProbes, cmap = plt.cm.ocean):
     """Return a colormap color for a selected probe.
@@ -269,26 +274,36 @@ def plot_interpolated_data(waveData, original_data_bucket, interpolated_data_buc
     return fig
 
 def plot_timeseries_on_surface(Surface, waveData, dataBucketName = " ", indices = (0, 0, None, slice(None), slice(None)), chan_to_highlight = 0 , timepoint =0, plottype = "power"):
-    '''Plot topo time series on a surface
-    + actual timeseries of a selected channel
-    Defaults to plotting power. Set type to "real" to plot real part of the data, "phase" to plot angle
+    """Plot surface data over time with one channel time series.
+
     Parameters
     ----------
-    Surface : list
-        list containing vertices and faces of the surface
-    waveData : WaveData object
-    dataBucketName : str
-        name of the data bucket to plot
+    Surface : list of numpy.ndarray
+        Surface vertices and triangular faces.
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing sensor data and channel positions.
+    dataBucketName : str, default=" "
+        Name of the data bucket to plot. A single space selects the active
+        bucket.
     indices : tuple
-        data indeces. IAll exlicit indeces are used as such, None is averaged over and slice(None) stays as is
-        example: (0, 0, None, slice(None), slice(None)) will plot mean(data[1,3,:,:,:], axis = 2). the remaining dimensions need to be channels x time
-    chan_to_highlight : int
-        channel to plot timeseries of
-    timepoint : int
-        timepoint to plot topo of
-    plottype : str
-        "power" (default), "real" or "phase"
-    '''
+        Explicit integer indices select dimensions, ``None`` averages a
+        dimension, and ``slice(None)`` retains it.
+    chan_to_highlight : int, default=0
+        Channel whose time series is plotted and highlighted on the surface.
+    timepoint : int, default=0
+        Retained for compatibility; slider steps determine the displayed time.
+    plottype : {"power", "real", "phase"}, default="power"
+        Transformation applied before plotting.
+
+    Returns
+    -------
+    plotly.graph_objects.Figure
+        Interactive figure with a time slider and selected-channel trace.
+
+    Notes
+    -----
+    After indexing and averaging, data must reduce to channel by time.
+    """
 
     if dataBucketName == " ":
         dataBucketName = waveData.ActiveDataBucket
@@ -449,11 +464,25 @@ def plot_timeseries_on_surface(Surface, waveData, dataBucketName = " ", indices 
     return fig
 #
 def animate_grid_data(gridData,DataBucketName = "", dataInd = None, probepositions=[(0,0)], plottype = "real"):
-    """Plots gridData over time. 
-        gridData: waveData object.  
-        dataInd: Needs to point to a single trial with shape posx_posy_time, it is either a single int or a tuple. Time ranges can be indicated as
-        eg. (0, 0, slice(None), slice(None), [491, 492, 493, 494, 495, 496, 497, 498, 499, ...]) to index some point
+    """Animate gridded data with time series at selected probe positions.
 
+    Parameters
+    ----------
+    gridData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing a spatial grid over time.
+    DataBucketName : str, default=""
+        Name of the input data bucket. An empty string uses the active bucket.
+    dataInd : int or tuple or None, default=None
+        Indices selecting one three-dimensional ``posx_posy_time`` array.
+    probepositions : sequence of tuple of int, default=[(0, 0)]
+        Spatial probe positions shown on the grid and in the time-series plot.
+    plottype : {"real", "power", "angle", "isPhase"}, default="real"
+        Transformation applied to the input data before animation.
+
+    Returns
+    -------
+    matplotlib.animation.FuncAnimation
+        Animation of grid values and probe time series.
     """
     if DataBucketName == "":
         DataBucketName = gridData.ActiveDataBucket
@@ -546,6 +575,25 @@ def animate_grid_data(gridData,DataBucketName = "", dataInd = None, probepositio
     return ani
 
 def AnimateFullStatus(frameNR, fullstatus,timevec, img, ax1, probepositions, lineseriesdata, currentPlot, linedistance, probecolors, ylim):
+    """
+    Parameters
+    ----------
+    frameNR : int
+    fullstatus : numpy.ndarray
+    timevec : array-like
+    img : matplotlib.image.AxesImage
+    ax1 : matplotlib.axes.Axes
+    probepositions : sequence of tuple of int
+    lineseriesdata : numpy.ndarray
+    currentPlot : matplotlib.axes.Axes
+    linedistance : float
+    probecolors : sequence
+    ylim : array-like
+
+    Returns
+    -------
+    None
+    """
     # plt.figure(figsize=(10,10))
     img.set_data(fullstatus[ :, :, frameNR])
     #update time stamp in title
@@ -573,15 +621,27 @@ def AnimateFullStatus(frameNR, fullstatus,timevec, img, ax1, probepositions, lin
     #currentPlot.get_lines()[3].set_color("red")
 
 def plot_geodesic_distance_on_surface(vertices, faces, sensor_positions, path, chanInds, distance):
-    """
-    Plot the geodesic distance along the surface, highlighting the path and start/end points.
-    
-    vertices: The vertices of the surface.
-    faces: The faces of the surface (triangular mesh).
-    sensor_positions: Positions of the sensors.
-    path: 3D coordinates of the points forming the geodesic path. Get from geoalg.geodesicDistance (from oygeodesic package)
-    chanInds: Tuple of indices indicating the start and end points of the geodesic distance.
-    distance: The geodesic distance value.
+    """Plot a geodesic path and its endpoints on a triangular surface.
+
+    Parameters
+    ----------
+    vertices : numpy.ndarray
+        Three-dimensional surface vertices.
+    faces : numpy.ndarray
+        Triangular face indices.
+    sensor_positions : numpy.ndarray
+        Sensor positions. Retained for compatibility and not used directly.
+    path : numpy.ndarray
+        Three-dimensional coordinates along the geodesic path.
+    chanInds : tuple of int
+        Indices of the path start and end vertices.
+    distance : float
+        Geodesic distance displayed in the figure title.
+
+    Returns
+    -------
+    None
+        Displays an interactive Plotly figure.
     """
     # Create the 3D surface
     surface = go.Mesh3d(
@@ -652,11 +712,28 @@ def plot_geodesic_distance_on_surface(vertices, faces, sensor_positions, path, c
     fig.show()
 
 def plot_topomap(waveData, dataBucketName=None, dataInds=None,timeInds= None, trlInd = None, type = None):
-    """Plots a topomap of the data
-    Args:
-        waveData: WaveData object
-        dataBucketName: name of the data bucket to plot
-        dataInds: tuple with indices of data to plot e.g.:(freqbin,trial, None, None). data after indexing needs to be posx_posy
+    """Interpolate channel values onto a two-dimensional topographic map.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object with channel data and two-dimensional coordinates.
+    dataBucketName : str or None, default=None
+        Name of the input data bucket. None uses the active bucket.
+    dataInds : tuple or None, default=None
+        Indices selecting data that reduce to trial, channel, and time.
+    timeInds : tuple of int, int, or None, default=None
+        Time interval to average, a single time index, or None to average all
+        time points.
+    trlInd : int or None, default=None
+        Trial index to plot. None averages across trials.
+    type : {"angle", "power", None}, default=None
+        Transformation applied before interpolation.
+
+    Returns
+    -------
+    None
+        Displays a Matplotlib topographic map.
     """
     if dataBucketName is None:
         dataBucketName = waveData.ActiveDataBucket
@@ -787,14 +864,31 @@ def plot_optical_flow(waveData, PlottingDataBucketName = None, UVBucketName = No
     return ani
 
 def plot_optical_flow_polar_scatter(waveData, UVBucketName=None, directionalStabilityBucket=None, dataInds=None, windowSize=100):
-    '''Plots a polar scatter plot of the UV data to show direction consistency.
-    Args:
-        waveData: WaveData object
-        dataBucketName: name of the data bucket to plot. No default. Needs to be set to the data used to calculate the optical flow
-        directionalStabilityBucket: name of the data bucket with the directional stability data. No default. Run OpticalFlow.calculate_directional_stability first
-        dataInds: tuple with indices of data to plot e.g.:(freqbin,trial). Dimensions after indexing should be posx_posy_time
-        windowSize: int, number of timepoints to average over for directional stability. 
-    '''
+    """Animate optical-flow directions and directional stability in polar form.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing optical-flow and directional-stability data.
+    UVBucketName : str or None, default=None
+        Name of the complex optical-flow bucket.
+    directionalStabilityBucket : str or None, default=None
+        Name of the moving-window directional-stability bucket.
+    dataInds : tuple or None, default=None
+        Indices selecting one ``posx_posy_time`` data array.
+    windowSize : int, default=100
+        Number of time points displayed in each polar-scatter window.
+
+    Returns
+    -------
+    matplotlib.animation.FuncAnimation
+        Polar-scatter animation with directional-stability vectors.
+
+    Raises
+    ------
+    ValueError
+        If either required bucket name or ``dataInds`` is not supplied.
+    """
    
     if UVBucketName is None:
         raise ValueError('Please specify a data bucket with UV information to plot')
@@ -873,6 +967,16 @@ def plot_optical_flow_polar_scatter(waveData, UVBucketName=None, directionalStab
     return ani
 
 def plot_streamlines(UV, seedpoints):
+    """
+    Parameters
+    ----------
+    UV : numpy.ndarray
+    seedpoints : numpy.ndarray
+
+    Returns
+    -------
+    pyvista.Plotter
+    """
     #uv = np.dstack((np.zeros((UV.shape[0], UV.shape[1])), UV))
     nx = UV.shape[0]
     ny = UV.shape[1]
@@ -919,11 +1023,21 @@ def plot_streamlines(UV, seedpoints):
     return p
 
 def plot_polar_histogram(waveData, DataBucketName, dataInds=None):
-    """Plots a polar histogram of the directional stability data
-    Args:
-        waveData: WaveData object
-        DataBucketName: name of the data bucket to plot from. Should be the result of OpticalFlow.calculate_directional_stability
-        dataInds: tuple with indices of data to plot e.g.:(freqbin,trial). Dimensions after indexing should be posx_posy_time
+    """Plot a magnitude-weighted polar histogram of directional stability.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing complex directional-stability vectors.
+    DataBucketName : str
+        Name of the directional-stability data bucket.
+    dataInds : tuple or None, default=None
+        Indices selecting vectors to include in the histogram.
+
+    Returns
+    -------
+    matplotlib.figure.Figure
+        Polar histogram with vector magnitudes used as weights.
     """
     waveData.set_active_dataBucket(DataBucketName)
     # Ensure consistency

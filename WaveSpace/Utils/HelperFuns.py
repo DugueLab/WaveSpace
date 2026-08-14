@@ -11,9 +11,28 @@ import matplotlib.pyplot as plt
 import scipy.stats as stats
 
 def circular_distance_between_angles(angle1, angle2):
+    """
+    Parameters
+    ----------
+    angle1, angle2 : numpy.ndarray or float
+
+    Returns
+    -------
+    numpy.ndarray or float
+    """
     return np.pi -np.abs(np.pi - np.abs(angle1 - angle2))
 
 def circular_linear_correlation(alpha, x):
+    """
+    Parameters
+    ----------
+    alpha, x : numpy.ndarray
+
+    Returns
+    -------
+    rho : float
+    pval : float
+    """
     n = np.size(alpha)
     rxs = np.corrcoef(x, np.sin(alpha))[0,1]
     rxc = np.corrcoef(x, np.cos(alpha))[0,1]
@@ -22,27 +41,54 @@ def circular_linear_correlation(alpha, x):
     pval = 1-stats.chi2.cdf(n*rho**2,2)
     return rho, pval
 
-# Mean 2 like in Matlab
+
 def mean2(x):
+    """
+    Mean 2 like in Matlab
+
+    Parameters
+    ----------
+    x : numpy.ndarray
+
+    Returns
+    -------
+    float
+    """
     return np.sum(x) / np.size(x)
 
 def divergence(U, V):
-    """ compute the divergence of n-D vector field `F` """
+    """Compute divergence of a two-dimensional vector field.
+
+    Parameters
+    ----------
+    U, V : numpy.ndarray
+        Horizontal and vertical vector-field components.
+
+    Returns
+    -------
+    numpy.ndarray
+        Divergence at each spatial position.
+    """
     dud, px = np.gradient(U)
     qy, dud = np.gradient(V)
     return px+qy
 
 def add_noise_channels(data, proportion=1.0, No_noise_channels=10):
-    """
-    Add noise channels to the data with a variance set to a proportion of the input data's variance.
-    
-    Parameters:
-    - data: numpy array with shape [trials, channels, time]
-    - proportion: float indicating the proportion of the input data's variance to be used for noise variance
-    - No_noise_channels: int indicating the number of noise channels to add
-    
-    Returns:
-    - data_out: numpy array with added noise channels with shape [trials, channels + No_noise_channels, time]
+    """Add noise channels to the data with a variance set to a proportion of the input data's variance.
+
+    Parameters
+    ----------
+    data : numpy.ndarray
+        Data ordered as trials, channels, and time.
+    proportion : float, default=1.0
+        Multiplier applied to the mean within-trial channel variance.
+    No_noise_channels : int, default=10
+        Number of noise channels appended to each trial.
+
+    Returns
+    -------
+    numpy.ndarray
+        Input data with appended noise channels.
     """
 
     # Get data dimensions
@@ -65,14 +111,22 @@ def add_noise_channels(data, proportion=1.0, No_noise_channels=10):
     return data_out
 
 def find_nearest(array, value):
-    """_position and value of element in array closest to value_
-    Args:
-        array
-        value 
-    Returns:
-        ind (int)
-        value(value of array at position ind)
-    """   
+    """position and value of element in array closest to value.
+
+    Parameters
+    ----------
+    array : array-like
+        Values to search.
+    value : float
+        Target value.
+
+    Returns
+    -------
+    ind : int
+        Index of the closest value.
+    nearest_value : float
+        Array value at ``ind``.
+    """
     if not isinstance(array, np.ndarray):
         array = np.asarray(array)
     ind = np.nanargmin(np.abs(array - value))
@@ -81,10 +135,21 @@ def find_nearest(array, value):
 def find_max_signal(data, dimension, averageDimension=None):
     """Return index of signal with highest amplitude, averaged over averageDimension
 
-    Args:
-        data (Array): Input data
-        dimension (Int): which dimension to find maximum in
-        averageDimension (Int): which dimension to average over
+    Parameters
+    ----------
+    data : numpy.ndarray
+        Input data.
+    dimension : int
+        Axis along which to locate the maximum.
+    averageDimension : int or None, default=None
+        Axis averaged before finding the maximum.
+
+    Returns
+    -------
+    ind : numpy.ndarray or int
+        Index or indices of the maximum signal.
+    value : float
+        Mean value at the selected index or indices.
     """
     # Average over dimension
     avg = np.nanmean(data, axis=averageDimension)
@@ -93,15 +158,44 @@ def find_max_signal(data, dimension, averageDimension=None):
     return ind, np.nanmean(avg[ind])
 
 def scale(x, out_range=(-1, 1), axis=None):
+    """
+    Parameters
+    ----------
+    x : numpy.ndarray
+    out_range : tuple of float, default=(-1, 1)
+    axis : int or None, default=None
+
+    Returns
+    -------
+    numpy.ndarray
+    """
     # Scale any input to be between out_range[0] and out_range[1]; defaults to range (-1 1)
     domain = np.min(x, axis), np.max(x, axis)
     y = (x - (domain[1] + domain[0]) / 2) / (domain[1] - domain[0])
     return y * (out_range[1] - out_range[0]) + (out_range[1] + out_range[0]) / 2
 
 def square_rooted(x):
+    """
+    Parameters
+    ----------
+    x : array-like
+
+    Returns
+    -------
+    float
+    """
     return round(sqrt(sum([a * a for a in x])), 3)
 
 def cartesian_product_trials(**arrays):
+    """
+    Parameters
+    ----------
+    **arrays : array-like
+
+    Returns
+    -------
+    dict of numpy.ndarray
+    """
     out_dict = {}
     for key, value in arrays.items():
         if isinstance(value, (int, float)):  # check if value is a single number
@@ -121,11 +215,30 @@ def cartesian_product_trials(**arrays):
     return out_dict
 
 def cosine_similarity(x, y):
+    """
+    Parameters
+    ----------
+    x, y : array-like
+
+    Returns
+    -------
+    float
+    """
     numerator = sum(a * b for a, b in zip(x, y))
     denominator = square_rooted(x) * square_rooted(y)
     return round(numerator / float(denominator), 3)
 
 def posxy_to_chan(data):
+    """
+    Parameters
+    ----------
+    data : numpy.ndarray
+
+    Returns
+    -------
+    data : numpy.ndarray
+    shape : tuple of int
+    """
     shape = data.shape
     chanDim = shape[-3] * shape[-2]
     newShape = (*shape[0:-3], chanDim, shape[-1])
@@ -133,7 +246,27 @@ def posxy_to_chan(data):
     return data, shape
 
 def force_dimord(data,  currentDimord, desiredDimord):
-    """Force data into specific dimord. Not meant to be called directly by user"""
+    """Reshape data to satisfy a requested dimension order.
+
+    Parameters
+    ----------
+    data : numpy.ndarray
+        Input data array.
+    currentDimord, desiredDimord : str
+        Current and requested underscore-separated dimension orders.
+
+    Returns
+    -------
+    hasBeenReshaped : bool
+        Whether the data shape was changed.
+    data : numpy.ndarray
+        Data reshaped to match ``desiredDimord`` where possible.
+
+    Notes
+    -----
+    Two spatial dimensions can be flattened into a channel dimension. This is
+    an internal bookkeeping helper.
+    """
     if (currentDimord == desiredDimord):
         return False, data
     
@@ -184,14 +317,26 @@ def force_dimord(data,  currentDimord, desiredDimord):
     return True, data
 
 def combine_grad_sensors(waveData, dataBucketName="", method='RMS'):
-    """
-    Combines the gradiometer sensors in the data to create a single sensor. 
-    CAUTION: assumes that all channels are gradiometers, with pairs listed in order.
-    Parameters:
-    waveData (WaveData): waveData object
-    dataBucketName (str, optional): name of the data bucket to use. If None, active data bucket is used. Defaults to None.
-    method (str, optional): The method to use for combining the sensors. Can be 'RMS' for root mean square or 'mean' for mean. Defaults to 'RMS'.
+    """Combine ordered pairs of gradiometer channels.
 
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing paired gradiometer channels.
+    dataBucketName : str, default=""
+        Input data bucket. An empty string uses the active bucket.
+    method : {"RMS", "mean"}, default="RMS"
+        Method used to combine each channel pair.
+
+    Returns
+    -------
+    None
+        Adds combined, x-gradient, and y-gradient data buckets to ``waveData``.
+
+    Notes
+    -----
+    Channel pairs must be consecutive, and channel-position metadata is
+    reduced to the first channel of each pair. CAUTION: assumes that all channels are gradiometers, with pairs listed in order.
     """
     if dataBucketName == "":
         dataBucketName = waveData.ActiveDataBucket
@@ -257,7 +402,17 @@ def combine_grad_sensors(waveData, dataBucketName="", method='RMS'):
 
 
 def mutual_information(hgram):
-    """ Mutual information for joint histogram
+    """Calculate mutual information from a joint histogram.
+
+    Parameters
+    ----------
+    hgram : numpy.ndarray
+        Joint histogram counts.
+
+    Returns
+    -------
+    float
+        Mutual information in natural-log units.
     """
     # Convert bins counts to probability values
     pxy = hgram / float(np.sum(hgram))
@@ -269,6 +424,22 @@ def mutual_information(hgram):
     return np.sum(pxy[nzs] * np.log(pxy[nzs] / px_py[nzs]))
 
 def order_to_grid(data,shape,dimord):
+    """
+    Reorder array to order and reshape to shape
+    Parameters
+    ----------
+    data : WaveSpace.Utils.WaveData.WaveData
+        WaveData object
+    shape : tuple of int
+        Shape of desired grid 
+    dimord : str
+        Underscore seperated dimension order like ``trl_posx_posy_time``.
+    Returns
+    -------
+    None
+        Changes active databucket shape in place for 
+
+    """
     #Reorder array to order and reshape to shape
     dimord = dimord.split('_')
     for ind, dimension in enumerate(dimord):
@@ -283,6 +454,16 @@ def order_to_grid(data,shape,dimord):
     data.log_history(["order_to_grid", "order", "Square"])
 
 def assure_consistency(waveData, dataBucketName = None):
+    """
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+    dataBucketName : str or None, default=None
+
+    Returns
+    -------
+    None
+    """
     if dataBucketName == None:
         dataBucketName = waveData.ActiveDataBucket
     dimord = waveData.DataBuckets[dataBucketName].get_dimord()
@@ -305,6 +486,16 @@ def assure_consistency(waveData, dataBucketName = None):
     assert dimord[-13:] == "trl_chan_time" or dimord[-18:] == "trl_posx_posy_time", "dimord does not contain trl_chan_time or trl_posx_posy_time in the appropriate positions"
 
 def convert_units(dataBucket, new_unit):
+    """
+    Parameters
+    ----------
+    dataBucket : WaveSpace.Utils.WaveData.DataBucket
+    new_unit : str
+
+    Returns
+    -------
+    None
+    """
     ureg = UnitRegistry()
     # Check if the new unit is valid and the conversion is possible
     try:
@@ -319,6 +510,16 @@ def convert_units(dataBucket, new_unit):
     dataBucket._unit = new_unit
 
 def plot_chanpos(waveData, show_names = True):
+    """
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+    show_names : bool, default=True
+
+    Returns
+    -------
+    None
+    """
     chanpos = waveData.get_channel_positions()
     chan_names = waveData.get_channel_names()
     fig = go.Figure(data=[go.Scatter3d(
@@ -346,11 +547,22 @@ def plot_chanpos(waveData, show_names = True):
     fig.show()
          
 def squareSpatialPositions(waveData):
-    """
-        Reshapes active dataBucket into a Square.
-        "chan" position of dimord will be transformed into "posx_posy"
-        Reshaped row and columnsize to square root of length of "Chan"
-        Only use when you are sure this is appropriate 
+    """Reshape active databucket into two spatial dimensions.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object whose active bucket has a square number of channels.
+
+    Returns
+    -------
+    None
+        Updates the active bucket's data shape and dimension order in place.
+
+    Notes
+    -----
+    The ``chan`` dimension is replaced with ``posx_posy`` using the square
+    root of the channel count for both spatial axes. Only use when you are sure this is appropriate 
     """
     dimord = waveData.DataBuckets[waveData.ActiveDataBucket].get_dimord()
     shape = waveData.get_active_data().shape
@@ -366,36 +578,60 @@ def squareSpatialPositions(waveData):
         waveData.DataBuckets[waveData.ActiveDataBucket].reshape(newShape,'_'.join(dimensions))
 
 def tic():
+    """
+    Returns
+    -------
+    float
+    """
     #Homemade version of matlab tic and toc functions
     startTime_for_tictoc = time.time()
     return startTime_for_tictoc
 
 def toc(startTime_for_tictoc):
+    """
+    Parameters
+    ----------
+    startTime_for_tictoc : float
+
+    Returns
+    -------
+    float
+    """
     toctime = time.time() - startTime_for_tictoc
     return toctime
 
 def relative_phase(waveData, ref=None, dataBucketName=""):
-    '''
-    Calculates the relative phase of complex data with respect to a reference channel or position.
-    Negative values mean lag, positive values mean lead. All values are expressed in radians.
-    Parameters:
-        data : waveData object. Data in the bucket must be complex and have dimord trl_chan_time or trl_posx_posy_time.
-        ref : tuple or int, optional
-            A tuple (posx, posy) indicating the reference position in the data, or an integer indicating the reference channel index in the data.
-            The type of ref determines whether it's treated as a position or channel index.
-            Default is None.
-        refchan_ind : int, optional
-            An integer indicating the reference channel index in the data. Only used if dimord trl_chan_time.
-            Default is None.
+    """Calculate phase relative to a reference channel, position, or time series.
 
-    Returns:
-        rel_phase : numpy.ndarray
-            The relative phase of data with respect to the reference channel or position. Has the same shape as input data.
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing complex-valued data.
+    ref : tuple of int, int, or numpy.ndarray, default=None
+        Spatial ``(posx, posy)`` reference, channel index, or reference time
+        series.
+    dataBucketName : str, default=""
+        Input data bucket. An empty string uses the active bucket.
 
-    Raises:
+    Notes
+    -----
+        Negative values mean lag, positive values mean lead. All values are expressed in radians.
+
+    Returns
+    -------
+    None
+        Adds relative phase in radians to ``waveData`` as the
+        ``relativePhase`` bucket.
+
+    Raises
+    ------
         ValueError: If neither ref_coord nor refchan_ind are provided, or if both are provided.
         ValueError: If the dimensions of the data do not match the type of reference provided (i.e., refchan_ind with 4D data or ref_coord with 3D data).
-    '''
+
+    Notes
+    -----
+        Negative values mean lag, positive values mean lead. All values are expressed in radians.
+    """
     # Ensure proper bookkeeping of data dimensions
     if dataBucketName == "":
         dataBucketName = waveData.ActiveDataBucket
@@ -456,6 +692,16 @@ def relative_phase(waveData, ref=None, dataBucketName=""):
         waveData.log_history(["Relative Phase", f"Phase_relative_to_time_series"])
 
 def unwrap_phase(Data, dataBucketName=""):
+    """
+    Parameters
+    ----------
+    Data : WaveSpace.Utils.WaveData.WaveData
+    dataBucketName : str, default=""
+
+    Returns
+    -------
+    None
+    """
     if dataBucketName == "":
         dataBucketName = Data.ActiveDataBucket
     else:
@@ -483,9 +729,23 @@ def unwrap_phase(Data, dataBucketName=""):
     Data.log_history(["UnwrappedPhase", "Phase_unwrapped from " + dataBucketName])
 
 def bin_edges_from_centers(bin_centers):
-    '''convenience function to get histogram bin edges from centers. 
-    Takes array of bin centers and returns array of bin edges.
-    Centers can be evenly spaced, or log spaced (detemined automatically from the input).)'''
+    """Derive histogram bin edges from linearly or logarithmically spaced centers.
+
+    Parameters
+    ----------
+    bin_centers : array-like
+        Ordered histogram bin centers.
+
+    Returns
+    -------
+    list of float
+        Bin edges spanning the supplied centers.
+
+    Notes
+    -----
+    Linear spacing uses arithmetic midpoints; nonuniform spacing uses
+    geometric midpoints.
+    """
     # Check if the centers are evenly spaced
     evenly_spaced = np.allclose(np.diff(bin_centers), bin_centers[1] - bin_centers[0])
     bin_edges = []
@@ -506,18 +766,22 @@ def bin_edges_from_centers(bin_centers):
     return bin_edges
 
 def normalize_data(waveData, dimension = "", dataBucketName = " "):
-    '''
-    Normalizes the magnitude of data in a waveData object. 
-    Parameters:
-        waveData : waveData object
-        dimension : str or list of strings, optional
-            The dimension along which to normalize the data. 
-            '' defaults to the last dimension (usually time).
-            use 'chan' to normalize over spatial dimensions, 
-            even if data has 'posx' 'posy' dimensions.
-        dataBucketName : str, optional
-            The name of the data bucket to normalize. Default is active DataBucket.
-    '''
+    """Normalize data magnitude over selected dimensions.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing the data to normalize.
+    dimension : str or list of str, default=""
+        Dimension name or names used for normalization.
+    dataBucketName : str, default=" "
+        Input data bucket. Defaults to the active bucket.
+
+    Returns
+    -------
+    None
+        Adds a ``<dataBucketName>_MagnitudeNormalized`` data bucket.
+    """
     chanshape = []
     if dataBucketName == " ":
         dataBucketName = waveData.ActiveDataBucket
@@ -565,18 +829,22 @@ def normalize_data(waveData, dimension = "", dataBucketName = " "):
     waveData.log_history(["Normalize magnitude", "Normalized over " + '_'.join(dimension)])
 
 def z_score_data(waveData, dimension = "", dataBucketName = " "):
-    '''
-    z scores (subtract mean, divide by standard deviation) dataBucket. 
-    Parameters:
-        waveData : waveData object
-        dimension : str or list of strings, optional
-            The dimension along which to normalize the data. 
-            '' defaults to the last dimension (usually time).
-            use 'chan' to normalize over spatial dimensions, 
-            even if data has 'posx' 'posy' dimensions.
-        dataBucketName : str, optional
-            The name of the data bucket to normalize. Default is active DataBucket.
-    '''
+    """Z-score data over selected dimensions.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing the data to standardize.
+    dimension : str or list of str, default=""
+        Dimension name or names used for standardization.
+    dataBucketName : str, default=" "
+        Input data bucket. A single space selects the active bucket.
+
+    Returns
+    -------
+    None
+        Adds a ``<dataBucketName>_zScored`` data bucket.
+    """
     chanshape = []
     if dataBucketName == " ":
         dataBucketName = waveData.ActiveDataBucket
@@ -625,18 +893,20 @@ def z_score_data(waveData, dimension = "", dataBucketName = " "):
     waveData.log_history(["z score", "z scored over " + '_'.join(dimension)])
 
 def rescale_data_in_Bucket(waveData, dimension =['posx', 'posy', 'time'], range = (0,1),dataBucketName = ""):
-    '''
-    Rescales dataBucket to a specified range. 
-    Parameters:
-        waveData : waveData object
-        dimension : list of strings, optional
-            The dimensions along which to rescale the data. 
-            Defaults to ['posx', 'posy', 'time'].
-        range : tuple, optional
-            The range to which to rescale the data. Default is (0, 1).
-        dataBucketName : str, optional
-            The name of the data bucket to rescale. Defaults to active DataBucket.
-    '''
+    """Rescale data to a target range over selected dimensions.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+    dimension : list of str, default=["posx", "posy", "time"]
+    range : tuple of float, default=(0, 1)
+    dataBucketName : str, default=""
+
+    Returns
+    -------
+    None
+        Adds a ``<dataBucketName>_rescaled`` data bucket.
+    """
     if dataBucketName == " ":
         dataBucketName = waveData.ActiveDataBucket
     waveData.set_active_dataBucket(dataBucketName)
@@ -677,17 +947,20 @@ def rescale_data_in_Bucket(waveData, dimension =['posx', 'posy', 'time'], range 
     waveData.log_history(["rescale", "rescaled over " + '_'.join(dimension)])
 
 def average_over_trials(waveData, trialInfo=None, dataBucketName=" ", type = None):
-    '''
-    Averages data in a waveData object over trials.
-    Parameters:
-        waveData : waveData object
-        trialInfo : list of strings, optional
-            The trial information to use for averaging (use to make e.g., condition specific averages). 
-            Defaults to None, which averages over all trials.
-        dataBucketName : str, optional
-            The name of the data bucket to average. Default is active DataBucket.
-        type : str, optional. If 'power', the data will be averaged over trials after taking the absolute value of the data.
-    '''
+    """Average data across all trials or trial-information groups.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+    trialInfo : sequence or None, default=None
+    dataBucketName : str, default=" "
+    type : {"power", None}, default=None
+
+    Returns
+    -------
+    None
+        Adds one or more average data buckets to ``waveData``.
+    """
     if dataBucketName == " ":
         dataBucketName = waveData.ActiveDataBucket
     waveData.set_active_dataBucket(dataBucketName)
@@ -733,18 +1006,25 @@ def average_over_trials(waveData, trialInfo=None, dataBucketName=" ", type = Non
             waveData.log_history(["Average", "Averaged over trial: " + trial])
 
 def generate_complex_timeseries(desired_frequency, signal_duration, sampling_frequency, pre_oscillation_time, post_oscillation_time=0):
-    """
-    Generate a complex-valued time series.
+    """Generate a complex-valued time series consisting of noise,   oscillation, and zero-valued complex signal segments.
 
-    Args:
-        desired_frequency (float): The desired oscillation frequency in Hz.
-        signal_duration (float): The total duration of the signal in seconds.
-        sampling_frequency (int): The sampling rate in Hz.
-        pre_oscillation_time (float): The duration of random noise before oscillation starts in seconds.
-        post_oscillation_time (float, optional): The duration of signal after oscillation ends (default is 0 seconds).
+    Parameters
+    ----------
+    desired_frequency : float
+        Oscillation frequency in Hz.
+    signal_duration : float
+        Oscillation duration in seconds.
+    sampling_frequency : float
+        Sampling frequency in Hz.
+    pre_oscillation_time : float
+        Duration of leading complex noise in seconds.
+    post_oscillation_time : float, default=0
+        Duration of trailing zero-valued samples in seconds.
 
-    Returns:
-        np.ndarray: The generated complex-valued time series.
+    Returns
+    -------
+    numpy.ndarray
+        Complex time series formed by concatenating the three segments.
     """
     t_pre = np.linspace(0, pre_oscillation_time, int(pre_oscillation_time * sampling_frequency), endpoint=False)
     t_oscillation = np.linspace(0, signal_duration, int(signal_duration * sampling_frequency), endpoint=False)
@@ -762,6 +1042,15 @@ def generate_complex_timeseries(desired_frequency, signal_duration, sampling_fre
     return complex_timeseries
         
 def get_freqs_from_log(waveData):
+    """
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+
+    Returns
+    -------
+    list of int or None
+    """
     # Iterate over the log history
     for log_entry in waveData.get_log_history():
         # Check if the log entry corresponds to the FFT operation
@@ -787,10 +1076,26 @@ def get_freqs_from_log(waveData):
     return None
 
 def merge_wavedata_objects(waveDataList):
-    '''merge all dataBuckets from list of waveData objects into one waveData object.
-    data is concatenated along the "trl" dimension.
-    waveDataList : list of waveData objects
-    '''
+    """Merge matching data buckets from multiple WaveData objects.
+
+    Parameters
+    ----------
+    waveDataList : sequence of WaveSpace.Utils.WaveData.WaveData
+        WaveData objects with matching channel names, bucket names, and
+        dimension orders.
+
+    Returns
+    -------
+    WaveSpace.Utils.WaveData.WaveData
+        Deep copy of the first object with every bucket concatenated along its
+        ``trl`` dimension.
+
+    Raises
+    ------
+    ValueError
+        If inputs do not have matching channel names, bucket names, or
+        dimension orders.
+    """
     #check if all waveData objects have the same channel names, number (andd names) of dataBuckets and same dimord
     for waveData in waveDataList:
         if not (waveData.get_channel_names() == waveDataList[0].get_channel_names()):
@@ -832,6 +1137,15 @@ def merge_wavedata_objects(waveDataList):
     return merged_waveData
 
 def cosine_similarity_complex(a, b):
+    """
+    Parameters
+    ----------
+    a, b : numpy.ndarray
+
+    Returns
+    -------
+    float
+    """
     return np.abs(np.vdot(a, b)) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 def find_wave_motifs(waveData, dataBucketName=None, oscillationThresholdDataBucket = None, oscillationThresholdFlag = False, baselinePeriod = None, threshold = .7, nTimepointsEdge = 50, mergeThreshold =.6, minFrames = 10, pixelThreshold = .3, magnitudeThreshold = .1, dataInds = None, Mask = None):
@@ -1035,15 +1349,25 @@ def merge_motifs_across_subjects(motifs, mergeThreshold = .6, pixelThreshold = 1
     """
     Merges motifs across subjects for a specific condition and frequency based on their cosine similarity.
 
-    Parameters:
-    allmotifs (dict): A dictionary of motifs, where each key is a subject and each value is a dictionary of conditions and frequencies.
-    cond_ind (int): The condition index.
-    freqind (int): The frequency index.
-    mergeThreshold (float, optional): The threshold for the cosine similarity between motifs to consider them the same and merge them. Defaults to 0.6.
-    pixelThreshold (float, optional): The minimum proportion of pixels that must meet the threshold for a motif to be considered part of a merged motif. Defaults to 1.
+    Parameters
+    ----------
+    motifs : list of dict
+        Motifs with ``average``, ``subject``, ``trial_frames``, and
+        ``num_frames`` entries.
+    mergeThreshold : float, default=0.6
+        Minimum cosine similarity for spatial positions to support a merge.
+    pixelThreshold : float, default=1
+        Minimum proportion of spatial positions meeting ``mergeThreshold``.
 
-    Returns:
-    list: A list of merged motifs for the specified condition and frequency, where each motif is a dictionary that includes a 'subject' field with a list of the subject names the motif comes from.
+    Returns
+    -------
+    list of dict
+        Merged motifs with subject-labelled trial-frame entries.
+
+    Notes
+    -----
+    This function mutates the input motif dictionaries and removes the first
+    item from ``motifs``.
     """
     merged_motifs = []
     minPixels = motifs[0]['average'].shape[0]*motifs[0]['average'].shape[1]*pixelThreshold
@@ -1085,17 +1409,26 @@ def merge_motifs_across_subjects(motifs, mergeThreshold = .6, pixelThreshold = 1
     return merged_motifs
 
 def match_motifs_to_templates(motifs, templates=None, mergeThreshold = None, pixelThreshold = 1):
-    """
-    Matches motifs to templates based on cosine similarity.
+    """Assign motifs to spatial templates using cosine similarity.
 
-    Parameters:
-    motifs (list): A list of motifs, where each motif is a dictionary that includes an 'average' field.
-    templates (list, optional): A list of templates to match the motifs against. If None, uses the first motif as the template. Defaults to None.
-    mergeThreshold (float, optional): The threshold for the cosine similarity between motifs to consider them the same and merge them. Can be between 0 and 1 or None, which does winner takes all.
-    pixelThreshold (float, optional): The minimum proportion of pixels that must meet the threshold for a motif to be considered part of a merged motif. Defaults to 1. Not applicable if mergeThreshold is None.
+    Parameters
+    ----------
+    motifs : list of dict
+        Motifs with ``average``, ``subject``, ``trial_frames``, and
+        ``num_frames`` entries.
+    templates : list of dict or numpy.ndarray or None, default=None
+        Existing templates or template arrays. When None, the first motif
+        average initializes one template.
+    mergeThreshold : float or None, default=None
+        Similarity criterion. None assigns every motif to its most similar
+        template; a number requires enough matching pixels.
+    pixelThreshold : float, default=1
+        Minimum proportion of matching pixels when ``mergeThreshold`` is set.
 
-    Returns:
-    list: A list of matched motifs.
+    Returns
+    -------
+    list of dict
+        Templates updated with assigned motif trial frames and frame counts.
     """
     minPixels = motifs[0]['average'].shape[0] * motifs[0]['average'].shape[1] * pixelThreshold
     epsilon = 1e-18
@@ -1139,17 +1472,25 @@ def match_motifs_to_templates(motifs, templates=None, mergeThreshold = None, pix
 
 
 def nan_gradient(data, dx, dy, dz):
-    """
-    Compute the gradient of a 3D volume of phases, accounting for cyclic behavior.
+    """Calculate centered phase gradients while preserving NaN boundaries.
 
-    :param data: the 3D volume to be derived (3D np.ndarray), with phases in radians.
-    :param dx: the spacing in the x direction (axis 0)
-    :param dy: the spacing in the y direction (axis 1)
-    :param dz: the spacing in the z direction (axis 2)
+    Parameters
+    ----------
+    data : numpy.ndarray
+        Three-dimensional phase array in radians.
+    dx, dy, dz : float
+        Sample spacing along the first, second, and third axes.
 
-    :return: a tuple, the three gradients (in each direction) with the
-    same shape as the input data
-    credit: https://stackoverflow.com/questions/71585733/
+    Returns
+    -------
+    grad_x, grad_y, grad_z : numpy.ndarray
+        Centered phase gradients with the same shape as ``data``. Boundary
+        values are padded with NaNs.
+
+    Notes
+    -----
+    Wrapped phase differences are calculated through complex unit vectors
+    before centered averaging.
     """
     # Compute differences along each axis and unwrap the phase differences
     diff_x = np.angle(np.exp(1j * (data[1:, ...] - data[:-1, ...]))) / dx

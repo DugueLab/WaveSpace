@@ -5,6 +5,16 @@ import numpy as np
 
 
 def perform_cluster_gradient(waveData, dataBucket="FrequencyCluster"):
+    """
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+    dataBucket : str, default="FrequencyCluster"
+
+    Returns
+    -------
+    None
+    """
     waveData.set_active_data_bucket(dataBucket)
     hf.assure_consistency(waveData)
     ClusterContacts = waveData.get_data(dataBucket)
@@ -26,6 +36,19 @@ def perform_cluster_gradient(waveData, dataBucket="FrequencyCluster"):
     waveData.add_data_bucket(angle_bucket)
 
 def getClusterGradient(ClusterPhase, chanpos2D):
+    """
+    Parameters
+    ----------
+    ClusterPhase : numpy.ndarray
+    chanpos2D : numpy.ndarray
+
+    Returns
+    -------
+    local_angle : numpy.ndarray
+    local_sf : numpy.ndarray
+    local_corr : numpy.ndarray
+    local_offset : numpy.ndarray
+    """
  #complexData contains data per trial and frequency cluster (i.e., each [trl][Freqcluster] has dimord [channel,time])
  #chanpos is the 2D or 3D positions of all channels within the current cluster 
     #get the maximum distance between neighboring contacts:
@@ -50,11 +73,36 @@ def getClusterGradient(ClusterPhase, chanpos2D):
     return local_angle, local_sf, local_corr, local_offset
 
 def circ_lin_regress(phases, coords, theta_r, params):
+    """Fit a two-dimensional circular-linear phase model.
+
+    Parameters
+    ----------
+    phases : numpy.ndarray
+        Phase observations arranged by channel and time.
+    coords : numpy.ndarray
+        Two-dimensional channel coordinates.
+    theta_r : numpy.ndarray
+        Candidate angle and spatial-frequency pairs.
+    params : numpy.ndarray
+        Candidate spatial-frequency vectors.
+
+    Returns
+    -------
+    wave_ang : numpy.ndarray
+        Estimated wave angles.
+    wave_freq : numpy.ndarray
+        Estimated spatial frequencies.
+    r2_adj : numpy.ndarray
+        Squared circular correlation coefficients.
+    offs : numpy.ndarray
+        Estimated phase offsets.
+
+    Notes
+    -----
+    The fit selects the candidate parameter pair with the minimum negative
+    resultant-vector length at each time point.
+    """
     import pycircstat
-    """
-    Performs 2D circular linear regression.
-    This is from https://github.com/john-myers-github/INSULA_RS, and was originally ported from Honghui's matlab code.
-    """
 
     n = phases.shape[1]
     pos_x = np.expand_dims(coords[:, 0], 1)

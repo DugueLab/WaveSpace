@@ -83,6 +83,18 @@ def find_wave_activity(waveData, dataBucketName=None, dataInd = None, nBases=3):
     waveData.add_data_bucket(betasBucket)
 
 def c_TW_bases_betas(phi_cts,nBases=3):
+    """
+    Parameters
+    ----------
+    phi_cts : numpy.ndarray
+    nBases : int, default=3
+
+    Returns
+    -------
+    bases_sb : numpy.ndarray
+    fit_ct : numpy.ndarray
+    betas_ctb : numpy.ndarray
+    """
     #phi complex-valued phase, c cases, t times, s sensors
     phi_Cs = np.asarray(phi_cts.reshape(-1,phi_cts.shape[-1]))
     phi_cent = phi_Cs - phi_Cs.mean(0)

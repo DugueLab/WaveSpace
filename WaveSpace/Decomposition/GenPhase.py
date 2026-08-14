@@ -11,13 +11,40 @@ from WaveSpace.Utils import HelperFuns as hf
 
 #helper funs:
 def continous_label(arr):
+    """
+    Parameters
+    ----------
+    arr : numpy.ndarray
+
+    Returns
+    -------
+    numpy.ndarray
+    """
     changes = np.where(arr[:-1] != arr[1:])[0]  
     return changes
 
 def rewrap(xp):
+    """
+    Parameters
+    ----------
+    xp : numpy.ndarray
+
+    Returns
+    -------
+    numpy.ndarray
+    """
     return (xp - 2 * np.pi * np.floor((xp - np.pi) / (2 * np.pi)) - 2 * np.pi)
 
 def naninterp(xp):
+    """
+    Parameters
+    ----------
+    xp : numpy.ndarray
+
+    Returns
+    -------
+    numpy.ndarray
+    """
     nonnan_indices = np.where(~np.isnan(xp))[0]
     xp_nonnan = xp[~np.isnan(xp)]
     nan_indices = np.where(np.isnan(xp))[0]

@@ -7,9 +7,36 @@ from scipy.signal.windows import hann
 
 #%%
 def hann_fft(waveData, dataBucketName = "", timeStart = [], timeEnd = [], timeStep = 1, freqStart = 0, freqEnd = -1):
-    """
-    Computes the fft of the data in the active data bucket.
-    The fft is computed along the time dimension of the data array.
+    """Compute a Hann-windowed fast Fourier transform over time.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing the data to transform.
+    dataBucketName : str, default=""
+        Name of the input data bucket. An empty string uses the active bucket.
+    timeStart : float or list, default=[]
+        Start time in seconds. An empty list selects the first sample.
+    timeEnd : float or list, default=[]
+        End time in seconds. An empty list selects the last sample.
+    timeStep : int, default=1
+        Sample stride applied before the transform.
+    freqStart : float, default=0
+        Lowest retained frequency in Hz.
+    freqEnd : float, default=-1
+        Highest retained frequency in Hz. ``-1`` selects the Nyquist
+        frequency.
+
+    Returns
+    -------
+    None
+        Adds complex Fourier coefficients to ``waveData`` as the ``FFT`` data
+        bucket.
+
+    Notes
+    -----
+    The transform is applied along the ``time`` dimension after data are
+    temporarily reordered to trial, channel, and time dimensions.
     """
     #set defaults
     if timeStart == []:

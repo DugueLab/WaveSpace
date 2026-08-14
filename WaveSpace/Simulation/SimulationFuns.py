@@ -9,6 +9,29 @@ from WaveSpace.Utils import WaveData as wd
 from WaveSpace.Utils import HelperFuns as hf
 
 def assertCorrectWaveSettings(Type, ntrials, waveSettings):
+    """Validate type-specific wave simulation settings.
+
+    Parameters
+    ----------
+    Type : str
+        Simulation type passed to :func:`simulate_signal`.
+    ntrials : int
+        Number of simulated trials.
+    waveSettings : dict
+        Type-specific simulation settings.
+
+    Returns
+    -------
+    None
+        Raises an assertion error when required settings are absent or an
+        array-like setting does not have one value per trial.
+
+    Raises
+    ------
+    AssertionError
+        If required settings are missing, nonlinear plane-wave settings are
+        incomplete, or per-trial setting lengths do not match ``ntrials``.
+    """
     # Check if all required variables are set for the type of wave
     if Type == "PlaneWave" or Type == "TargetWave" :
         assert "TemporalFrequency" in waveSettings.keys(), "TemporalFrequency not set"
@@ -126,9 +149,52 @@ def simulate_signal(Type, ntrials, MatrixSize, SampleRate, SimDuration, SimLayou
     return waveData
 
 def initialize_data(MatrixSize, SampleRate,SimDuration):
+    """Create an empty square spatiotemporal simulation array.
+
+    Parameters
+    ----------
+    MatrixSize : int
+        Number of positions along each spatial dimension.
+    SampleRate : float
+        Sampling frequency in Hz.
+    SimDuration : float
+        Simulation duration in seconds.
+
+    Returns
+    -------
+    numpy.ndarray
+        Zero-filled array ordered as x position, y position, and time.
+    """
     return np.zeros((MatrixSize,MatrixSize,int(np.floor(SimDuration * SampleRate))))  
 
 def create_wavedata(data, SampleRate, SimDuration, SimLayout, simOptions, name = "SimulatedData", time=[]):
+    """Create a WaveData object from simulated array data.
+
+    Parameters
+    ----------
+    data : numpy.ndarray
+        Simulated data ordered as trials, x position, y position, and time or
+        as trials, channels, and time.
+    SampleRate : float
+        Sampling frequency in Hz.
+    SimDuration : float
+        Duration of each simulation trial in seconds.
+    SimLayout : {"channels", "grid"}
+        Output spatial layout. ``"grid"`` reshapes square channels into
+        ``posx_posy`` dimensions.
+    simOptions : list of dict
+        Per-trial simulation settings stored as simulation metadata.
+    name : str, default="SimulatedData"
+        Name of the output data bucket.
+    time : array-like, default=[]
+        Explicit time vector. When omitted, it is derived from the sample rate.
+
+    Returns
+    -------
+    WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing the simulated bucket, regular-grid channel
+        metadata, and simulation settings.
+    """
     #flatten channels
     if (len(data.shape)==4):
        data = np.reshape(data,(data.shape[0],data.shape[1]*data.shape[2],data.shape[3]), order='C') 
@@ -156,9 +222,42 @@ def create_wavedata(data, SampleRate, SimDuration, SimLayout, simOptions, name =
     return waveData
 
 def apply_mask(signal, mask):
+    """Suppress signal values where a mask is 1.
+
+    Parameters
+    ----------
+    signal : numpy.ndarray
+        Signal array.
+    mask : numpy.ndarray
+        Mask broadcastable to ``signal`` where 1 denotes suppression.
+
+    Returns
+    -------
+    numpy.ndarray
+        Masked signal calculated as ``signal * (1 - mask)``.
+    """
     return signal * (1-mask)
 
 def create_stationary_pulse(MatrixSize, SampleRate, SimDuration, SimOptions):
+    """Generate a spatially stationary Gaussian pulse with temporal oscillation.
+
+    Parameters
+    ----------
+    MatrixSize : int
+        Number of positions along each spatial dimension.
+    SampleRate : float
+        Sampling frequency in Hz.
+    SimDuration : float
+        Simulation duration in seconds.
+    SimOptions : dict
+        Settings containing ``CenterX``, ``CenterY``, ``Sigma``, and
+        ``TemporalFrequency``.
+
+    Returns
+    -------
+    numpy.ndarray
+        Array ordered as x position, y position, and time.
+    """
     signalCube = initialize_data(MatrixSize, SampleRate, SimDuration)
     xsize, ysize, npoints = signalCube.shape    
     grid = get_board(MatrixSize)
@@ -171,10 +270,45 @@ def create_stationary_pulse(MatrixSize, SampleRate, SimDuration, SimOptions):
     return signalCubeOut 
 
 def gaussian2d(x, y, x0, y0, sigma):
-    """Return the value of a 2D Gaussian function at (x, y) with the given center point (x0, y0) and standard deviation sigma."""
+    """Evaluate a two-dimensional isotropic Gaussian.at (x, y) with the given center point (x0, y0) and standard deviation sigma.
+
+    Parameters
+    ----------
+    x, y : numpy.ndarray or float
+        Evaluation coordinates.
+    x0, y0 : float
+        Gaussian center coordinates.
+    sigma : float
+        Gaussian standard deviation.
+
+    Returns
+    -------
+    numpy.ndarray or float
+        Gaussian values at the supplied coordinates.
+    """
     return np.exp(-((x - x0)**2 + (y - y0)**2) / (2 * sigma**2))
 
 def create_plane_wave(MatrixSize, SampleRate, SimDuration,SimOption):
+    """Generate a travelling plane wave across a square spatial grid.
+
+    Parameters
+    ----------
+    MatrixSize : int
+        Number of positions along each spatial dimension.
+    SampleRate : float
+        Sampling frequency in Hz.
+    SimDuration : float
+        Simulation duration in seconds.
+    SimOption : dict
+        Settings containing ``TemporalFrequency``, ``SpatialFrequency``, and
+        ``WaveDirection``. Optional ``NonLinearDegree`` and ``NonLinearSkew``
+        control waveform nonlinearity.
+
+    Returns
+    -------
+    numpy.ndarray
+        Plane-wave values ordered as x position, y position, and time.
+    """
     signalCube = initialize_data(MatrixSize, SampleRate, SimDuration) 
     NonLinearDegree = 0
     NonLinearSkew = 0
@@ -223,6 +357,26 @@ def create_plane_wave(MatrixSize, SampleRate, SimDuration,SimOption):
     return signalCube
 
 def create_plane_wave_mask(MatrixSize, SampleRate, SimDuration,SimOption):
+    """Generate a spatiotemporal onset and offset mask for a plane wave.
+
+    Parameters
+    ----------
+    MatrixSize : int
+        Number of positions along each spatial dimension.
+    SampleRate : float
+        Sampling frequency in Hz.
+    SimDuration : float
+        Simulation duration in seconds.
+    SimOption : dict
+        Settings containing wave direction, temporal and spatial frequencies,
+        ``WaveOnset``, and ``WaveDuration``.
+
+    Returns
+    -------
+    numpy.ndarray
+        Mask ordered as x position, y position, and time. One denotes masked
+        samples and zero denotes active wave samples.
+    """
     MaskCube = initialize_data(MatrixSize, SampleRate, SimDuration)  
     orientation = np.deg2rad(360-SimOption["WaveDirection"])      
     grid = get_board(MatrixSize)          
@@ -273,6 +427,25 @@ def create_plane_wave_mask(MatrixSize, SampleRate, SimDuration,SimOption):
     return MaskCube
 
 def create_frequency_gradient(MatrixSize, SampleRate, SimDuration,SimOption):
+    """Generate oscillations with a spatial frequency gradient.
+
+    Parameters
+    ----------
+    MatrixSize : int
+        Number of positions along each spatial dimension.
+    SampleRate : float
+        Sampling frequency in Hz.
+    SimDuration : float
+        Simulation duration in seconds.
+    SimOption : dict
+        Settings containing ``WaveDirection``, ``MinTemporalFrequency``, and
+        ``MaxTemporalFrequency``. Optional nonlinear settings are supported.
+
+    Returns
+    -------
+    numpy.ndarray
+        Frequency-gradient signal ordered as x position, y position, and time.
+    """
     signalCube = initialize_data(MatrixSize, SampleRate, SimDuration) 
     NonLinearDegree = 0
     NonLinearSkew = 0
@@ -319,6 +492,26 @@ def create_frequency_gradient(MatrixSize, SampleRate, SimDuration,SimOption):
     return signalCube
 
 def create_target_wave(MatrixSize, SampleRate, SimDuration,SimOption):
+    """Generate a radial target wave around a specified spatial center.
+
+    Parameters
+    ----------
+    MatrixSize : int
+        Number of positions along each spatial dimension.
+    SampleRate : float
+        Sampling frequency in Hz.
+    SimDuration : float
+        Simulation duration in seconds.
+    SimOption : dict
+        Settings containing ``CenterX``, ``CenterY``, ``TemporalFrequency``,
+        ``SpatialFrequency``, and signed ``WaveDirection``.
+
+    Returns
+    -------
+    numpy.ndarray
+        Real-valued target-wave signal ordered as x position, y position, and
+        time.
+    """
     signalCube = initialize_data(MatrixSize, SampleRate, SimDuration)  
     grid = get_board(MatrixSize)    
     X = grid[0]
@@ -344,6 +537,25 @@ def create_target_wave(MatrixSize, SampleRate, SimDuration,SimOption):
         return np.real(signalCube)
 
 def create_rotating_wave(MatrixSize, SampleRate, SimDuration,SimOption):
+    """Generate a rotating wave.
+
+    Parameters
+    ----------
+    MatrixSize : int
+        Number of positions along each spatial dimension.
+    SampleRate : float
+        Sampling frequency in Hz.
+    SimDuration : float
+        Simulation duration in seconds.
+    SimOption : dict
+        Settings containing ``TemporalFrequency`` and signed ``WaveDirection``.
+
+    Returns
+    -------
+    numpy.ndarray
+        Complex rotating-wave signal ordered as x position, y position, and
+        time.
+    """
     signalCube = initialize_data(MatrixSize, SampleRate, SimDuration)
     grid = get_board(MatrixSize)    
     X = grid[0] 
@@ -362,6 +574,25 @@ def create_rotating_wave(MatrixSize, SampleRate, SimDuration,SimOption):
     return signalCube
 
 def create_local_oscillators(MatrixSize, SampleRate, SimDuration,SimOption):
+    """Generate synchronized or random-phase local oscillators.
+
+    Parameters
+    ----------
+    MatrixSize : int
+        Number of positions along each spatial dimension.
+    SampleRate : float
+        Sampling frequency in Hz.
+    SimDuration : float
+        Simulation duration in seconds.
+    SimOption : dict
+        Settings containing ``TemporalFrequency`` and ``OscillatoryPhase`` as
+        either ``"Random"`` or ``"Synchronized"``.
+
+    Returns
+    -------
+    numpy.ndarray
+        Oscillator values ordered as x position, y position, and time.
+    """
     signalCube = initialize_data(MatrixSize, SampleRate, SimDuration)
     time = np.linspace(0,SimDuration , int( SimDuration * SampleRate ))
     if SimOption["OscillatoryPhase"] == "Random": 
@@ -380,6 +611,25 @@ def create_local_oscillators(MatrixSize, SampleRate, SimDuration,SimOption):
     return signalCube
 
 def CreateOscillatorMask(MatrixSize, SampleRate, SimDuration, SimOption):
+    """Generate a random mask for a proportion of local oscillators.
+
+    Parameters
+    ----------
+    MatrixSize : int
+        Number of positions along each spatial dimension.
+    SampleRate : float
+        Sampling frequency in Hz.
+    SimDuration : float
+        Simulation duration in seconds.
+    SimOption : dict
+        Settings containing ``OscillatorProportion``.
+
+    Returns
+    -------
+    numpy.ndarray
+        Mask ordered as x position, y position, and time. One marks selected
+        spatial positions.
+    """
     # selects which cells will be oscillating
     proportionOfOscillators = SimOption["OscillatorProportion"]
     oscillatorIndeces = np.random.choice(MatrixSize * MatrixSize, int(np.floor((MatrixSize**2) * (1-proportionOfOscillators))),replace=False)
@@ -389,9 +639,46 @@ def CreateOscillatorMask(MatrixSize, SampleRate, SimDuration, SimOption):
     return oscillatorMask
 
 def create_white_noise( MatrixSize, SampleRate, SimDuration):
+    """Generate spatially and temporally independent Gaussian noise.
+
+    Parameters
+    ----------
+    MatrixSize : int
+        Number of positions along each spatial dimension.
+    SampleRate : float
+        Sampling frequency in Hz.
+    SimDuration : float
+        Simulation duration in seconds.
+
+    Returns
+    -------
+    numpy.ndarray
+        White-noise array ordered as x position, y position, and time.
+    """
     return np.random.randn(MatrixSize,MatrixSize, int(np.floor(SimDuration*SampleRate)))
 
 def create_pink_noise( MatrixSize, SampleRate, SimDuration):
+    """Generate spatially filtered pink-noise-like data.
+
+    Parameters
+    ----------
+    MatrixSize : int
+        Number of positions along each spatial dimension.
+    SampleRate : float
+        Sampling frequency in Hz.
+    SimDuration : float
+        Simulation duration in seconds.
+
+    Returns
+    -------
+    numpy.ndarray
+        Rescaled noise array ordered as x position, y position, and time.
+
+    Notes
+    -----
+    Each time point is filtered in the two-dimensional Fourier domain using a
+    spatial spectrum with exponent two.
+    """
     signalCube = np.random.randn(MatrixSize,MatrixSize, int(np.floor(SimDuration * SampleRate))) 
 
     for i in range(int(np.floor(SimDuration * SampleRate))):        
@@ -456,6 +743,18 @@ def SNRMix(SignalWaveData, NoiseWaveData, SNR, Mask=None, SimLayout="channels"):
 # utility functions
 
 def createVectorField(board):
+    """Create a normalized two-dimensional vector field from grid coordinates.
+
+    Parameters
+    ----------
+    board : sequence of numpy.ndarray
+        X and Y coordinate arrays, for example from :func:`get_board`.
+
+    Returns
+    -------
+    x, y, u, v : numpy.ndarray
+        Input coordinates and vector-field components.
+    """
     # outputs to matplotlib Quiver
     x = board[0]
     y = board[1]
@@ -464,20 +763,76 @@ def createVectorField(board):
     return x,y,u,v
 
 def getProbeColor(index, totalProbes):
+    """Select an HSV color for a probe index.
+
+    Parameters
+    ----------
+    index : int
+        Zero-based probe index.
+    totalProbes : int
+        Number of probe colors to distribute across the colormap.
+
+    Returns
+    -------
+    tuple of float
+        RGBA color value.
+    """
     cmap = plt.cm.hsv
     return cmap(index/totalProbes) 
 
 def cart2pol(x, y):
+    """Convert Cartesian coordinates to polar coordinates.
+
+    Parameters
+    ----------
+    x, y : numpy.ndarray or float
+        Cartesian coordinate components.
+
+    Returns
+    -------
+    rho : numpy.ndarray or float
+        Radial distance.
+    phi : numpy.ndarray or float
+        Polar angle in radians.
+    """
     rho = np.sqrt(x**2 + y**2)
     phi = np.arctan2(y, x)
     return(rho, phi)
 
 def pol2cart(rho, phi):
+    """Convert polar coordinates to Cartesian coordinates.
+
+    Parameters
+    ----------
+    rho : numpy.ndarray or float
+        Radial distance.
+    phi : numpy.ndarray or float
+        Polar angle in radians.
+
+    Returns
+    -------
+    x, y : numpy.ndarray or float
+        Cartesian coordinate components.
+    """
     x = rho * np.cos(phi)
     y = rho * np.sin(phi)
     return(x, y)
 
 def get_updated_colors(cmap, status):    
+    """Map normalized simulation values to colormap face colors.
+
+    Parameters
+    ----------
+    cmap : matplotlib.colors.Colormap
+        Colormap used to transform values to colors.
+    status : numpy.ndarray
+        Simulation values expected to lie between -1 and 1.
+
+    Returns
+    -------
+    list
+        Colormap values for every flattened status element.
+    """
     #fp = open('cmap.pkl', 'rb')
     #cmap = pickle.load(fp)
     #fp.close()
@@ -491,11 +846,39 @@ def get_updated_colors(cmap, status):
     return facecolors
 
 def scale(x, out_range=(-1, 1), axis=None):
+    """Linearly rescale values to a target range.
+
+    Parameters
+    ----------
+    x : numpy.ndarray
+        Input values.
+    out_range : tuple of float, default=(-1, 1)
+        Lower and upper values of the output range.
+    axis : int or None, default=None
+        Axis used to calculate input minimum and maximum values.
+
+    Returns
+    -------
+    numpy.ndarray
+        Rescaled values.
+    """
     domain = np.min(x, axis), np.max(x, axis)
     y = (x - (domain[1] + domain[0]) / 2) / (domain[1] - domain[0])
     return y * (out_range[1] - out_range[0]) + (out_range[1] + out_range[0]) / 2
 
 def get_board(size):
+    """Create centered two-dimensional coordinate arrays.
+
+    Parameters
+    ----------
+    size : int
+        Number of positions along each spatial dimension.
+
+    Returns
+    -------
+    list of numpy.ndarray
+        X and Y coordinate arrays forming a square grid.
+    """
     #make a grid go from  -7 to 8 in two dimensions
     #one matrix x and one matrix y
     xs = np.arange(0, size) - (np.floor(size /2)-1)

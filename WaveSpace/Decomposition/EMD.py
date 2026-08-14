@@ -13,16 +13,25 @@ import platform
 
 
 def start_emd_logging():
+    """Returns
+    -------
+    None
+    """
     emd.logger.set_up(level='CRITICAL')  # supress the warning about too few IMFs
 
 # Utility funs________________________________________________
 def FreqAmpPhaseFromAnalytic(waveData, smooth_phase=None, smooth_freq = 3, dataBucketName="", timeRange=(slice(None))):
-    """Get the instantaneous frequency, amplitude, and phase from the analytic signal.
-    WaveData: waveData object
-    smooth_phase: smoothing window for phase
-    smooth_freq: smoothing window for frequency
-    dataBucketName: name of the data bucket to use. Defaults to the active data bucket
-    timeRange: time range to use in samples. Defaults to all time points
+    """Parameters
+    ----------
+    waveData : WaveData
+    smooth_phase : int or None, default=None
+    smooth_freq : int, default=3
+    dataBucketName : str, default=""
+    timeRange : tuple, default=(slice(None),)
+
+    Returns
+    -------
+    tuple[numpy.ndarray, numpy.ndarray, numpy.ndarray]
     """
 
     if dataBucketName == "":
@@ -66,16 +75,21 @@ def FreqAmpPhaseFromAnalytic(waveData, smooth_phase=None, smooth_freq = 3, dataB
     return IF, IA, IP
 
 def checkFrequencySpectrum(IA, IF, waveData, freqMin, freqMax, nbins=50, trialnum=0, chanNum=0, FOI = None):
-    """Plot the frequency spectrum of the IMFs.
-    IA: instantaneous amplitude
-    IF: instantaneous frequency
-    waveData: waveData object
-    freqMin: minimum frequency to plot
-    freqMax: maximum frequency to plot
-    nbins: number of bins for the histogram, defaults to 50
-    trialnum: trial number to plot, defaults to 0
-    chanNum: channel number to plot, defaults to 0
-    FOI: frequency of interest, draws a vertical line at FOI, defaults to None
+    """Parameters
+    ----------
+    IA : numpy.ndarray
+    IF : numpy.ndarray
+    waveData : WaveData
+    freqMin : float
+    freqMax : float
+    nbins : int, default=50
+    trialnum : int, default=0
+    chanNum : int, default=0
+    FOI : float or None, default=None
+
+    Returns
+    -------
+    tuple[matplotlib.figure.Figure, numpy.ndarray]
     """
     currentDimord = waveData.DataBuckets[waveData.ActiveDataBucket].get_dimord()
     hf.assure_consistency(waveData)
@@ -129,6 +143,19 @@ def checkFrequencySpectrum(IA, IF, waveData, freqMin, freqMax, nbins=50, trialnu
     return fig, spec_weighted
    
 def freqSpecTrialAverage(waveData, freqMin, freqMax, nbins=50, dataBucketName = "", timeRange =(slice(None))):
+    """Parameters
+    ----------
+    waveData : WaveData
+    freqMin : float
+    freqMax : float
+    nbins : int, default=50
+    dataBucketName : str, default=""
+    timeRange : tuple, default=(slice(None),)
+
+    Returns
+    -------
+    list[numpy.ndarray]
+    """
     freqEdges, freqCenters = emd.spectra.define_hist_bins(
         freqMin, freqMax, nbins)
     if dataBucketName == "":
@@ -157,6 +184,14 @@ def freqSpecTrialAverage(waveData, freqMin, freqMax, nbins=50, dataBucketName = 
     return result
 
 def freqSpecTrialAverageProcessChannel(args):
+    """Parameters
+    ----------
+    args : tuple
+
+    Returns
+    -------
+    numpy.ndarray
+    """
     IF, IA, trials, freqEdges, sample_rate, tempSpec = args
     for trl in range(trials):
         if np.isnan(IF[:,trl,0]).any():
@@ -170,10 +205,30 @@ def freqSpecTrialAverageProcessChannel(args):
     return AllSpecWeighted
 
 def parallel_assess_harmonic_criteria(args):
+    """Parameters
+    ----------
+    args : tuple
+
+    Returns
+    -------
+    pandas.DataFrame
+    """
     IPs, IFs, IAs, base_imf = args
     return emd.imftools.assess_harmonic_criteria(IPs.T, IFs.T, IAs.T, base_imf=base_imf, num_segments=10)
 
 def check_for_harmonics(waveData, IPs, IFs, IAs, base_imf_list):
+    """Parameters
+    ----------
+    waveData : WaveData
+    IPs : numpy.ndarray
+    IFs : numpy.ndarray
+    IAs : numpy.ndarray
+    base_imf_list : numpy.ndarray
+
+    Returns
+    -------
+    list[list[numpy.ndarray]]
+    """
     currentDimord= waveData.DataBuckets[waveData.ActiveDataBucket].get_dimord()
     IAhasBeenReshaped, IAs =  hf.force_dimord(IAs, currentDimord , "imf_trl_chan_time")
     IFhasBeenReshaped, IFs =  hf.force_dimord(IFs, currentDimord , "imf_trl_chan_time")
@@ -210,6 +265,16 @@ def check_for_harmonics(waveData, IPs, IFs, IAs, base_imf_list):
     return HarmonicInds   
 
 def CombineIMFsIfPositiveJointInstFreq(waveData, potentialHarmonicInds, dataBucketName=""):
+    """Parameters
+    ----------
+    waveData : WaveData
+    potentialHarmonicInds : list[list[numpy.ndarray]]
+    dataBucketName : str, default=""
+
+    Returns
+    -------
+    None
+    """
     if dataBucketName == "":
         dataBucketName = waveData.ActiveDataBucket
     else:
@@ -236,16 +301,17 @@ def CombineIMFsIfPositiveJointInstFreq(waveData, potentialHarmonicInds, dataBuck
     waveData.log_history(["EMD", "Combined harmonic IMFs"])
 
 def find_nearest_to_FOI(waveData, IF, FOI, start_time=None, end_time=None):
-    """Find the index and value of the element in IF closest to FOI
-    Args:
-        waveData (WaveData object)
-        IF (np.ndarray)
-        FOI (float)
-        start_time (float)
-        end_time (float)
-    Returns:
-        ind (np.ndarray)
-        value (np.ndarray)
+    """Parameters
+    ----------
+    waveData : WaveData
+    IF : numpy.ndarray
+    FOI : float
+    start_time : float or None, default=None
+    end_time : float or None, default=None
+
+    Returns
+    -------
+    tuple[numpy.ndarray, numpy.ndarray]
     """
     hf.assure_consistency(waveData)
     currentDimord = waveData.DataBuckets[waveData.ActiveDataBucket].get_dimord()
@@ -280,49 +346,24 @@ def find_nearest_to_FOI(waveData, IF, FOI, start_time=None, end_time=None):
 #main EMD funs
 def EMD(waveData, nIMFs=7, dataBucketName="", noiseVar = 0.05, n_noiseChans = 10, siftType = 'regular',
         ndir=None, stp_crit ='stop', sd=0.075, sd2=0.75, tol=0.075,stp_cnt=2):
-    """Decompose each time series into intrinsic mode functions (IMFs).
-
-    Parameters
+    """Parameters
     ----------
-    waveData : WaveSpace.Utils.WaveData.WaveData
-        WaveData object containing the data to decompose.
+    waveData : WaveData
     nIMFs : int, default=7
-        Maximum number of IMFs to extract per time series.
     dataBucketName : str, default=""
-        Name of the input data bucket. By default, the active data bucket is
-        used.
     noiseVar : float, default=0.05
-        Proportion of noise added for ``"multivariate_sift"``.
     n_noiseChans : int, default=10
-        Number of auxiliary noise channels for ``"multivariate_sift"``.
-    siftType : {"regular", "masked_sift", "iterated_masked_sift", "ensemble_sift", "multivariate_sift"}, default="regular"
-        Sifting algorithm used to extract IMFs.
+    siftType : str, default="regular"
     ndir : int or None, default=None
-        Number of projection directions for multivariate sifting. When None,
-        twice the channel count is used.
-    stp_crit : {"stop", "fix_h"}, default="stop"
-        Multivariate-sift stopping criterion.
+    stp_crit : str, default="stop"
     sd : float, default=0.075
-        Multivariate-sift first stopping threshold.
     sd2 : float, default=0.75
-        Multivariate-sift second stopping threshold.
     tol : float, default=0.075
-        Multivariate-sift tolerance.
     stp_cnt : int, default=2
-        Consecutive stopping-condition count for ``stp_crit="fix_h"``.
 
     Returns
     -------
     None
-        Adds complex analytic IMFs to ``waveData`` as the ``complexData``
-        bucket, with an ``IMF`` dimension prepended to the input dimension
-        order.
-
-    Notes
-    -----
-    Fewer IMFs than requested may be found for individual time series; missing
-    output rows are filled with NaNs. Processing is parallelized by trial and
-    channel except for multivariate sifting.
     """
 
     # ensure proper bookkeeping of data dimensions
@@ -395,6 +436,17 @@ def EMD(waveData, nIMFs=7, dataBucketName="", noiseVar = 0.05, n_noiseChans = 10
     waveData.log_history(["Phase estimate", "EMD","siftType: " , siftType, "nIMFS: ", nIMFs])
 
 def EMD_process_timeseries(pair, currentData, nIMFs, siftfun):
+    """Parameters
+    ----------
+    pair : tuple[int, int]
+    currentData : numpy.ndarray
+    nIMFs : int
+    siftfun : callable
+
+    Returns
+    -------
+    numpy.ndarray
+    """
     trl, chn = pair
     imf = siftfun(
         currentData[trl, chn, :], max_imfs=nIMFs, verbose="CRITICAL")

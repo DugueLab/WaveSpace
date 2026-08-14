@@ -6,33 +6,44 @@ import WaveSpace.Utils.HelperFuns as hf
 #%%
 #mirrior-pad data array to all sides
 def pad_data(data, padSize):
-    """
-    Mirrior-pad the first two dimensions of the 3 dimensinal data array to all sides.
+    """Reflect-pad the first two dimensions of a three-dimensional array.
 
-    Parameters:
-    data (np.array): Data array.
-    padSize (int): Size of padding.
+    Parameters
+    ----------
+    data : numpy.ndarray
+        Array with spatial dimensions first and time last.
+    padSize : int
+        Number of elements to add at each edge of both spatial dimensions.
 
-    Returns:
-    data (np.array): Padded data array.
+    Returns
+    -------
+    numpy.ndarray
+        Reflect-padded array.
     """
     data = np.pad(data, ((padSize, padSize), (padSize, padSize), (0, 0)), 'reflect')
     return data
 
 def get_warp_field(gridSize, maxDistortion, nSteps):
-    """
-    Generates a diffeomorphic warp field by adding random discrete cosine transforms.
-    Based on Stojanoski, B., & Cusack, R. (2014). Time to wave good-bye to phase scrambling: 
-    Creating controlled scrambled images using diffeomorphic transformations. 
-    Journal of Vision, 14(12), 6. doi:10.1167/14.12.6
-    
-    Parameters:
-    gridSize (int,int): size of grid.
-    maxDistortion (float): Maximum distortion.
-    nSteps (int): Number of steps.
+    """Generate random displacement fields for a two-dimensional grid.
 
-    Returns:
-    XIn, YIn (np.array): Diffeomorphic warp fields.
+    Parameters
+    ----------
+    gridSize : tuple of int
+        Number of grid points along the two spatial dimensions.
+    maxDistortion : float
+        Maximum displacement scale.
+    nSteps : int
+        Number of sequential distortion steps.
+
+    Returns
+    -------
+    XIn, YIn : numpy.ndarray
+        Horizontal and vertical displacement fields.
+
+    Notes
+    -----
+    The fields are generated from random discrete-cosine components and scaled
+    by ``maxDistortion / nSteps``.
     """
 
     gridX, gridY = gridSize
@@ -65,11 +76,25 @@ def get_warp_field(gridSize, maxDistortion, nSteps):
     return XIn, YIn
 
 def warp_array(data,maxDistortion, nSteps):
-    """ Apply same diffeomorphic transformation to each snapshot of data array (2 spatial dims)
-    Parameters:
-    data (np.array): Data array. shape(nX,nY,nT)
-    maxDistortion (float): Maximum distortion. 
-    nSteps (int): Number of steps.
+    """Apply one random warp field across the time axis of an array.
+
+    Parameters
+    ----------
+    data : numpy.ndarray
+        Three-dimensional array ordered as x, y, and time.
+    maxDistortion : float
+        Maximum displacement scale.
+    nSteps : int
+        Number of sequential distortion steps.
+
+    Returns
+    -------
+    numpy.ndarray
+        Reflect-padded and warped data array.
+
+    Notes
+    -----
+    The same displacement field is used for every time point.
     """
     # pad array to avoid edge effects
     padSize = 10
@@ -94,15 +119,27 @@ from skimage.color import rgb2gray
 from skimage.transform import resize
 
 def warp_snapshot(data, XIn, YIn, phaseoffset=40):
-    """
-    Apply diffeomorphic transformation to snapshot of data array (2 spatial dims)
-[cxA cyA]=getdiffeo(imsz,distortion);
-[cxB cyB]=getdiffeo(imsz,distortion);
-[cxF cyF]=getdiffeo(imsz,distortion);
-    Parameters:
-    data (np.array): Data array. shape(nX,nY)
-    cxA, cyA, cxB, cyB, cxF, cyF (np.array): Diffeomorphic warp fields.
-    phaseoffset (int): Phase offset for the transformation.
+    """Warp spatial data with supplied displacement fields.
+
+    Parameters
+    ----------
+    data : numpy.ndarray
+        Array whose first two dimensions are spatial and whose final dimension
+        is iterated during interpolation.
+    XIn, YIn : numpy.ndarray
+        Horizontal and vertical displacement fields.
+    phaseoffset : int, default=40
+        Retained for compatibility; it is not used by the implementation.
+
+    Returns
+    -------
+    numpy.ndarray
+        Resized grayscale warped image.
+
+    Notes
+    -----
+    The displacement fields are applied in four quadrants before converting
+    the interpolated result to grayscale.
     """
     imsz = data.shape[0]
     YI, XI = np.mgrid[0:imsz, 0:imsz]
