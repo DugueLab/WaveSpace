@@ -3,7 +3,7 @@ import WaveSpace.Utils.HelperFuns as hf
 import WaveSpace.Utils.WaveData as wd
 
 def find_wave_activity(waveData, dataBucketName=None, dataInd = None, nBases=3):
-    """Extract dominant travelling-wave spatial bases from complex data.
+    """Extract dominant traveling-wave spatial bases from complex data.
 
     Data are normalized to unit-magnitude phase values before singular-value
     decomposition of their covariance.

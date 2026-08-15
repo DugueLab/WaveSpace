@@ -110,7 +110,7 @@ def add_color_grid_legend(ax, color_grid, position=[0.8, 0.8, 2.0, 2.0], border=
     return inset_ax
  
 def plotfft_zoomed(fft_abs, sfreq, minFreq, maxFreq, title, scale='linear'):    
-    """Plot selected temporal frequencies from a spatial-temporal FFT.
+    """Plot selected temporal frequencies from a spatio-temporal FFT.
 
     Parameters
     ----------
@@ -202,7 +202,7 @@ def plot_interpolated_data(waveData, original_data_bucket, interpolated_data_buc
     interpolated_data_bucket : str
         Name of the interpolated grid-data bucket.
     grid_x, grid_y : numpy.ndarray
-        Two-dimensional coordinate arrays returned by
+        Two-dimensional coordinate arrays e.g. returned by
         :func:`interpolate_pos_to_grid`.
     OrigInd : tuple
         Indices selecting a channel-value vector from the original bucket.
@@ -274,7 +274,8 @@ def plot_interpolated_data(waveData, original_data_bucket, interpolated_data_buc
     return fig
 
 def plot_timeseries_on_surface(Surface, waveData, dataBucketName = " ", indices = (0, 0, None, slice(None), slice(None)), chan_to_highlight = 0 , timepoint =0, plottype = "power"):
-    """Plot surface data over time with one channel time series.
+    """Plot topo time series on a surface
+    + actual timeseries of a selected channel.
 
     Parameters
     ----------
@@ -464,14 +465,14 @@ def plot_timeseries_on_surface(Surface, waveData, dataBucketName = " ", indices 
     return fig
 #
 def animate_grid_data(gridData,DataBucketName = "", dataInd = None, probepositions=[(0,0)], plottype = "real"):
-    """Animate gridded data with time series at selected probe positions.
+    """Animate gridData over time and show time series at selected probe positions.
 
     Parameters
     ----------
     gridData : WaveSpace.Utils.WaveData.WaveData
         WaveData object containing a spatial grid over time.
     DataBucketName : str, default=""
-        Name of the input data bucket. An empty string uses the active bucket.
+        Name of the input data bucket. Defaults to the active bucket.
     dataInd : int or tuple or None, default=None
         Indices selecting one three-dimensional ``posx_posy_time`` array.
     probepositions : sequence of tuple of int, default=[(0, 0)]
@@ -620,7 +621,7 @@ def AnimateFullStatus(frameNR, fullstatus,timevec, img, ax1, probepositions, lin
         currentPlot.add_patch(plt.Rectangle((-2.5, (ind*linedistance)-0.25), 1, 0.5, facecolor='none',edgecolor=probecolors[ind],lw=8, clip_on=False))
     #currentPlot.get_lines()[3].set_color("red")
 
-def plot_geodesic_distance_on_surface(vertices, faces, sensor_positions, path, chanInds, distance):
+def plot_geodesic_distance_on_surface(vertices, faces,  path, chanInds, distance):
     """Plot a geodesic path and its endpoints on a triangular surface.
 
     Parameters
@@ -629,8 +630,6 @@ def plot_geodesic_distance_on_surface(vertices, faces, sensor_positions, path, c
         Three-dimensional surface vertices.
     faces : numpy.ndarray
         Triangular face indices.
-    sensor_positions : numpy.ndarray
-        Sensor positions. Retained for compatibility and not used directly.
     path : numpy.ndarray
         Three-dimensional coordinates along the geodesic path.
     chanInds : tuple of int
@@ -1028,11 +1027,12 @@ def plot_polar_histogram(waveData, DataBucketName, dataInds=None):
     Parameters
     ----------
     waveData : WaveSpace.Utils.WaveData.WaveData
-        WaveData object containing complex directional-stability vectors.
+        WaveData object containing complex data. Should be the result of opticl flow analysis.
     DataBucketName : str
-        Name of the directional-stability data bucket.
+        Name of the data bucket. Should be the result of optical flow analysis.
     dataInds : tuple or None, default=None
-        Indices selecting vectors to include in the histogram.
+        Indices of data to plot e.g.:(freqbin,trial).
+        Dimensions after indexing should be posx_posy_time
 
     Returns
     -------

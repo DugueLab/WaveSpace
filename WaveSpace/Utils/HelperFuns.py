@@ -158,7 +158,8 @@ def find_max_signal(data, dimension, averageDimension=None):
     return ind, np.nanmean(avg[ind])
 
 def scale(x, out_range=(-1, 1), axis=None):
-    """
+    """Scale any input to be between out_range[0] and out_range[1]; defaults to range (-1 1)
+
     Parameters
     ----------
     x : numpy.ndarray
@@ -169,7 +170,7 @@ def scale(x, out_range=(-1, 1), axis=None):
     -------
     numpy.ndarray
     """
-    # Scale any input to be between out_range[0] and out_range[1]; defaults to range (-1 1)
+    
     domain = np.min(x, axis), np.max(x, axis)
     y = (x - (domain[1] + domain[0]) / 2) / (domain[1] - domain[0])
     return y * (out_range[1] - out_range[0]) + (out_range[1] + out_range[0]) / 2
@@ -265,7 +266,7 @@ def force_dimord(data,  currentDimord, desiredDimord):
     Notes
     -----
     Two spatial dimensions can be flattened into a channel dimension. This is
-    an internal bookkeeping helper.
+    an internal bookkeeping helper not meant to be called directly by the user.
     """
     if (currentDimord == desiredDimord):
         return False, data
@@ -425,7 +426,8 @@ def mutual_information(hgram):
 
 def order_to_grid(data,shape,dimord):
     """
-    Reorder array to order and reshape to shape
+    Reshapes the active databucket of a WaveData object into a grid with the specified shape and dimension order.  
+
     Parameters
     ----------
     data : WaveSpace.Utils.WaveData.WaveData
@@ -440,7 +442,7 @@ def order_to_grid(data,shape,dimord):
         Changes active databucket shape in place for 
 
     """
-    #Reorder array to order and reshape to shape
+    
     dimord = dimord.split('_')
     for ind, dimension in enumerate(dimord):
         if dimension == "chan":
@@ -455,9 +457,12 @@ def order_to_grid(data,shape,dimord):
 
 def assure_consistency(waveData, dataBucketName = None):
     """
+    Ensure dimensions of data in <dataBucketName> are consistent with its dimord. If the data is missing a trial dimension, add one of size 1. 
+
     Parameters
     ----------
     waveData : WaveSpace.Utils.WaveData.WaveData
+        waveData object
     dataBucketName : str or None, default=None
 
     Returns
@@ -601,7 +606,7 @@ def toc(startTime_for_tictoc):
     return toctime
 
 def relative_phase(waveData, ref=None, dataBucketName=""):
-    """Calculate phase relative to a reference channel, position, or time series.
+    """Calculate phase relative to a reference channel or position.
 
     Parameters
     ----------
@@ -613,9 +618,7 @@ def relative_phase(waveData, ref=None, dataBucketName=""):
     dataBucketName : str, default=""
         Input data bucket. An empty string uses the active bucket.
 
-    Notes
-    -----
-        Negative values mean lag, positive values mean lead. All values are expressed in radians.
+
 
     Returns
     -------
@@ -838,7 +841,7 @@ def z_score_data(waveData, dimension = "", dataBucketName = " "):
     dimension : str or list of str, default=""
         Dimension name or names used for standardization.
     dataBucketName : str, default=" "
-        Input data bucket. A single space selects the active bucket.
+        Input data bucket. Defaults to active data bucket.
 
     Returns
     -------
@@ -898,6 +901,7 @@ def rescale_data_in_Bucket(waveData, dimension =['posx', 'posy', 'time'], range 
     Parameters
     ----------
     waveData : WaveSpace.Utils.WaveData.WaveData
+        waveData object containing the data to rescale.
     dimension : list of str, default=["posx", "posy", "time"]
     range : tuple of float, default=(0, 1)
     dataBucketName : str, default=""
@@ -952,7 +956,9 @@ def average_over_trials(waveData, trialInfo=None, dataBucketName=" ", type = Non
     Parameters
     ----------
     waveData : WaveSpace.Utils.WaveData.WaveData
+        waveData object containing the data to average.
     trialInfo : sequence or None, default=None
+        Sequence of trial information corresponding to each trial in the data.
     dataBucketName : str, default=" "
     type : {"power", None}, default=None
 
@@ -1363,11 +1369,6 @@ def merge_motifs_across_subjects(motifs, mergeThreshold = .6, pixelThreshold = 1
     -------
     list of dict
         Merged motifs with subject-labelled trial-frame entries.
-
-    Notes
-    -----
-    This function mutates the input motif dictionaries and removes the first
-    item from ``motifs``.
     """
     merged_motifs = []
     minPixels = motifs[0]['average'].shape[0]*motifs[0]['average'].shape[1]*pixelThreshold
@@ -1491,6 +1492,7 @@ def nan_gradient(data, dx, dy, dz):
     -----
     Wrapped phase differences are calculated through complex unit vectors
     before centered averaging.
+    credit: https://stackoverflow.com/questions/71585733/
     """
     # Compute differences along each axis and unwrap the phase differences
     diff_x = np.angle(np.exp(1j * (data[1:, ...] - data[:-1, ...]))) / dx

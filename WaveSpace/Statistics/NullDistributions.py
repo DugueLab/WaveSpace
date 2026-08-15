@@ -43,7 +43,10 @@ def get_warp_field(gridSize, maxDistortion, nSteps):
     Notes
     -----
     The fields are generated from random discrete-cosine components and scaled
-    by ``maxDistortion / nSteps``.
+    by ``maxDistortion / nSteps``.  Based on Stojanoski, B., & Cusack, R. (2014). Time to wave good-bye to phase scrambling: 
+    Creating controlled scrambled images using diffeomorphic transformations. 
+    Journal of Vision, 14(12), 6. doi:10.1167/14.12.6
+    
     """
 
     gridX, gridY = gridSize
@@ -118,7 +121,7 @@ from scipy.interpolate import interp2d
 from skimage.color import rgb2gray
 from skimage.transform import resize
 
-def warp_snapshot(data, XIn, YIn, phaseoffset=40):
+def warp_snapshot(data, XIn, YIn):
     """Warp spatial data with supplied displacement fields.
 
     Parameters
@@ -128,8 +131,7 @@ def warp_snapshot(data, XIn, YIn, phaseoffset=40):
         is iterated during interpolation.
     XIn, YIn : numpy.ndarray
         Horizontal and vertical displacement fields.
-    phaseoffset : int, default=40
-        Retained for compatibility; it is not used by the implementation.
+    
 
     Returns
     -------

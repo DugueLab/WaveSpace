@@ -75,7 +75,7 @@ def simulate_signal(Type, ntrials, MatrixSize, SampleRate, SimDuration, SimLayou
         Duration of each trial in seconds.
     SimLayout : {"channels", "grid"}, default="channels"
         Spatial representation of the returned data. ``"grid"`` preserves the
-        two-dimensional spatial layout; other values use flattened channels.
+        two-dimensional spatial layout; ``"channels"`` uses flattened channels.
     time : array-like, default=[]
         Explicit time values for the generated data. By default, time is
         derived from ``SampleRate`` and ``SimDuration``.
@@ -427,7 +427,7 @@ def create_plane_wave_mask(MatrixSize, SampleRate, SimDuration,SimOption):
     return MaskCube
 
 def create_frequency_gradient(MatrixSize, SampleRate, SimDuration,SimOption):
-    """Generate oscillations with a spatial frequency gradient.
+    """Generate oscillations with a frequency gradient along a spatial dimension.
 
     Parameters
     ----------

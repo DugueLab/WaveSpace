@@ -14,19 +14,17 @@ def hann_fft(waveData, dataBucketName = "", timeStart = [], timeEnd = [], timeSt
     waveData : WaveSpace.Utils.WaveData.WaveData
         WaveData object containing the data to transform.
     dataBucketName : str, default=""
-        Name of the input data bucket. An empty string uses the active bucket.
+        Name of the input data bucket. Defaults to the active data bucket.
     timeStart : float or list, default=[]
-        Start time in seconds. An empty list selects the first sample.
+        Start time in seconds. Defaults to the first sample.
     timeEnd : float or list, default=[]
-        End time in seconds. An empty list selects the last sample.
+        End time in seconds. Defaults to the last sample.
     timeStep : int, default=1
         Sample stride applied before the transform.
     freqStart : float, default=0
         Lowest retained frequency in Hz.
     freqEnd : float, default=-1
-        Highest retained frequency in Hz. ``-1`` selects the Nyquist
-        frequency.
-
+        Highest retained frequency in Hz. Defaults to the Nyquist frequency (half the sample rate).
     Returns
     -------
     None

@@ -12,7 +12,7 @@ import os
 from functools import partial
 
 def create_uv(waveData, applyGaussianBlur=False, type = "real", Sigma=1, alpha = 2, maxIter = 100, is_phase = False, dataBucketName = ''): 
-    """Estimate optical-flow vectors with the Horn-Schunck method.
+    """Estimate optical-flow vectors with the Horn-Schunck method. Not the fasted pony in the barn....
 
     Parameters
     ----------
@@ -48,6 +48,8 @@ def create_uv(waveData, applyGaussianBlur=False, type = "real", Sigma=1, alpha =
     Townsend, R. G., & Gong, P. (2018). Detection and analysis of
     spatiotemporal patterns in brain activity. PLOS Computational Biology,
     14(12), e1006643.
+
+    code partially based on https://github.com/BrainDynamicsUSYD/NeuroPattToolbox (Matlab)
     """
     if dataBucketName == "":
         dataBucketName = waveData.ActiveDataBucket

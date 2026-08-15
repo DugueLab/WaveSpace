@@ -11,8 +11,7 @@ def apply_hilbert(waveData, dataBucketName =None ):
     waveData : WaveSpace.Utils.WaveData.WaveData
         WaveData object containing the data to transform.
     dataBucketName : str, default=None
-        Name of the input data bucket. The active data bucket is used when an
-        empty string is supplied.
+        Name of the input data bucket. Defaults to the active data bucket.
 
     Returns
     -------
@@ -27,7 +26,7 @@ def apply_hilbert(waveData, dataBucketName =None ):
     output of :func:`WaveSpace.Preprocessing.Filter.filter_narrowband`.
     """
     # ensure proper bookkeeping of data dimensions
-    if dataBucketName == "":
+    if dataBucketName == None:
         dataBucketName = waveData.ActiveDataBucket
     else:
         waveData.set_active_dataBucket(dataBucketName)

@@ -10,7 +10,7 @@ def FFT_2D(waveData, channelIndices, lowerBound, upperBound, DataBucketName = ""
 
     The transform identifies peak power at positive and negative spatial
     frequencies within the requested temporal-frequency interval, representing
-    reverse and along-channel propagation respectively.
+    propagation along the selected cannel indices.
 
     Parameters
     ----------
@@ -37,13 +37,19 @@ def FFT_2D(waveData, channelIndices, lowerBound, upperBound, DataBucketName = ""
     -----
     ``Result`` contains per-trial peak power and the temporal and spatial
     frequencies at each along and reverse peak.
+    'Along' is the max value in the upper right quadrant of the 2D FFT trimmed to lower and upper bound
+    'Reverse' is the max value in the lower right quadrant of the 2D FFT trimmed to lower and upper bound
+    those correspond to a phase-shift along or opposite to the direction of selected channels, respectively
+    i.e. along means wave travels along direction of selected channels
+    
+    References
+    ----------
+    code is adapted from publicly available Matlab code written by Andrea Alamia (available here: https://github.com/artipago/travellingWaveEEG)
+    
+    corresponding publication: https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3000487
     """
-    #code is adapted from publicly available Matlab code written by Andrea Alamia (available here: https://github.com/artipago/travellingWaveEEG)
-    #corresponding publication: https://journals.plos.org/plosbiology/article?id=10.1371/journal.pbio.3000487
-    # 'Along' is the max value in the upper right quadrant of the 2D FFT trimmed to lower and upper bound
-    # 'Reverse' is the max value in the lower right quadrant of the 2D FFT trimmed to lower and upper bound
-    # those correspond to a phase-shift along or opposite to the direction of selected channels, respectively
-    # i.e. along means wave travels along direction of selected channels
+    
+
     if not DataBucketName == "":
         waveData.set_active_dataBucket(DataBucketName)
 

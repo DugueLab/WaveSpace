@@ -34,7 +34,7 @@ def regularGrid(waveData):
     Returns
     -------
     None
-        The function updates ``waveData`` in place.
+        updates ``waveData`` in place.
 
     Notes
     -----
@@ -77,7 +77,7 @@ def create_surface_from_points(data, type = 'channels', num_points=1000, plottin
     Notes
     -----
     For the channel method, extra points below the channel cloud are added to
-    avoid a flat convex-hull base when estimating geodesic distances.
+    avoid a flat convex-hull base (which messes with  estimating geodesic distances). Keep in mind that this means the surface has more vertices than there are electrodes
     """
     
     positions = data.get_channel_positions()
@@ -662,7 +662,7 @@ def distmat_to_2d_coordinates_Isomap(waveData):
     waveData.log_history(["distmat_to_2d_coordinates", "projectionmethod","Isomap"])
 
 def is_regular_grid_2d(distMat, tolerance = 0.001):
-    """Check whether a two-dimensional distance matrix represents a regular grid.
+    """Check whether a two-dimensional distance matrix is a regular grid.
 
     Parameters
     ----------
@@ -897,7 +897,7 @@ def apply_mask(waveData, mask, dataBucketName, overwrite = True, maskValue = 0.,
     mask : numpy.ndarray
         Boolean spatial mask.
     dataBucketName : str
-        Name of the data bucket to mask. An empty string uses the active
+        Name of the data bucket to mask. Defaults to active
         bucket.
     overwrite : bool, default=True
         Whether to replace the input bucket rather than add a masked bucket.
@@ -964,7 +964,7 @@ def interpolate_spherical_spline_2d(waveData, resolution=10, scalePos=1000, func
         Number of parallel interpolation workers. ``-1`` uses all available
         processors.
     dataBucketName : str, default=""
-        Name of the input data bucket. An empty string uses the active bucket.
+        Name of the input data bucket. Defaults to active bucket.
 
     Returns
     -------
@@ -975,7 +975,7 @@ def interpolate_spherical_spline_2d(waveData, resolution=10, scalePos=1000, func
     Notes
     -----
     The interpolation uses a best-fit sphere and radial basis functions over
-    the resulting Cartesian grid.
+    the resulting Cartesian grid. Something is not quite right here. Maybe because grid is in sperical coords and interpolation in cartesian?
     """
     if dataBucketName == "":
         dataBucketName = waveData.ActiveDataBucket

@@ -22,9 +22,9 @@ def perform_cluster_gradient(waveData, dataBucket="FrequencyCluster"):
     nTrials, nChannels, nTime = ClusterContacts.shape()
 
     complexData_FreqCluster = waveData.get_data(dataBucket)
+    chanpos = waveData.get_channel_positions()
     chanpos2D = chanpos[:,:2]
-    # For real data some sort of projection has to happen there e.g. 
-    # project the first 2 principle components: 
+    # For real data some sort of projection has to happen there e.g. project the first 2 principle components or use multidimensional scaling to get a 2D representation of the channel positions. 
     # pca = decomposition.PCA(n_components=2)
     # chanpos2D=pca.fit_transform(chanpos)
     for trl in range(nTrials):
@@ -101,6 +101,7 @@ def circ_lin_regress(phases, coords, theta_r, params):
     -----
     The fit selects the candidate parameter pair with the minimum negative
     resultant-vector length at each time point.
+    This is from https://github.com/john-myers-github/INSULA_RS, and was originally ported from Honghui's matlab code.
     """
     import pycircstat
 
