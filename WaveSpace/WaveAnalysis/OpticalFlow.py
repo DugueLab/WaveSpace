@@ -213,7 +213,7 @@ def HS(im1, im2, U,V, alpha, kernel, maxIter, is_phase, tol=1e-6):
     return U, V, iter_count + 1
 
 def normalize_angle(p):
-    """Wrap angles to the interval $[-\pi, \pi]$.
+    """Wrap angles to the interval $[-pi, pi]$.
 
     Parameters
     ----------
@@ -327,7 +327,7 @@ def P_index1(D):
     Returns
     -------
     float
-        Sum of wrapped angular differences divided by $\pi$.
+        Sum of wrapped angular differences divided by $pi$.
     """
     D = np.reshape(D, (2, 2))
     s = np.zeros((4))
@@ -374,7 +374,7 @@ def SourceSinkSaddle(delta, tau):
     Notes
     -----
     Classification follows the signs of the determinant and trace and the
-    discriminant $\tau^2 - 4\delta$.
+    discriminant tau^2 - delta.
     """
     if delta < 0:
         return 0, 0

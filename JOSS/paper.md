@@ -91,6 +91,6 @@ This project received funding from the European Research Council (ERC) under the
 [Environment file](https://github.com/kpetras/WaveSpace/blob/main/WaveSpaceEnv.yaml)
 
 # AI usage disclosure
-Github copilot in "ask" mode has been used in the initial translation of Matlab code to Python. When the resulting code was found to be inaccurate and failed to match the style of the rest of the package, most of it was manually re-written. Single word autocomplete was used throughout for code and comments. Copilot was used for code and formatting suggestions. No agentic AI was used. 
+Github copilot in "ask" mode has been used in the initial translation of Matlab code to Python. When the resulting code was found to be inaccurate and failed to match the style of the rest of the package, most of it was manually re-written. Single word autocomplete was used throughout for code and comments. Copilot was used for code and formatting suggestions. Agentic AI was used to draft documentation. 
 
 # References

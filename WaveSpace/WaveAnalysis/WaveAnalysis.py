@@ -10,7 +10,7 @@ def FFT_2D(waveData, channelIndices, lowerBound, upperBound, DataBucketName = ""
 
     The transform identifies peak power at positive and negative spatial
     frequencies within the requested temporal-frequency interval, representing
-    propagation along the selected cannel indices.
+    propagation along the selected channel indices.
 
     Parameters
     ----------

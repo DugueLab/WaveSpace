@@ -7,9 +7,9 @@ from scipy.signal import detrend
 from scipy.signal import impulse
 from scipy.signal import firwin
 import numpy as np
+import mne
 
 def filter_broadband(waveData,dataBucketName = "", LowCutOff=0, HighCutOff=100,  n_jobs=5):
-    import mne
     """Apply an MNE non-causal band-pass filter to a data bucket.
 
     Parameters

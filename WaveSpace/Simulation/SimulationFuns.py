@@ -627,7 +627,7 @@ def CreateOscillatorMask(MatrixSize, SampleRate, SimDuration, SimOption):
     Returns
     -------
     numpy.ndarray
-        Mask ordered as x position, y position, and time. One marks selected
+        Mask ordered as x position, y position, and time. 1 marks selected
         spatial positions.
     """
     # selects which cells will be oscillating
@@ -714,7 +714,7 @@ def SNRMix(SignalWaveData, NoiseWaveData, SNR, Mask=None, SimLayout="channels"):
         Signal weighting. A scalar applies to all samples; arrays may match the
         signal shape or provide one value per trial.
     Mask : numpy.ndarray, default=None
-        Mask that suppresses the signal contribution where its value is one.
+        Mask that suppresses the signal contribution where its value is 1.
         When omitted, the ``Mask`` bucket in ``SignalWaveData`` is used when
         available.
     SimLayout : str, default="channels"
@@ -903,9 +903,6 @@ def abreu2010(f, nonlin_deg, nonlin_phi, sample_rate, seconds):
         The sampling frequency of the generated signal
     seconds : float
         The number of seconds of data to generate
-
-    math::
-        u(t) = U_wf \frac{ sin(\omega t) + \frac{r sin \phi}{1+\sqrt{1-r^2}} } {1-r cos(\omega t+ \phi)}
 
     References
     ----------

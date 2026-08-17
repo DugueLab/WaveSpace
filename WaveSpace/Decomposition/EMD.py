@@ -22,6 +22,7 @@ def start_emd_logging():
 # Utility funs________________________________________________
 def FreqAmpPhaseFromAnalytic(waveData, smooth_phase=None, smooth_freq = 3, dataBucketName="", timeRange=(slice(None))):
     """Get the instantaneous frequency, amplitude, and phase from the analytic signal.
+    
     Parameters
     ----------
     waveData : WaveSpace.Utils.WaveData.WaveData
@@ -78,6 +79,7 @@ def FreqAmpPhaseFromAnalytic(waveData, smooth_phase=None, smooth_freq = 3, dataB
 
 def checkFrequencySpectrum(IA, IF, waveData, freqMin, freqMax, nbins=50, trialnum=0, chanNum=0, FOI = None):
     """Plot the frequency spectrum of the instantaneous amplitude and frequency.
+    
     Parameters
     ----------
     IA : numpy.ndarray
@@ -367,6 +369,7 @@ def EMD(waveData, nIMFs=7, dataBucketName="", noiseVar = 0.05, n_noiseChans = 10
     Note that to speed things up a little, this function uses multiprocessing with numpy arrays. The number of intrinsic
     mode functions that are actually found in the data may be less than the number of IMFs requested for any given timeseries.
     Those rows of the output array will be filled with NaNs. If you have a better idea for how to do this, please let me know via github.
+    
     Parameters
     ----------
     waveData : WaveSpace.Utils.WaveData.WaveData
