@@ -4,11 +4,24 @@ Creating a WaveData Object
 This tutorial demonstrates how to create a `WaveData` object in **WaveSpace**
 from scratch, including adding data, metadata, and optional information such
 as channel positions and trial info.
+
 """
 
 # %%
 # Setup
 # -----
+# Optional: Add the project root directory to the Python path if you have just checked out the repository and
+# did not install the package into your Python environment:
+#
+# .. code-block:: python
+#
+#    import os
+#    import sys
+#    path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+#    sys.path.insert(0, path)
+#
+# Otherwise just import
+
 import numpy as np
 
 from WaveSpace.Utils import WaveData

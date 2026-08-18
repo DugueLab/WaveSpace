@@ -9,6 +9,17 @@ grid. EEG, MEG sensors usually come with 3d coordinates.
 # %%
 # Setup
 # -----
+# Optional: Add the project root directory to the Python path if you have just checked out the repository and
+# did not install the package into your Python environment:
+#
+# .. code-block:: python
+#
+#    import os
+#    import sys
+#    path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+#    sys.path.insert(0, path)
+#
+# Otherwise just import
 import os
 from pathlib import Path
 
