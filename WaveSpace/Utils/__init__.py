@@ -1,3 +1,3 @@
-from . import HelperFuns, ImportHelpers, WaveData, WaveResult, generateFromLog
+from . import HelperFuns, ImportHelpers, WaveData, WaveResult
 
-__all__ = ["HelperFuns", "ImportHelpers", "WaveData", "WaveResult", "generateFromLog"]
+__all__ = ["HelperFuns", "ImportHelpers", "WaveData", "WaveResult"]
