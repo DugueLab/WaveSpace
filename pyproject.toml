@@ -56,15 +56,6 @@ Repository = "https://github.com/kpetras/WaveSpace"
 Issues = "https://github.com/kpetras/WaveSpace/issues"
 Documentation = "https://wavespace.readthedocs.io"
 
-[project.optional-dependencies]
-memd = [
-    "chaospy",
-    "numba",
-]
-cluster = [
-    "pycircstat",
-]
-
 [dependency-groups]
 dev = [
     "ruff",
