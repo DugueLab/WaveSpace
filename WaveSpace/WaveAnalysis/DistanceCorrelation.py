@@ -39,7 +39,7 @@ def calculate_distance_correlation(waveData, dataBucketName = "", sourcePoints =
     The result stores a correlation coefficient and p-value for every trial,
     source point, and time point.
     """
-    if sourcePoints == None:
+    if sourcePoints is None:
         sourcePoints = []
 
     if  dataBucketName == "":
