@@ -417,8 +417,8 @@ def makeContours(u, v, Nmin, Lmin_source, Lmax_sink):
     Contours are generated from the divergence of the vector field using
     :func:`matplotlib.pyplot.contour`.
     """
-    [uy, ux] = np.gradient(u)
-    [vy, vx] = np.gradient(v)
+    [_uy, ux] = np.gradient(u)
+    [vy, _vx] = np.gradient(v)
 
     div1 = ux + vy  # Divergence
     sourceContours = []

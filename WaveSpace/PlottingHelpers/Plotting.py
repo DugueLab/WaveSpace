@@ -71,7 +71,7 @@ def get_color_grid_from_probes(gridsize, probes):
             color_grid[i, j] = color
     return color_grid
 
-def add_color_grid_legend(ax, color_grid, position=[0.8, 0.8, 2.0, 2.0], border=True):
+def add_color_grid_legend(ax, color_grid, position=None, border=True):
     """Add a color-grid legend as an inset in a Matplotlib axes.
 
     Parameters
@@ -465,8 +465,8 @@ def plot_timeseries_on_surface(Surface, waveData, dataBucketName = " ", indices 
     )
     fig.show()
     return fig
-#
-def animate_grid_data(gridData,DataBucketName = "", dataInd = None, probepositions=[(0,0)], plottype = "real"):
+
+def animate_grid_data(gridData,DataBucketName = "", dataInd = None, probepositions=None, plottype = "real"):
     """Animate gridData over time and show time series at selected probe positions.
 
     Parameters

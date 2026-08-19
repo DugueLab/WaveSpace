@@ -13,7 +13,7 @@ from WaveSpace.Utils import HelperFuns as hf
 from WaveSpace.Utils import WaveData as wa
 
 
-def calculate_distance_correlation(waveData, dataBucketName = "", sourcePoints = [], pixelSpacing= 1):
+def calculate_distance_correlation(waveData, dataBucketName = "", sourcePoints = None, pixelSpacing= 1):
     """Calculate circular-linear phase-distance correlations from source points.
 
     Parameters
@@ -39,6 +39,9 @@ def calculate_distance_correlation(waveData, dataBucketName = "", sourcePoints =
     The result stores a correlation coefficient and p-value for every trial,
     source point, and time point.
     """
+    if sourcePoints == None:
+        sourcePoints = []
+
     if  dataBucketName == "":
         dataBucketName =  waveData.ActiveDataBucket
     else:

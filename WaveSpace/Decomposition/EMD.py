@@ -171,7 +171,7 @@ def freqSpecTrialAverage(waveData, freqMin, freqMax, nbins=50, dataBucketName = 
     -------
     list[numpy.ndarray]
     """
-    freqEdges, freqCenters = emd.spectra.define_hist_bins(
+    freqEdges, _freqCenters = emd.spectra.define_hist_bins(
         freqMin, freqMax, nbins)
     if dataBucketName == "":
         dataBucketName = waveData.ActiveDataBucket

@@ -69,8 +69,8 @@ def divergence(U, V):
     numpy.ndarray
         Divergence at each spatial position.
     """
-    dud, px = np.gradient(U)
-    qy, dud = np.gradient(V)
+    _dud, px = np.gradient(U)
+    qy, _dud = np.gradient(V)
     return px+qy
 
 def add_noise_channels(data, proportion=1.0, No_noise_channels=10):
@@ -785,7 +785,6 @@ def normalize_data(waveData, dimension = "", dataBucketName = " "):
     None
         Adds a ``<dataBucketName>_MagnitudeNormalized`` data bucket.
     """
-    chanshape = []
     if dataBucketName == " ":
         dataBucketName = waveData.ActiveDataBucket
     waveData.set_active_dataBucket(dataBucketName)
@@ -848,7 +847,6 @@ def z_score_data(waveData, dimension = "", dataBucketName = " "):
     None
         Adds a ``<dataBucketName>_zScored`` data bucket.
     """
-    chanshape = []
     if dataBucketName == " ":
         dataBucketName = waveData.ActiveDataBucket
     waveData.set_active_dataBucket(dataBucketName)
@@ -895,7 +893,7 @@ def z_score_data(waveData, dimension = "", dataBucketName = " "):
     waveData.add_data_bucket(dataBucket)
     waveData.log_history(["z score", "z scored over " + '_'.join(dimension)])
 
-def rescale_data_in_Bucket(waveData, dimension =['posx', 'posy', 'time'], range = (0,1),dataBucketName = ""):
+def rescale_data_in_Bucket(waveData, dimension =None , range = (0,1),dataBucketName = ""):
     """Rescale data to a target range over selected dimensions.
 
     Parameters
@@ -911,6 +909,8 @@ def rescale_data_in_Bucket(waveData, dimension =['posx', 'posy', 'time'], range 
     None
         Adds a ``<dataBucketName>_rescaled`` data bucket.
     """
+    if dimension == None:
+        dimension =['posx', 'posy', 'time']
     if dataBucketName == " ":
         dataBucketName = waveData.ActiveDataBucket
     waveData.set_active_dataBucket(dataBucketName)

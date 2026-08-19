@@ -54,7 +54,7 @@ def assertCorrectWaveSettings(Type, ntrials, waveSettings):
             assert len(item[1])==ntrials, f"Length of supplied array for \"{item[0]}\" must equal amount of trials"
 
 #%%
-def simulate_signal(Type, ntrials, MatrixSize, SampleRate, SimDuration, SimLayout= "channels",time=[], **waveSettings):
+def simulate_signal(Type, ntrials, MatrixSize, SampleRate, SimDuration, SimLayout= "channels",time=None, **waveSettings):
     """Generate simulated wave or noise data as a WaveData object.
 
     Parameters
@@ -166,7 +166,7 @@ def initialize_data(MatrixSize, SampleRate,SimDuration):
     """
     return np.zeros((MatrixSize,MatrixSize,int(np.floor(SimDuration * SampleRate))))  
 
-def create_wavedata(data, SampleRate, SimDuration, SimLayout, simOptions, name = "SimulatedData", time=[]):
+def create_wavedata(data, SampleRate, SimDuration, SimLayout, simOptions, name = "SimulatedData", time=None):
     """Create a WaveData object from simulated array data.
 
     Parameters

@@ -54,7 +54,7 @@ def FFT_2D(waveData, channelIndices, lowerBound, upperBound, DataBucketName = ""
     """
     
 
-    if not DataBucketName == "":
+    if DataBucketName != "":
         waveData.set_active_dataBucket(DataBucketName)
 
     HelperFuns.assure_consistency(waveData)
@@ -154,7 +154,7 @@ def FFT_2D_shuffle_and_average(waveData, channelIndices, lowerBound, upperBound,
     -------
     None
     """
-    if not DataBucketName == "":
+    if DataBucketName != "":
         waveData.set_active_dataBucket(DataBucketName)
     HelperFuns.assure_consistency(waveData)
     shape = waveData.get_active_data().shape

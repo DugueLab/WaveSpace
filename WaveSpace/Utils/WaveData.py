@@ -8,7 +8,7 @@ from . import ImportHelpers
 
 
 class DataBucket:
-    def __init__(self, data, description, dimord, chanNames, sampleRate=1000, time=[], unit=""):
+    def __init__(self, data, description, dimord, chanNames, sampleRate=1000, time=None, unit=""):
         """Store one named data array and its metadata.
 
         Parameters
@@ -32,6 +32,9 @@ class DataBucket:
         unit : str, default=""
             Physical unit of the stored data.
         """
+        if time == None:
+            time = []
+        
         self._data = data
         self._description = description
         self._dimord = dimord
@@ -224,22 +227,8 @@ class DataBucket:
         if len(chanShape) > 0 :
             self._chanNames = np.reshape(self._chanNames, chanShape, order="C")
 
-    def assure_consistency():
-        """Provide a placeholder consistency check.
-
-        Returns
-        -------
-        None
-            Always returns ``None``.
-
-        Notes
-        -----
-        This method currently performs no validation.
-        """
-        return None
-
-class WaveData():
-    def __init__(self, chanpos=[], coords2D=[], time = [], sampleRate=0.0):
+class WaveData:
+    def __init__(self, chanpos=None, coords2D=None, time = None, sampleRate=0.0):
         """Create an empty container for WaveSpace data buckets and metadata.
 
         Parameters
@@ -380,7 +369,7 @@ class WaveData():
         NameError
             If no bucket has the requested name.
         """
-        if dataBucketName in self.DataBuckets.keys():
+        if dataBucketName in self.DataBuckets:
             del self.DataBuckets[dataBucketName]
         else:
             raise NameError("DataBucket does not exist")
@@ -558,7 +547,7 @@ class WaveData():
         Exception
             If no bucket has the requested name.
         """
-        if not (name in self.DataBuckets.keys()):
+        if not (name in self.DataBuckets):
             raise KeyError(f"DataBucket {name} does not exist, can not set as active databucket")
         self.ActiveDataBucket = name
 

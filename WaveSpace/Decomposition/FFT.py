@@ -8,7 +8,7 @@ from WaveSpace.Utils import WaveData as wd
 
 
 #%%
-def hann_fft(waveData, dataBucketName = "", timeStart = [], timeEnd = [], timeStep = 1, freqStart = 0, freqEnd = -1):
+def hann_fft(waveData, dataBucketName = "", timeStart = None, timeEnd =  None, timeStep = 1, freqStart = 0, freqEnd = -1):
     """Compute a Hann-windowed fast Fourier transform over time.
 
     Parameters

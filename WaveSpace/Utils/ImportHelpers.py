@@ -102,7 +102,7 @@ def save_wavedata_object(waveData, filename):
 
 
     """
-    f = open(filename, 'wb')
+    f = open(filename, 'wb')  # noqa: SIM115
     pickle.dump(waveData, f, pickle.HIGHEST_PROTOCOL)
     f.close()
 
