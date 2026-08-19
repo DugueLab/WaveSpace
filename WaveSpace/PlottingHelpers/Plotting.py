@@ -592,10 +592,7 @@ def plot_topomap(waveData, dataBucketName=None, dataInds=None,timeInds= None, tr
     elif isinstance(timeInds, int): #single timepoint
         data = data[:, :, timeInds]
 
-    if trlInd is None:#average over trials
-        data = np.mean(data, axis=0)
-    else:
-        data= data[trlInd]   
+    data = np.mean(data, axis=0) if trlInd is None else data[trlInd]
         
     # Create a grid to interpolate the data
     grid_x, grid_y = np.mgrid[
@@ -785,10 +782,7 @@ def plot_streamlines(UV, seedpoints):
         # Arrange 2d vector-fields in space-time(added 3rd dimension = time)
         newarray = np.stack(
             (np.ravel(u[:, :, tt]) ** 3, np.ravel(v[:, :, tt]) ** 3, np.ones(u[:, :, tt].size))).T
-        if tt == 0:
-            vectors = newarray
-        else:
-            vectors = np.vstack((vectors, newarray))
+        vectors = newarray if tt == 0 else np.vstack((vectors, newarray))
     # Create polydata object
     mesh['vectors'] = vectors
     #create plotters
@@ -800,9 +794,6 @@ def plot_streamlines(UV, seedpoints):
         wrappedPoints, 'vectors', integration_direction="forward",
         initial_step_length=0.5, max_step_length=0.5, min_step_length=0.5,
         interpolator_type="cell")
-
-    for cellID in range(stream.n_cells):
-        stream.get_cell(cellID).points
 
     # plotting vectors
     # pdata.glyph(orient='vectors', scale='mag').plot()

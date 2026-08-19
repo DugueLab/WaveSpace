@@ -60,7 +60,6 @@ def find_wave_activity(waveData, dataBucketName=None, dataInd = None, nBases=3):
 
         groupDimensions = splitDimensions[0:nGroupDimensions]
         groupDimSizes = origShape[:len(groupDimensions)]
-        np.array(np.unravel_index(np.arange(complexData.shape[0]), groupDimSizes)).T
         
         bases = np.reshape(bases, (*channelShape, bases.shape[-1]))
         basesBucket = wd.DataBucket(bases,"Bases","posx_posy_base",chanNames= chan_names)

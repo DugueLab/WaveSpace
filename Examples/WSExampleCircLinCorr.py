@@ -124,7 +124,7 @@ if not os.environ.get("BUILDING_DOCS"):
 
     rho = np.zeros((8, 20, 20))
     for condInd, condition in enumerate(conditions):
-        for i, (x, y) in enumerate(sourcePoints):
+        for x, y in sourcePoints:
             phaseDistCorrOverTime = phaseDistCorr.loc[(phaseDistCorr["trialInd"] == condInd * 2) &
                                                     (phaseDistCorr["sourcePointX"] == x) &
                                                     (phaseDistCorr["sourcePointY"] == y)]

@@ -159,10 +159,7 @@ def freqSpecTrialAverage(waveData, freqMin, freqMax, nbins=50, dataBucketName = 
 def freqSpecTrialAverageProcessChannel(args):
     IF, IA, trials, freqEdges, sample_rate, tempSpec = args
     for trl in range(trials):
-        if np.isnan(IF[:,trl,0]).any():
-            ind = np.min(np.where(np.isnan(IF)))
-        else:
-            ind= IF.shape[0]+1
+        ind = np.min(np.where(np.isnan(IF))) if np.isnan(IF[:,trl,0]).any() else IF.shape[0]+1
         _f, IMFspectrum = emd.spectra.hilberthuang(
                 IF[0:ind,trl,:].T, IA[0:ind,trl, :].T, freqEdges, sample_rate= sample_rate , sum_imfs=True)
         tempSpec[trl,:] = IMFspectrum

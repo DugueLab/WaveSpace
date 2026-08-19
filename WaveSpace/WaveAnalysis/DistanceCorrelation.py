@@ -24,9 +24,8 @@ def calculate_distance_correlation(waveData, dataBucketName = "", sourcePoints =
     hf.assure_consistency(waveData)
     complexData = waveData.get_data(dataBucketName)
     origDimord = waveData.DataBuckets[dataBucketName].get_dimord()
-    origShape = complexData.shape
     desiredDimord = "trl_posx_posy_time"
-    hasBeenReshaped, complexData =  hf.force_dimord(complexData, origDimord , desiredDimord)
+    _hasBeenReshaped, complexData =  hf.force_dimord(complexData, origDimord , desiredDimord)
     nTrials = complexData.shape[0]
     if os.name == 'posix':  # Unix 
         pool = Pool(cpu_count())
@@ -36,12 +35,6 @@ def calculate_distance_correlation(waveData, dataBucketName = "", sourcePoints =
         output = Parallel(n_jobs=cpu_count())(delayed(phase_dist_corr_task)([np.angle(complexData[ii]),ii, sourcePoints, pixelSpacing]) for ii in range(nTrials))
     
     df = pd.concat(output, ignore_index=True)
-    if hasBeenReshaped:
-        origDimordList = str.split(origDimord, '_')
-        groupDims  = [dim for dim in origDimordList if not (dim == "posx" or dim =="posy" or dim == "time")]
-        groupDimSizes = origShape[:len(groupDims)]
-        np.array(np.unravel_index(np.arange(complexData.shape[0]), groupDimSizes)).T
-          
     phaseCorrBucket = wa.DataBucket(df, "PhaseDistanceCorrelation", "DataFrame", sampleRate=waveData.get_sample_rate() ,chanNames= waveData.get_channel_names())
     waveData.add_data_bucket(phaseCorrBucket)
 
@@ -49,7 +42,7 @@ def phase_dist_corr_task(args):
     data, ii, sourcePoints, pixelSpacing, = args
     nTimePoints = data.shape[-1]
     df = DataFrame(columns=['trialInd', 'sourcePointX', 'sourcePointY', 'evaluationPoint', 'rho', 'p'])
-    for sourceIndex, sourcePoint in enumerate(sourcePoints):
+    for sourcePoint in sourcePoints:
         for timePoint in range(nTimePoints):
             corr = phase_dist_corr(data[:,:,timePoint], sourcePoint, pixelSpacing)
             df.loc[len(df)] =  ii, sourcePoint[0], sourcePoint[1], timePoint, corr[0], corr[1]
@@ -127,7 +120,7 @@ def calculate_distance_correlation_GP(waveData, dataBucketName = "", evaluationA
         groupDims  = [dim for dim in origDimordList if not (dim == "posx" or dim =="posy" or dim == "time")]
         groupDimSizes = origShape[:len(groupDims)]
         multi_indices  = np.array(np.unravel_index(np.arange(complexData.shape[0]), groupDimSizes)).T
-        for ind, dim in enumerate(groupDims):
+        for dim in groupDims:
                 df.insert(0,dim,0)
 
         for TargetTrialInd, currentIndex in enumerate(multi_indices):

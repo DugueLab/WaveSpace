@@ -151,7 +151,7 @@ def force_dimord(data,  currentDimord, desiredDimord):
     chanshape = ()
     if new_last_dims != last_dims: 
         if (len(new_last_dims) > len(last_dims)): 
-            raise Exception("Function requires XY positions")
+            raise ValueError("Function requires XY positions")
         if (len(new_last_dims) < len(last_dims)): 
             data, chanshape = posxy_to_chan(data)
             oldDims.remove("posx")

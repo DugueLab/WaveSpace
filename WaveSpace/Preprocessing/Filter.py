@@ -99,13 +99,8 @@ def filter_narrowband(waveData, dataBucketName = "", LowCutOff=0, HighCutOff=120
     b, a, impulse_response_length = bandpass(LowCutOff, HighCutOff, waveData.get_sample_rate(),type=type, order=order)
     print("CAUTION!!! Impulse response length: " + str(impulse_response_length))
     
-    # Apply the filter
-    if causal:
-        # For a causal filter, use lfilter
-        NewData = lfilter(b, a, currentData)
-    else:
-        # For a non-causal filter, use filtfilt
-        NewData = filtfilt(b, a, currentData)
+    # Apply the filter.
+    NewData = lfilter(b, a, currentData) if causal else filtfilt(b, a, currentData)
 
     if hasBeenReshaped:
         NewData = np.reshape(NewData, origShape)

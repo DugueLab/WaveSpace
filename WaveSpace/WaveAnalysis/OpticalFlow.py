@@ -74,7 +74,7 @@ def create_uv(waveData, applyGaussianBlur=False, type = "real", Sigma=1, alpha =
 
     if hasBeenReshaped:
         #reshape back to original dimord, take into account that the last dimension has been reduced by 1
-        allUV = np.reshape(allUV, oldshape[:-1] + (oldshape[-1] - 1,)) 
+        allUV = np.reshape(allUV, (*oldshape[:-1], oldshape[-1] - 1)) 
     time = waveData.get_time(dataBucketName)[:-1]      
     dataBucket = wd.DataBucket(allUV, "UV",currentDimord,
                                time=time, 
@@ -118,7 +118,7 @@ def HS(im1, im2, U,V, alpha, kernel, maxIter, is_phase, tol=1e-6):
     # derivatives
     [fx, fy, ft] = computeDerivatives(im1, im2, is_phase)
     
-    for iter_count in range(maxIter):
+    for _iter_count in range(maxIter):
         U_old = U.copy()
         V_old = V.copy()
         
@@ -134,7 +134,7 @@ def HS(im1, im2, U,V, alpha, kernel, maxIter, is_phase, tol=1e-6):
         if change < tol:
             break    
 
-    return U, V, iter_count + 1
+    return U, V, _iter_count + 1
 
 def normalize_angle(p):
     return -np.mod(p + np.pi, 2*np.pi) + np.pi
@@ -221,10 +221,7 @@ def SourceSinkSaddle(delta, tau):
     # delta > 0
     if tau == 0:
         return 2, 1
-    if tau > 0:
-        type = 1
-    else:
-        type = -1
+    type = 1 if tau > 0 else -1
     if tau * tau < 4 * delta:
         return type, 1
     return type, 0

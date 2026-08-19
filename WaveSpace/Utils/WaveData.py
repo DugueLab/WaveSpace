@@ -209,7 +209,7 @@ class WaveData:
 
     def set_active_dataBucket(self, name):
         if name not in self.DataBuckets:
-            raise Exception(f"DataBucket {name} does not exist, can not set as active databucket")
+            raise KeyError(f"DataBucket {name} does not exist, can not set as active databucket")
         self.ActiveDataBucket = name
 
     def set_sample_rate(self, sampleRate):

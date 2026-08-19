@@ -221,7 +221,8 @@ def create_plane_wave_mask(MatrixSize, SampleRate, SimDuration,SimOption):
 
         #Signal Onset        
         if (timeSample < (len(onsetTimeVector) + onsetStartingIndex)) and (timeSample >= onsetStartingIndex) :            
-            MatrixFunction = np.vectorize(lambda a : 0.0 if a <= onsetTimeVector[timeSample-onsetStartingIndex] else 1.0)
+            onset = onsetTimeVector[timeSample - onsetStartingIndex]
+            MatrixFunction = np.vectorize(lambda a, onset=onset: 0.0 if a <= onset else 1.0)
             MaskCube[:,:,timeSample]  = MatrixFunction(M)
 
         # no mask Sustain
@@ -230,8 +231,8 @@ def create_plane_wave_mask(MatrixSize, SampleRate, SimDuration,SimOption):
 
         #Offset
         if (timeSample >= offsetStartingIndex) and (timeSample < offsetStartingIndex + len(onsetTimeVector)):            
-            MatrixFunction = np.vectorize(lambda a : 1.0\
-                            if a <= onsetTimeVector[timeSample - offsetStartingIndex ] else 0.0)
+            offset = onsetTimeVector[timeSample - offsetStartingIndex]
+            MatrixFunction = np.vectorize(lambda a, offset=offset: 1.0 if a <= offset else 0.0)
             MaskCube[:,:,timeSample]  = MatrixFunction(M)
         #Signal Off
         if (timeSample >= offsetStartingIndex + len(onsetTimeVector)):
@@ -364,7 +365,7 @@ def create_pink_noise( MatrixSize, SampleRate, SimDuration):
         u = matlib.repmat(u,MatrixSize, 1)
         v = u.T
         SF = (u**2 + v**2)**(beta / 2)
-        SF[SF==np.inf] = 0
+        SF[np.inf == SF] = 0
         # phi=(np.reshape(np.arange(0,1,1/(16*16)),[16,16])).T
         #Take timepoint over space
         phi=scale(signalCube[:,:,i],[0,2*np.pi]).T

@@ -77,7 +77,7 @@ class wavedata_test(unittest.TestCase):
     def test_exception_on_setting_non_existent_databucket(self):
         #Tries to set active databucket to a non-existent one and checks if an error is raised
         self.assertRaises(
-            Exception,
+            KeyError,
             self.waveData.set_active_dataBucket,
             "illegal name"
         )

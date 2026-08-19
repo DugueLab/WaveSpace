@@ -94,7 +94,7 @@ gdist = "tvb-gdist"
 line-length = 100
 
 [tool.ruff.lint]
-extend-select = ["I"]
+extend-select = ["I", "B", "UP", "SIM", "C4", "PIE", "RUF"]
 ignore = [    
     "N999",    # invalid-module-name
     "TRY002",  # raise-vanilla-class

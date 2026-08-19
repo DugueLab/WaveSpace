@@ -36,7 +36,7 @@ if os.path.isdir(_target):
         os.symlink(_target, _link)
 
 project = "WaveSpace"
-copyright = "2025–2026, Kirsten Petras, Dennis Croonenberg, Laura Dugué"
+copyright = "2025-2026, Kirsten Petras, Dennis Croonenberg, Laura Dugué"
 author = "Kirsten Petras, Dennis Croonenberg, Laura Dugué"
 release = _pkg_version("WaveSpace")
 

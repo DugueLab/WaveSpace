@@ -387,7 +387,7 @@ def plot_distance_along_surface(waveData):
                 line_shapes.append(line)
 
     # Combine the scatter plot and line shapes
-    plotData = [scatter] + line_shapes
+    plotData = [scatter, *line_shapes]
     min_distance = DistMat.min()
     max_distance = DistMat.max()
     coolwarm = [[0, 'blue'], [0.5, 'white'], [1, 'red']]
@@ -404,7 +404,7 @@ def plot_distance_along_surface(waveData):
     )
 
     # Add the dummy scatter plot to the data
-    plotData = [scatter, dummy_scatter] + line_shapes
+    plotData = [scatter, dummy_scatter, *line_shapes]
 
     # Define the layout of the plot
     layout = go.Layout(
@@ -592,10 +592,7 @@ def interpolate_pos_to_grid(waveData, numGridBins=10, dataBucketName = "", retur
     range_x = x_max - x_min
     range_y = y_max - y_min
     step_size = max(range_x, range_y) / (numGridBins - 1)
-    if mask_stretching:
-        stretch = step_size * 2 
-    else:
-        stretch = 0
+    stretch = step_size * 2 if mask_stretching else 0
     # Calculate the new min and max for x and y to create a square grid
     x_min_new = x_min - (step_size * numGridBins - range_x) / 2
     x_max_new = x_min_new + step_size * numGridBins
@@ -704,10 +701,7 @@ def apply_mask(waveData, mask, dataBucketName, overwrite = True, maskValue = 0.,
     oldshape = data.shape
     currentDimord = waveData.DataBuckets[dataBucketName].get_dimord()
     currentDims = currentDimord.split("_")
-    if len(mask.shape)==2:
-        desiredDimord = "trl_posx_posy_time"
-    else:
-        desiredDimord = "trl_chan_time"
+    desiredDimord = "trl_posx_posy_time" if len(mask.shape) == 2 else "trl_chan_time"
     desiredDims = desiredDimord.split("_")
     hasBeenReshaped, data =  hf.force_dimord(data, currentDimord , desiredDimord)
     data[:,~mask,:] = maskValue

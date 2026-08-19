@@ -72,7 +72,7 @@ for cond in unique_conds:
 # Note that this only makes sense if we **already know** that there is a
 # narrowband oscillation at the frequency of interest.
 # To demonstrate this, we will filter the data at 17Hz as well.
-for freqInd, freq in enumerate([10, 17]):
+for freq in [10, 17]:
     Filter.filter_narrowband(waveData, dataBucketName="SimulatedData", LowCutOff=freq - 1, HighCutOff=freq + 1, type="FIR", order=100, causal=False)
     waveData.DataBuckets[str(freq)] = waveData.DataBuckets.pop("NBFiltered")  # Rename
 
