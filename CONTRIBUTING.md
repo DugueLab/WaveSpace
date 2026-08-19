@@ -34,7 +34,7 @@ WaveSpace enforces linting with [Ruff](https://docs.astral.sh/ruff/). Pull reque
 uv run --only-group dev ruff check .
 ```
 
-The rules enforce import sorting and checks for common bugs, outdated Python syntax, unnecessary complexity, and problematic comprehensions. The complete, authoritative configuration is in `pyproject.toml`. Please keep functions focused, use descriptive names, and avoid unrelated formatting changes in the same pull request.
+The rules enforce import sorting and checks for common bugs, outdated Python syntax, unnecessary complexity, and problematic comprehensions. The complete, authoritative configuration is in `pyproject.toml`. Please keep functions focused, use descriptive names, and avoid unrelated formatting changes in the same pull request. Use NumPy-style docstrings for public modules, classes, and functions, including `Parameters`, `Returns`, and `Raises` sections where applicable.
 
 Ruff can automatically correct many findings:
 
