@@ -6,12 +6,29 @@ import WaveSpace.Utils.WaveData as wd
 
 
 def apply_hilbert(waveData, dataBucketName =None ):
-    """
-    Computes the hilbert transform of the data in the active data bucket.
-    The hilbert transform is computed along the time dimension of the data array.
+    """Compute the analytic signal with a Hilbert transform.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing the data to transform.
+    dataBucketName : str, default=None
+        Name of the input data bucket. Defaults to the active data bucket.
+
+    Returns
+    -------
+    None
+        Adds the complex analytic signal to ``waveData`` as the ``complexData``
+        databucket.
+
+    Notes
+    -----
+    The transform is computed along the time dimension. For interpretable
+    instantaneous phase, use a sufficiently narrowband input such as the
+    output of :func:`WaveSpace.Preprocessing.Filter.filter_narrowband`.
     """
     # ensure proper bookkeeping of data dimensions
-    if dataBucketName == "":
+    if dataBucketName == None:
         dataBucketName = waveData.ActiveDataBucket
     else:
         waveData.set_active_dataBucket(dataBucketName)
