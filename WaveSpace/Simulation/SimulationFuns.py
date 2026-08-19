@@ -91,6 +91,8 @@ def simulate_signal(Type, ntrials, MatrixSize, SampleRate, SimDuration, SimLayou
         simulation settings attached. A ``Mask`` bucket is added when onset,
         duration, or oscillator-proportion settings are supplied.
     """
+    if time is None:
+        time = []
     assertCorrectWaveSettings(Type, ntrials, waveSettings)
     #InitializeDataCubes
     fullData = np.zeros((ntrials,MatrixSize,MatrixSize,int(np.floor(SampleRate*SimDuration))))
