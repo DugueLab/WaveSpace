@@ -5,7 +5,7 @@ WaveSpace
 Python tools for the simulation and analysis of cortical traveling waves
 
 .. contents:: Table of Contents
-  :depth: 2
+  :depth: 3
 
 Statement of Need
 =================
@@ -90,8 +90,35 @@ simulation and analysis of cortical traveling waves.
 
    auto_examples/index
 
+The WaveData Class
+------------------
+
+The ``WaveData`` class serves as a container for time-series data related to cortical traveling waves. It provides functionalities for data storage, manipulation, and analysis, ensuring a structured workflow for handling multi-channel neural recordings.
+
+Key Features
+~~~~~~~~~~~~
+
+- **Initialization (`__init__`)**: Stores channel positions, time vectors, sample rates, and maintains a structured dataset with multiple *DataBuckets* for flexible data handling.
+- **Data Management**:
+  - Supports multiple datasets through *DataBuckets*, enabling users to store, retrieve, and manipulate data flexibly.
+  - Provides methods to add, delete, and check the existence of specific *DataBuckets*.
+  - Allows appending datasets and setting an active dataset for streamlined analysis.
+- **Data Processing**:
+  - Cropping: Enables temporal cropping of data using specific time intervals.
+  - Trial Pruning: Removes unwanted trials from datasets while maintaining metadata consistency.
+- **Metadata Handling**:
+  - Stores and retrieves spatial arrangements of recording channels (``set_channel_positions``, ``get_channel_positions``).
+  - Maintains a history of operations for reproducibility (``log_history``).
+  - Supports storage and retrieval of simulation and trial metadata (``set_simInfo``, ``get_trialInfo``).
+- **I/O and Persistence**:
+  - Saves objects to files for later retrieval (``save_to_file``).
+  - Provides a structured string representation (``__repr__``) for quick dataset summaries.
+
+This class is essential for organizing and processing large-scale neural recordings, offering flexibility in data structuring, preprocessing, and visualization.
+
+
 API Reference
--------------
+=============
 
 .. toctree::
    :maxdepth: 2
@@ -99,7 +126,7 @@ API Reference
    source/api
 
 Testing
--------
+=======
 
 WaveSpace includes an automated test suite based on Python's built-in
 ``unittest`` framework. The tests are located in the ``UnitTest`` directory.
@@ -122,31 +149,6 @@ Python 3.9 through 3.14 on pushes to the ``main`` branch and on pull
 requests. This helps ensure that changes remain compatible with the
 supported Python versions.
 
-The WaveData Class
-------------------
-
-The ``WaveData`` class serves as a container for time-series data related to cortical traveling waves. It provides functionalities for data storage, manipulation, and analysis, ensuring a structured workflow for handling multi-channel neural recordings.
-
-Key Features
-------------
-
-- **Initialization (`__init__`)**: Stores channel positions, time vectors, sample rates, and maintains a structured dataset with multiple *DataBuckets* for flexible data handling.
-- **Data Management**:
-  - Supports multiple datasets through *DataBuckets*, enabling users to store, retrieve, and manipulate data flexibly.
-  - Provides methods to add, delete, and check the existence of specific *DataBuckets*.
-  - Allows appending datasets and setting an active dataset for streamlined analysis.
-- **Data Processing**:
-  - Cropping: Enables temporal cropping of data using specific time intervals.
-  - Trial Pruning: Removes unwanted trials from datasets while maintaining metadata consistency.
-- **Metadata Handling**:
-  - Stores and retrieves spatial arrangements of recording channels (``set_channel_positions``, ``get_channel_positions``).
-  - Maintains a history of operations for reproducibility (``log_history``).
-  - Supports storage and retrieval of simulation and trial metadata (``set_simInfo``, ``get_trialInfo``).
-- **I/O and Persistence**:
-  - Saves objects to files for later retrieval (``save_to_file``).
-  - Provides a structured string representation (``__repr__``) for quick dataset summaries.
-
-This class is essential for organizing and processing large-scale neural recordings, offering flexibility in data structuring, preprocessing, and visualization.
 
 Community and Support
 ---------------------
