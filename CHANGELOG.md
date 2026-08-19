@@ -20,7 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Standardized public documentation on NumPy-style docstrings.
 
 ### Removed
-- Removed `ClusterGradient`, `MEMD_Matlab_translation`, and `generateFromLog` modules, as they were still in development.
+- Removed `ClusterGradient`, `MEMD_Matlab_translation`, and `generateFromLog` modules, as they are still in development.
 
 ## [1.1.8] - 2026-08-12
 
