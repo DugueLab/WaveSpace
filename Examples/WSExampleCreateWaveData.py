@@ -76,3 +76,5 @@ waveData.add_data_bucket(fakeEEG)
 waveData.set_channel_positions(chanpos)
 waveData.set_trialInfo(trialInfo)
 waveData.set_distMat(distMat)
+
+# %%

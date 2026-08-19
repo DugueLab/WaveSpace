@@ -32,7 +32,7 @@ class DataBucket:
         unit : str, default=""
             Physical unit of the stored data.
         """
-        if time == None:
+        if time is None:
             time = []
         
         self._data = data
