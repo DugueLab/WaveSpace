@@ -12,25 +12,45 @@ import os
 from functools import partial
 
 def create_uv(waveData, applyGaussianBlur=False, type = "real", Sigma=1, alpha = 2, maxIter = 100, is_phase = False, dataBucketName = ''): 
-    '''Calculate optical Flow using Horn-Schunck method. Not the fasted pony in the barn....
-    
-    code partially based on https://github.com/BrainDynamicsUSYD/NeuroPattToolbox (Matlab)
-       
-    Most of the logic comes from:
-    Townsend, R. G., & Gong, P. (2018). 
-    Detection and analysis of spatiotemporal patterns in brain 867 activity. 
-    PLoS Computational Biology, 14(12), e1006643.
+    """Estimate optical-flow vectors with the Horn-Schunck method. Not the fasted pony in the barn....
 
-    applyGaussianBlur: if True, apply Gaussian blur to images before calculating optical flow
-    Sigma: standard deviation of Gaussian blur kernel
-    nIter: number of iterations for Horn-Schunck optical flow calculation
-    alpha: smoothness weighting parameter, +alpha => smoother optical flow (typically 0<ALPHA<5) 
-    BETA: nonlinear penalty parameter. Beta close to zero will be more accurate, but slow (ToDo: implement!)
-    type: 'angle', 'abs' or 'real' (default: 'real') which basis to use for optical flow calculation
-    !!careful!!: function expects complex data 
-    If you already have angles you want to use, choose type='real' and pass the angles as data, 
-    but set is_phase=True!!!
-    '''
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object with data arranged over two spatial dimensions and
+        time. Complex input can be transformed to phase, magnitude, or real
+        values before estimating flow.
+    applyGaussianBlur : bool, default=False
+        Apply Gaussian smoothing to each frame before flow estimation.
+    type : {"angle", "abs", "real"}, default="real"
+        Component of complex input used to calculate flow.
+    Sigma : float, default=1
+        Standard deviation of the Gaussian smoothing kernel.
+    alpha : float, default=2
+        Horn-Schunck smoothness weight. Larger values produce smoother flow.
+    maxIter : int, default=100
+        Maximum Horn-Schunck iterations per pair of frames.
+    is_phase : bool, default=False
+        Treat real-valued input as circular phase data.
+    dataBucketName : str, default=""
+        Name of the input data bucket. By default, the active data bucket is
+        used.
+
+    Returns
+    -------
+    None
+        Adds complex flow vectors to ``waveData`` as the ``UV`` bucket. The
+        real and imaginary components are the horizontal and vertical vectors,
+        respectively, and the time axis is one sample shorter than the input.
+
+    References
+    ----------
+    Townsend, R. G., & Gong, P. (2018). Detection and analysis of
+    spatiotemporal patterns in brain activity. PLOS Computational Biology,
+    14(12), e1006643.
+
+    code partially based on https://github.com/BrainDynamicsUSYD/NeuroPattToolbox (Matlab)
+    """
     if dataBucketName == "":
         dataBucketName = waveData.ActiveDataBucket
     else:
@@ -79,7 +99,41 @@ def create_uv(waveData, applyGaussianBlur=False, type = "real", Sigma=1, alpha =
     waveData.add_data_bucket(dataBucket)
 
 def uv_process_trial(trial_data, nframes , maxIter, uInitial, vInitial, kernel, applyGaussianBlur, Sigma, alpha,is_phase):
-    '''not to be called by user directly, but by create_uv.'''
+    """Estimate optical flow for each consecutive frame pair in one trial.
+
+    Parameters
+    ----------
+    trial_data : numpy.ndarray
+        Trial data ordered as x position, y position, and time.
+    nframes : int
+        Number of time frames in ``trial_data``.
+    maxIter : int
+        Maximum Horn-Schunck iterations for each frame pair.
+    uInitial, vInitial : numpy.ndarray
+        Initial horizontal and vertical velocity fields.
+    kernel : numpy.ndarray
+        Spatial averaging kernel used by the Horn-Schunck iteration.
+    applyGaussianBlur : bool
+        Whether to smooth each frame before estimating flow.
+    Sigma : float
+        Standard deviation of the Gaussian smoothing kernel.
+    alpha : float
+        Horn-Schunck smoothness weight.
+    is_phase : bool
+        Whether ``trial_data`` represents circular phase values.
+
+    Returns
+    -------
+    numpy.ndarray
+        Complex optical-flow vectors ordered as x position, y position, and
+        frame transition. Real and imaginary components represent horizontal
+        and vertical velocity, respectively.
+
+    Notes
+    -----
+    This worker is called by :func:`create_uv`. The output contains one fewer
+    time point than the input because it describes consecutive frame pairs.
+    """
     UV = np.zeros([trial_data.shape[0], trial_data.shape[1], nframes - 1], dtype=complex)
     itersToConverge = []
     for i in range(nframes - 1):
@@ -105,12 +159,37 @@ def uv_process_trial(trial_data, nframes , maxIter, uInitial, vInitial, kernel, 
     return UV
 
 def HS(im1, im2, U,V, alpha, kernel, maxIter, is_phase, tol=1e-6):
-    """
-    Horn - Schunck step
-    im1: image at t=0
-    im2: image at t=1
-    alpha: regularization constant
-    Niter: number of iteration
+    """Estimate a two-dimensional velocity field with Horn-Schunck iteration.
+
+    Parameters
+    ----------
+    im1, im2 : numpy.ndarray
+        Consecutive two-dimensional image frames.
+    U, V : numpy.ndarray
+        Initial horizontal and vertical velocity fields.
+    alpha : float
+        Smoothness regularization weight.
+    kernel : numpy.ndarray
+        Spatial averaging kernel for the velocity fields.
+    maxIter : int
+        Maximum number of update iterations.
+    is_phase : bool
+        Whether the input images contain circular phase values.
+    tol : float, default=1e-6
+        Convergence threshold for the maximum change across both velocity
+        fields.
+
+    Returns
+    -------
+    U, V : numpy.ndarray
+        Estimated horizontal and vertical velocity fields.
+    iter_count : int
+        Number of iterations performed.
+
+    Notes
+    -----
+    The iteration stops early when the summed maximum change in ``U`` and
+    ``V`` is below ``tol``.
     """
     # derivatives
     [fx, fy, ft] = computeDerivatives(im1, im2, is_phase)
@@ -134,10 +213,41 @@ def HS(im1, im2, U,V, alpha, kernel, maxIter, is_phase, tol=1e-6):
     return U, V, iter_count + 1
 
 def normalize_angle(p):
+    """Wrap angles to the interval $[-pi, pi]$.
+
+    Parameters
+    ----------
+    p : numpy.ndarray or float
+        Angle values in radians.
+
+    Returns
+    -------
+    numpy.ndarray or float
+        Wrapped angle values in radians.
+    """
     return -np.mod(p + np.pi, 2*np.pi) + np.pi
 
 def computeDerivatives(im1, im2, is_phase):
-    """get derivatives in x, y and t direction """
+    """Calculate spatial and temporal derivatives for two image frames.
+
+    Parameters
+    ----------
+    im1, im2 : numpy.ndarray
+        Consecutive two-dimensional image frames.
+    is_phase : bool
+        Whether the images contain circular phase values.
+
+    Returns
+    -------
+    fx, fy, ft : numpy.ndarray
+        Horizontal, vertical, and temporal derivatives.
+
+    Notes
+    -----
+    Phase data are differentiated through their complex unit-vector
+    representation to avoid discontinuities at the phase wrap boundary.
+    Non-phase data use two-by-two convolution kernels.
+    """
     if is_phase:
         # Convert to complex exponentials 
         c1 = np.exp(1j * im1)
@@ -167,6 +277,26 @@ def computeDerivatives(im1, im2, is_phase):
     return fx, fy, ft
 #%%
 def poincare_index(uv):
+    """Identify source/sink and saddle candidates in a vector field.
+
+    Parameters
+    ----------
+    uv : numpy.ndarray
+        Two-dimensional complex vector field. Vector direction is represented
+        by its complex angle.
+
+    Returns
+    -------
+    SinkSource : numpy.ndarray
+        Binary map of positions with a positive Poincare index.
+    Saddle : numpy.ndarray
+        Binary map of positions with a negative Poincare index.
+
+    Notes
+    -----
+    Poincare indices are calculated over two-by-two neighborhoods using
+    mirrored boundary handling from :func:`scipy.ndimage.generic_filter`.
+    """
     [row, col] = uv.shape
 
     SinkSource = np.zeros(uv.shape, dtype='double')
@@ -186,6 +316,19 @@ def poincare_index(uv):
     return SinkSource, Saddle
 
 def P_index1(D):
+    """Calculate the Poincare index for one two-by-two angular neighborhood.
+
+    Parameters
+    ----------
+    D : numpy.ndarray
+        Flattened or two-dimensional array containing four vector angles in
+        radians.
+
+    Returns
+    -------
+    float
+        Sum of wrapped angular differences divided by $pi$.
+    """
     D = np.reshape(D, (2, 2))
     s = np.zeros((4))
     tap = np.zeros((4))
@@ -211,6 +354,28 @@ def P_index1(D):
     return sum(tap) / np.pi
 
 def SourceSinkSaddle(delta, tau):
+    """Classify a critical point from its Jacobian determinant and trace.
+
+    Parameters
+    ----------
+    delta : float
+        Determinant of the local Jacobian matrix.
+    tau : float
+        Trace of the local Jacobian matrix.
+
+    Returns
+    -------
+    type : int or float
+        ``1`` for a source, ``-1`` for a sink, ``0`` for an invalid point, or
+        NaN for a degenerate point.
+    spiral : int or float
+        ``1`` for a spiral, ``0`` for a node, or NaN for a degenerate point.
+
+    Notes
+    -----
+    Classification follows the signs of the determinant and trace and the
+    discriminant tau^2 - delta.
+    """
     if delta < 0:
         return 0, 0
     if delta == 0:
@@ -227,6 +392,31 @@ def SourceSinkSaddle(delta, tau):
     return type, 0
 
 def makeContours(u, v, Nmin, Lmin_source, Lmax_sink):
+    """Extract closed divergence contours for source and sink verification.
+
+    Parameters
+    ----------
+    u, v : numpy.ndarray
+        Horizontal and vertical components of a two-dimensional vector field.
+    Nmin : int
+        Minimum number of vertices required for a contour.
+    Lmin_source : float
+        Minimum contour level accepted as a source contour.
+    Lmax_sink : float
+        Maximum contour level accepted as a sink contour.
+
+    Returns
+    -------
+    sourceContours : list of numpy.ndarray
+        Closed contours satisfying the source thresholds.
+    sinkContours : list of numpy.ndarray
+        Closed contours satisfying the sink thresholds.
+
+    Notes
+    -----
+    Contours are generated from the divergence of the vector field using
+    :func:`matplotlib.pyplot.contour`.
+    """
     [uy, ux] = np.gradient(u)
     [vy, vx] = np.gradient(v)
 
@@ -260,17 +450,28 @@ def makeContours(u, v, Nmin, Lmin_source, Lmax_sink):
     return sourceContours, sinkContours
 
 def calculate_directional_stability(waveData, dataBucketName = "", windowSize=10):
-    """ calculates the directional stability of the UV maps.
-        Arguments:
+    """Calculate moving-window directional stability for optical-flow vectors.
 
-        waveData: waveData object
-        dataBucketName: name of the dataBucket to use. Defaults to the last active dataBucket
-        windowSize: size of the window in samples during which a vector needs to be pointing in the same direction to be considered stable
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing complex optical-flow vectors.
+    dataBucketName : str, default=""
+        Name of the input vector-field bucket. An empty string uses the active
+        bucket.
+    windowSize : int, default=10
+        Number of samples averaged in each temporal window.
 
-        Example: 
-        Temporal frequency of interest = 10Hz 
-        sampling rate = 250Hz
-        WindowSize = 50 samples (2 cycles of the Temporal Frequency) """
+    Returns
+    -------
+    None
+        Adds a ``Directional_Stability_Timeseries`` bucket to ``waveData``.
+
+    Notes
+    -----
+    Vectors are normalized to unit magnitude before averaging. The result has
+    ``windowSize`` fewer time samples than the input.
+    """
         
     if dataBucketName == "":
         dataBucketName = waveData.ActiveDataBucket
@@ -300,6 +501,27 @@ def calculate_directional_stability(waveData, dataBucketName = "", windowSize=10
     waveData.add_data_bucket(dataBucket)
     
 def source_sink_process_trial(thistrialInd, trial_data):
+    """Detect source and sink locations for every frame in one trial.
+
+    Parameters
+    ----------
+    thistrialInd : int
+        Trial index assigned to detected events.
+    trial_data : numpy.ndarray
+        Complex vector field ordered as x position, y position, and time.
+
+    Returns
+    -------
+    source_df : pandas.DataFrame
+        Confirmed sources with trial, time, spatial position, and type.
+    sink_df : pandas.DataFrame
+        Confirmed sinks with trial, time, spatial position, and type.
+
+    Notes
+    -----
+    Poincare candidates are classified with local Jacobians and retained only
+    when they are enclosed by divergence contours.
+    """
     #initialize arrays
     SourcePoincareJacobian = np.zeros_like(trial_data[:,:,:], dtype=int)
     SinkPoincareJacobian = np.zeros_like(trial_data[:,:,:], dtype=int)
@@ -403,13 +625,31 @@ def source_sink_process_trial(thistrialInd, trial_data):
     return source_df, sink_df
 
 def find_sources_sinks(waveData, dataBucketName = ""):
-    """requires posx, posy channel dimensions. dataBucketName defaults to "UV" 
-    Input: waveData: waveData object
-    dataBucketName: name of the dataBucket to use. Defaults to "UV"
-    Output: Source and Sink DataFrames with columns: trial, timepoint, posx, posy
-    identifies sinks, sources, and saddles in UV maps using the Poincare index theorem 
-    and Jacobian matrices. Each critical point is checked against contours of the
-    divergence of the vector field to confirm its type and stability.    
+    """Find source and sink events in optical-flow vector fields.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object with data containing ``posx``, ``posy``, and ``time``
+        dimensions.
+    dataBucketName : str, default=""
+        Name of the input vector-field bucket. An empty string uses the active
+        bucket.
+
+    Returns
+    -------
+    source_df : pandas.DataFrame
+        Confirmed source events with trial, time point, spatial positions, and
+        event type.
+    sink_df : pandas.DataFrame
+        Confirmed sink events with trial, time point, spatial positions, and
+        event type.
+
+    Notes
+    -----
+    The function processes trials in parallel. It combines Poincare-index and
+    Jacobian classification with contour-based confirmation, then removes
+    duplicate events.
     """
     # Find Sources and Sinks
     if dataBucketName == "":

@@ -3,24 +3,30 @@ import WaveSpace.Utils.HelperFuns as hf
 import WaveSpace.Utils.WaveData as wd
 
 def find_wave_activity(waveData, dataBucketName=None, dataInd = None, nBases=3):
-    """Identifies dominant traveling wave patterns (spatial bases) in complex-valued waveData
-    via singular value decomposition on the data covariance. Converts complex data to normalized (unit-length) phase representation.
+    """Extract dominant traveling-wave spatial bases from complex data.
 
-    Inputs:
-    waveData : WaveData object        
-    dataBucketName : str, optional
-        which data bucket to use
-    dataInd : tuple or None, optional
-        Optional index tuple to select a subset of the data (e.g., (slice(0,1), slice(10,12), ...)). 
-        Needs to result in the same number of dimensions as full data. So use slices for singular dimensions. 
-        If None, uses all data.
-    nBases : int, optional
-        The number of spatial bases to extract (default is 3).
+    Data are normalized to unit-magnitude phase values before singular-value
+    decomposition of their covariance.
 
-    Adds data buckets to waveData:
-    Bases : Complex spatial bases (channels x bases).
-    Fit :   fit per trial and time ((freq) trials x time).
-    betas : weights ((freq) trials x time x bases).
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing complex-valued phase data.
+    dataBucketName : str, default=None
+        Name of the input data bucket. By default, the active data bucket is
+        used.
+    dataInd : tuple of slice, default=None
+        Indices selecting a data subset while retaining every input dimension.
+        By default, all data are used.
+    nBases : int, default=3
+        Number of spatial bases to extract.
+
+    Returns
+    -------
+    None
+        Adds ``Bases``, ``Fit``, and ``betas`` data buckets to ``waveData``.
+        ``Bases`` contains the spatial patterns, ``Fit`` their per-time-point
+        fit, and ``betas`` their complex weights.
 
     References
     ----------
@@ -77,6 +83,18 @@ def find_wave_activity(waveData, dataBucketName=None, dataInd = None, nBases=3):
     waveData.add_data_bucket(betasBucket)
 
 def c_TW_bases_betas(phi_cts,nBases=3):
+    """
+    Parameters
+    ----------
+    phi_cts : numpy.ndarray
+    nBases : int, default=3
+
+    Returns
+    -------
+    bases_sb : numpy.ndarray
+    fit_ct : numpy.ndarray
+    betas_ctb : numpy.ndarray
+    """
     #phi complex-valued phase, c cases, t times, s sensors
     phi_Cs = np.asarray(phi_cts.reshape(-1,phi_cts.shape[-1]))
     phi_cent = phi_Cs - phi_Cs.mean(0)

@@ -7,10 +7,35 @@ from scipy.signal import detrend
 from scipy.signal import impulse
 from scipy.signal import firwin
 import numpy as np
+import mne
 
 def filter_broadband(waveData,dataBucketName = "", LowCutOff=0, HighCutOff=100,  n_jobs=5):
-    import mne
-    '''wrapper for MNE non-causal filter'''
+    """Apply an MNE non-causal band-pass filter to a data bucket.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing the data to filter.
+    dataBucketName : str, default=""
+        Name of the input data bucket. By default, the active data bucket is
+        used.
+    LowCutOff : float, default=0
+        Low-frequency cutoff in Hz.
+    HighCutOff : float, default=100
+        High-frequency cutoff in Hz.
+    n_jobs : int, default=5
+        Number of parallel workers passed to MNE. (Required input for mne.filter.filter_data())
+
+    Returns
+    -------
+    None
+        Adds the filtered data to ``waveData`` as the ``BBFiltered`` bucket.
+
+    Notes
+    -----
+    The input is temporarily reshaped to trials, channels, and time when
+    necessary, then restored to its original dimensional ordering.
+    """
     if dataBucketName == "":
         dataBucketName = waveData.ActiveDataBucket
     else:
@@ -32,7 +57,29 @@ def filter_broadband(waveData,dataBucketName = "", LowCutOff=0, HighCutOff=100, 
     waveData.log_history(["Broadband Filter", "filt",LowCutOff, HighCutOff])
 
 def filter_notch(waveData, dataBucketName = "", LineNoiseFreq = 50, n_jobs=5):
-    '''wrapper forMNE non-causal filter'''
+    """Apply an MNE notch filter to remove line-frequency components.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing the data to filter.
+    dataBucketName : str, default=""
+        Name of the input data bucket. An empty string uses the active bucket.
+    LineNoiseFreq : float or array-like, default=50
+        Frequency or frequencies to remove in Hz.
+    n_jobs : int, default=5
+        Number of parallel workers passed to MNE.
+
+    Returns
+    -------
+    None
+        Adds filtered data to ``waveData`` as the ``NotchFiltered`` bucket.
+
+    Notes
+    -----
+    Data are temporarily reordered to trial, channel, and time dimensions
+    before filtering.
+    """
     if dataBucketName == "":
         dataBucketName = waveData.ActiveDataBucket
     else:
@@ -55,7 +102,32 @@ def filter_notch(waveData, dataBucketName = "", LineNoiseFreq = 50, n_jobs=5):
         waveData.log_history(["Notch Filter", "notch", LineNoiseFreq])
 
 def bandpass(lowcut, highcut, fs, type="IIR", order=5):
-    '''Design a bandpass filter using either an IIR or FIR approach. Returns filter coefficients and impulse response length.'''
+    """Design IIR or FIR band-pass filter coefficients.
+
+    Parameters
+    ----------
+    lowcut, highcut : float
+        Lower and upper cutoff frequencies in Hz.
+    fs : float
+        Sampling frequency in Hz.
+    type : {"IIR", "FIR"}, default="IIR"
+        Filter-design method.
+    order : int, default=5
+        IIR filter order or FIR order before conversion to tap count.
+
+    Returns
+    -------
+    b : numpy.ndarray
+        Numerator filter coefficients.
+    a : numpy.ndarray or list of float
+        Denominator filter coefficients.
+    impulse_response_length : int
+        Length of the calculated impulse response.
+
+    Notes
+    -----
+    FIR filters use ``order + 1`` taps and have a denominator of ``[1.0]``.
+    """
     nyq = 0.5 * fs
     low = lowcut / nyq
     high = highcut / nyq
@@ -85,7 +157,37 @@ def bandpass(lowcut, highcut, fs, type="IIR", order=5):
 from scipy.signal import lfilter
 
 def filter_narrowband(waveData, dataBucketName = "", LowCutOff=0, HighCutOff=120, type= "IIR", order=5, causal=True):
-    '''Scipy zero-phase bandpass filter. Detrends before narrowband filtering.'''
+    """Detrend and apply a narrowband IIR or FIR band-pass filter.
+
+    Parameters
+    ----------
+    waveData : WaveSpace.Utils.WaveData.WaveData
+        WaveData object containing the data to filter.
+    dataBucketName : str, default=""
+        Name of the input data bucket. By default, the active data bucket is
+        used.
+    LowCutOff : float, default=0
+        Low-frequency cutoff in Hz.
+    HighCutOff : float, default=120
+        High-frequency cutoff in Hz.
+    type : {"IIR", "FIR"}, default="IIR"
+        Filter design to use.
+    order : int, default=5
+        IIR filter order or FIR order before conversion to the number of taps.
+    causal : bool, default=True
+        If ``True``, apply a causal filter. If ``False``, apply zero-phase
+        forward-backward filtering.
+
+    Returns
+    -------
+    None
+        Adds the filtered data to ``waveData`` as the ``NBFiltered`` bucket.
+
+    Notes
+    -----
+    Data are detrended before filtering. The function prints the impulse
+    response length of the selected filter.
+    """
     # ensure proper bookkeeping of data dimensions
     if dataBucketName == "":
         dataBucketName = waveData.ActiveDataBucket

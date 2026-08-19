@@ -1,4 +1,3 @@
-from . import generateFromLog
 from . import HelperFuns
 from . import ImportHelpers
 from . import WaveData
