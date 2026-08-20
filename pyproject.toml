@@ -77,9 +77,10 @@ include = ["WaveSpace*"]
 ignore = ["DEP002"]
 
 [tool.deptry.package_module_name_map]
-sklearn = "scikit-learn"
-skimage = "scikit-image"
-gdist = "tvb-gdist"
+matplotlib = ["matplotlib", "mpl_toolkits"]
+tvb-gdist = "gdist"
+scikit-learn = "sklearn"
+scikit-image = "skimage"
 
 [tool.ruff]
 line-length = 100
