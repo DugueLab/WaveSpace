@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "WaveSpace"
-version = "1.1.8"
+version = "1.1.9"
 description = "A Python package for the analysis of cortical traveling waves"
 readme = "README.md"
 license = "GPL-3.0-or-later"
@@ -24,7 +24,6 @@ keywords = [
     "neural-oscillations",
 ]
 classifiers = [
-    "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3.9",
@@ -47,6 +46,8 @@ dependencies = [
     "tvb-gdist",
     "emd",
     "mne",
+    "joblib",
+    "vtk",
 ]
 
 [project.urls]
@@ -55,19 +56,42 @@ Repository = "https://github.com/kpetras/WaveSpace"
 Issues = "https://github.com/kpetras/WaveSpace/issues"
 Documentation = "https://wavespace.readthedocs.io"
 
-[project.optional-dependencies]
+[dependency-groups]
+dev = [
+    "ruff",
+    "tox",
+    "tox-uv",
+    "pytest>=8.4.2",
+    "deptry",
+]
 docs = [
     "sphinx",
     "pydata-sphinx-theme",
-]
-
-[dependency-groups]
-dev = [
-    "tox",
-    "tox-uv",
-    "sphinx",
-    "pydata-sphinx-theme",
+    "sphinx-gallery",
 ]
 
 [tool.setuptools.packages.find]
 include = ["WaveSpace*"]
+
+[tool.deptry]
+ignore = ["DEP002"]
+
+[tool.deptry.package_module_name_map]
+matplotlib = ["matplotlib", "mpl_toolkits"]
+tvb-gdist = "gdist"
+scikit-learn = "sklearn"
+scikit-image = "skimage"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.lint]
+extend-select = ["I", "B", "UP", "SIM", "C4", "PIE", "RUF"]
+ignore = [    
+    "N999",    # invalid-module-name
+    "TRY002",  # raise-vanilla-class
+    "BLE001",  # blind-except
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["WaveSpace"]

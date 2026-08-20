@@ -1,8 +1,8 @@
 import numpy as np
-import matplotlib.pyplot as plt
 import scipy.interpolate as si
-from WaveSpace.Utils import WaveData as wd
+
 from WaveSpace.Utils import HelperFuns as hf
+from WaveSpace.Utils import WaveData as wd
 
 # Python translation of:
 # https://github.com/mullerlab/generalized-phase
@@ -76,7 +76,6 @@ def generalized_phase(waveData, dataBucketName = ''):
     ----------
     Davis, *Muller, Martinez-Trujillo, Sejnowski, Reynolds. Spontaneous travelling cortical waves gate perception in behaving primates. Nature, 2020 (*equal contribution) 
     """
-    reshape = False
     # % parameters
     if dataBucketName == "":
         dataBucketName = waveData.ActiveDataBucket
@@ -150,7 +149,6 @@ def generalized_phase(waveData, dataBucketName = ''):
                 p[np.isnan(p)] = naninterp(p)
                 p = rewrap(p)
                 ph[ii,:] = p[0:ph.shape[1]]
-        #
         outcome[trialNr,:] = md * np.exp( 1j * ph )
         # reshape original data
     dataBucket = wd.DataBucket(outcome, "complexData", newDimord,time= waveData.DataBuckets[waveData.ActiveDataBucket].get_time() ,chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())

@@ -1,14 +1,14 @@
-import numpy as np
-from math import *
-from WaveSpace.Utils import WaveData as wd
-import plotly.graph_objects as go
-import time
-from pint import UnitRegistry
-from scipy.stats import trim_mean
-from scipy.ndimage import median_filter, convolve
 import copy
-import matplotlib.pyplot as plt
-import scipy.stats as stats
+import time
+from math import sqrt
+
+import numpy as np
+import plotly.graph_objects as go
+import scipy.stats
+from pint import UnitRegistry
+
+from WaveSpace.Utils import WaveData as wd
+
 
 def circular_distance_between_angles(angle1, angle2):
     """
@@ -38,7 +38,7 @@ def circular_linear_correlation(alpha, x):
     rxc = np.corrcoef(x, np.cos(alpha))[0,1]
     rcs = np.corrcoef(np.sin(alpha), np.cos(alpha))[0,1]
     rho = np.sqrt((rxc**2 + rxs**2 - 2*rxc*rxs*rcs)/(1-rcs**2))
-    pval = 1-stats.chi2.cdf(n*rho**2,2)
+    pval = 1-scipy.stats.chi2.cdf(n*rho**2,2)
     return rho, pval
 
 
@@ -69,8 +69,8 @@ def divergence(U, V):
     numpy.ndarray
         Divergence at each spatial position.
     """
-    dud, px = np.gradient(U)
-    qy, dud = np.gradient(V)
+    _dud, px = np.gradient(U)
+    qy, _dud = np.gradient(V)
     return px+qy
 
 def add_noise_channels(data, proportion=1.0, No_noise_channels=10):
@@ -283,9 +283,9 @@ def force_dimord(data,  currentDimord, desiredDimord):
         new_last_dims.insert(0, "trl")
 
     chanshape = ()
-    if not (new_last_dims == last_dims): 
+    if new_last_dims != last_dims: 
         if (len(new_last_dims) > len(last_dims)): 
-            raise Exception("Function requires XY positions")
+            raise ValueError("Function requires XY positions")
         if (len(new_last_dims) < len(last_dims)): 
             data, chanshape = posxy_to_chan(data)
             oldDims.remove("posx")
@@ -349,7 +349,7 @@ def combine_grad_sensors(waveData, dataBucketName="", method='RMS'):
     data=waveData.DataBuckets[waveData.ActiveDataBucket].get_data()
     originalDimord = waveData.DataBuckets[waveData.ActiveDataBucket].get_dimord()
     originalShape = data.shape
-    if not originalDimord == "trl_chan_time":
+    if originalDimord != "trl_chan_time":
         has_been_reshaped, data = force_dimord(data, originalDimord, "trl_chan_time")
     else:
         has_been_reshaped = False
@@ -506,7 +506,7 @@ def convert_units(dataBucket, new_unit):
     try:
         quantity = 1 * ureg(dataBucket._unit)
         quantity.to(new_unit)
-    except Exception as e:
+    except Exception:
         print(f"Warning: Conversion from {dataBucket._unit} to {new_unit} is not supported.")
         return
 
@@ -533,19 +533,19 @@ def plot_chanpos(waveData, show_names = True):
         z=chanpos[:, 2],
         mode='markers',
         text=chan_names if show_names else None,
-        marker=dict(
-            size=6,
-            color='blue',
-        )
+        marker={
+            "size": 6,
+            "color": 'blue',
+        }
     )])
 
     # Add title and labels
     fig.update_layout(
-        scene=dict(
-            xaxis_title='X',
-            yaxis_title='Y',
-            zaxis_title='Z'
-        ),
+        scene={
+            "xaxis_title": 'X',
+            "yaxis_title": 'Y',
+            "zaxis_title": 'Z'
+        },
         title="Channel Positions",
     )
 
@@ -665,7 +665,7 @@ def relative_phase(waveData, ref=None, dataBucketName=""):
         ref_data = ref
         ref_data = ref_data[np.newaxis, np.newaxis, :]
     else:
-        raise ValueError('ref must be a tuple, an integer, or a numpy array.')
+        raise TypeError('ref must be a tuple, an integer, or a numpy array.')
 
     # Calculate relative phase using complex division
     rel_complex_data = complex_data / ref_data
@@ -692,7 +692,7 @@ def relative_phase(waveData, ref=None, dataBucketName=""):
     elif isinstance(ref, int):
         waveData.log_history(["Relative Phase", f"Phase_relative_to_chanNr_{ref}"])
     else:
-        waveData.log_history(["Relative Phase", f"Phase_relative_to_time_series"])
+        waveData.log_history(["Relative Phase", "Phase_relative_to_time_series"])
 
 def unwrap_phase(Data, dataBucketName=""):
     """
@@ -726,7 +726,7 @@ def unwrap_phase(Data, dataBucketName=""):
         #reshape back to original dimord
         unwrappedPhaseofCurentData = np.reshape(unwrappedPhaseofCurentData, oldShape) 
     Unwrapped = wd.DataBucket(unwrappedPhaseofCurentData, "UnwrappedPhase", Data.DataBuckets[Data.ActiveDataBucket].get_dimord(),
-                                      time=waveData.DataBuckets[dataBucketName].get_time(),
+                                      time=Data.DataBuckets[dataBucketName].get_time(),
                                       chanNames= Data.DataBuckets[Data.ActiveDataBucket].get_channel_names())
     Data.add_data_bucket(Unwrapped)
     Data.log_history(["UnwrappedPhase", "Phase_unwrapped from " + dataBucketName])
@@ -785,7 +785,6 @@ def normalize_data(waveData, dimension = "", dataBucketName = " "):
     None
         Adds a ``<dataBucketName>_MagnitudeNormalized`` data bucket.
     """
-    chanshape = []
     if dataBucketName == " ":
         dataBucketName = waveData.ActiveDataBucket
     waveData.set_active_dataBucket(dataBucketName)
@@ -801,7 +800,7 @@ def normalize_data(waveData, dimension = "", dataBucketName = " "):
     elif isinstance(dimension, list):
         dimInd = []
         for thisdim in dimension:
-            if not thisdim in dimlist:
+            if thisdim not in dimlist:
                 raise ValueError("dimension not found in dimord")
             dimInd.append(dimlist.index(thisdim))
         keepdims = np.setdiff1d(np.arange(len(origShape)),dimInd)
@@ -813,7 +812,7 @@ def normalize_data(waveData, dimension = "", dataBucketName = " "):
         normaxis = -1
         hasbeenreshaped = True
     else:
-        raise ValueError("dimension must be string or list of strings")
+        raise TypeError("dimension must be string or list of strings")
 
     #normalize by the mean of the absolute
     data = data / np.nanmean(np.abs(data), axis=normaxis, keepdims=True)
@@ -848,7 +847,6 @@ def z_score_data(waveData, dimension = "", dataBucketName = " "):
     None
         Adds a ``<dataBucketName>_zScored`` data bucket.
     """
-    chanshape = []
     if dataBucketName == " ":
         dataBucketName = waveData.ActiveDataBucket
     waveData.set_active_dataBucket(dataBucketName)
@@ -864,7 +862,7 @@ def z_score_data(waveData, dimension = "", dataBucketName = " "):
     elif isinstance(dimension, list):
         dimInd = []
         for thisdim in dimension:
-            if not thisdim in dimlist:
+            if thisdim not in dimlist:
                 raise ValueError("dimension not found in dimord")
             dimInd.append(dimlist.index(thisdim))
         keepdims = np.setdiff1d(np.arange(len(origShape)),dimInd)
@@ -876,7 +874,7 @@ def z_score_data(waveData, dimension = "", dataBucketName = " "):
         normaxis = -1
         hasbeenreshaped = True
     else:
-        raise ValueError("dimension must be string or list of strings")
+        raise TypeError("dimension must be string or list of strings")
 
     #normalize by the mean of the absolute
     data = data - np.nanmean(data, axis=normaxis, keepdims=True)
@@ -895,7 +893,7 @@ def z_score_data(waveData, dimension = "", dataBucketName = " "):
     waveData.add_data_bucket(dataBucket)
     waveData.log_history(["z score", "z scored over " + '_'.join(dimension)])
 
-def rescale_data_in_Bucket(waveData, dimension =['posx', 'posy', 'time'], range = (0,1),dataBucketName = ""):
+def rescale_data_in_Bucket(waveData, dimension =None , range = (0,1),dataBucketName = ""):
     """Rescale data to a target range over selected dimensions.
 
     Parameters
@@ -911,6 +909,8 @@ def rescale_data_in_Bucket(waveData, dimension =['posx', 'posy', 'time'], range 
     None
         Adds a ``<dataBucketName>_rescaled`` data bucket.
     """
+    if dimension == None:
+        dimension =['posx', 'posy', 'time']
     if dataBucketName == " ":
         dataBucketName = waveData.ActiveDataBucket
     waveData.set_active_dataBucket(dataBucketName)
@@ -921,7 +921,7 @@ def rescale_data_in_Bucket(waveData, dimension =['posx', 'posy', 'time'], range 
     origShape = np.array(data.shape)
     dimInd = []
     for thisdim in dimension:
-        if not thisdim in dimlist:
+        if thisdim not in dimlist:
             raise ValueError("dimension not found in dimord")
         dimInd.append(dimlist.index(thisdim))
     keepdims = np.setdiff1d(np.arange(len(origShape)),dimInd)
@@ -974,7 +974,7 @@ def average_over_trials(waveData, trialInfo=None, dataBucketName=" ", type = Non
     dimord= waveData.DataBuckets[waveData.ActiveDataBucket].get_dimord()
     dimlist = dimord.split("_")
     data = waveData.DataBuckets[waveData.ActiveDataBucket].get_data()
-    origShape = np.array(data.shape)
+    np.array(data.shape)
 
     # Find the 'trl' dimension
     if 'trl' in dimlist:
@@ -1219,8 +1219,8 @@ def find_wave_motifs(waveData, dataBucketName=None, oscillationThresholdDataBuck
 
     if isinstance(Mask, np.ndarray) and not isinstance(Mask, bool):
         maskInds = np.where(Mask == 1)      
-    elif Mask == True: 
-        if not 'Mask' in waveData.DataBuckets.keys():
+    elif Mask: 
+        if 'Mask' not in waveData.DataBuckets:
             raise ValueError("No Mask dataBucket found")
         maskInds = np.where(waveData.get_data('Mask'))
         Mask = waveData.get_data('Mask')    
@@ -1438,9 +1438,8 @@ def match_motifs_to_templates(motifs, templates=None, mergeThreshold = None, pix
         templates = [{'average': motifs[0]['average'], 'num_frames': 0, 'trial_frames': []}]
     elif isinstance(templates, np.ndarray):
         templates = [{'average': templates, 'num_frames': 0, 'trial_frames': []}]
-    elif isinstance(templates, list):
-        if not isinstance(templates[0], dict):
-            templates = [{'average': t, 'num_frames': 0, 'trial_frames': []} for t in templates]
+    elif isinstance(templates, list) and not isinstance(templates[0], dict):
+        templates = [{'average': t, 'num_frames': 0, 'trial_frames': []} for t in templates]
 
     for motif in motifs:        
         motif_trial_frames = [(motif['subject'], tf) for tf in motif['trial_frames']]

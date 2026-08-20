@@ -1,15 +1,18 @@
-from __future__ import division
+
+import multiprocessing
+import os
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from joblib import Parallel, delayed
 from matplotlib import path
 from scipy.ndimage import convolve as filter2
 from scipy.ndimage import gaussian_filter, generic_filter
-import numpy as np
-from WaveSpace.Utils import WaveData as wd, HelperFuns as hf
-import pandas as pd
-import multiprocessing
-from joblib import Parallel, delayed
-import os
-from functools import partial
+
+from WaveSpace.Utils import HelperFuns as hf
+from WaveSpace.Utils import WaveData as wd
+
 
 def create_uv(waveData, applyGaussianBlur=False, type = "real", Sigma=1, alpha = 2, maxIter = 100, is_phase = False, dataBucketName = ''): 
     """Estimate optical-flow vectors with the Horn-Schunck method. Not the fasted pony in the barn....
@@ -62,7 +65,7 @@ def create_uv(waveData, applyGaussianBlur=False, type = "real", Sigma=1, alpha =
     oldshape = currentData.shape
     hasBeenReshaped, currentData =  hf.force_dimord(currentData, currentDimord , "trl_posx_posy_time")
 
-    nObs,posx,posy,nframes = currentData.shape
+    _nObs,posx,posy,nframes = currentData.shape
     if type=='angle' and np.iscomplexobj(currentData):
         currentData = np.angle(currentData)
         is_phase = True
@@ -91,7 +94,7 @@ def create_uv(waveData, applyGaussianBlur=False, type = "real", Sigma=1, alpha =
 
     if hasBeenReshaped:
         #reshape back to original dimord, take into account that the last dimension has been reduced by 1
-        allUV = np.reshape(allUV, oldshape[:-1] + (oldshape[-1] - 1,)) 
+        allUV = np.reshape(allUV, (*oldshape[:-1], oldshape[-1] - 1)) 
     time = waveData.get_time(dataBucketName)[:-1]      
     dataBucket = wd.DataBucket(allUV, "UV",currentDimord,
                                time=time, 
@@ -194,7 +197,7 @@ def HS(im1, im2, U,V, alpha, kernel, maxIter, is_phase, tol=1e-6):
     # derivatives
     [fx, fy, ft] = computeDerivatives(im1, im2, is_phase)
     
-    for iter_count in range(maxIter):
+    for _iter_count in range(maxIter):
         U_old = U.copy()
         V_old = V.copy()
         
@@ -210,7 +213,7 @@ def HS(im1, im2, U,V, alpha, kernel, maxIter, is_phase, tol=1e-6):
         if change < tol:
             break    
 
-    return U, V, iter_count + 1
+    return U, V, _iter_count + 1
 
 def normalize_angle(p):
     """Wrap angles to the interval $[-pi, pi]$.
@@ -330,8 +333,8 @@ def P_index1(D):
         Sum of wrapped angular differences divided by $pi$.
     """
     D = np.reshape(D, (2, 2))
-    s = np.zeros((4))
-    tap = np.zeros((4))
+    s = np.zeros(4)
+    tap = np.zeros(4)
 
     s[0] = D[1, 0]
     s[1] = D[1, 1]
@@ -383,10 +386,7 @@ def SourceSinkSaddle(delta, tau):
     # delta > 0
     if tau == 0:
         return 2, 1
-    if tau > 0:
-        type = 1
-    else:
-        type = -1
+    type = 1 if tau > 0 else -1
     if tau * tau < 4 * delta:
         return type, 1
     return type, 0
@@ -417,8 +417,8 @@ def makeContours(u, v, Nmin, Lmin_source, Lmax_sink):
     Contours are generated from the divergence of the vector field using
     :func:`matplotlib.pyplot.contour`.
     """
-    [uy, ux] = np.gradient(u)
-    [vy, vx] = np.gradient(v)
+    [_uy, ux] = np.gradient(u)
+    [vy, _vx] = np.gradient(v)
 
     div1 = ux + vy  # Divergence
     sourceContours = []
@@ -570,8 +570,6 @@ def source_sink_process_trial(thistrialInd, trial_data):
     Nmin = 2  # minimum number of points as the contour size
     Lmin_source = 0.05  # minimum source level
     Lmax_sink = -0.05  # maximum sink level
-    Nnested_source = 2  # minimum number of nested sources to verify the most interior source
-    Nnested_sink = 2  # minimum number of nested sources to verify the most interior sink
 
     for it in range(timepoints):
         u = np.real(trial_data[:, :, it])
@@ -661,7 +659,7 @@ def find_sources_sinks(waveData, dataBucketName = ""):
     currentDimord = waveData.DataBuckets[dataBucketName].get_dimord()
     oldShape = UV.shape
     hasBeenReshaped, UV =  hf.force_dimord(UV, currentDimord , "trl_posx_posy_time")
-    trial, sizeX, sizeY, timepoints = UV.shape
+    _trial, _sizeX, _sizeY, _timepoints = UV.shape
 
     if os.name == 'posix':  # Linux
         pool = multiprocessing.Pool(multiprocessing.cpu_count())
@@ -683,7 +681,7 @@ def find_sources_sinks(waveData, dataBucketName = ""):
 
     if hasBeenReshaped:
         def get_original_indices_from_flat(item, oldShape):
-            x, y = oldShape
+            _x, y = oldShape
             x_original = item // y
             y_original = item % y
             return x_original, y_original

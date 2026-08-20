@@ -28,7 +28,19 @@ For questions, bug reports, or feature requests, please open an [issue on GitHub
 
 ### Code Style
 
-WaveSpace does not currently enforce a formatter or linter. Please follow the style of the surrounding code: keep functions focused, prefer descriptive names, and avoid unrelated formatting changes mixed into the same pull request.
+WaveSpace enforces linting with [Ruff](https://docs.astral.sh/ruff/). Pull requests must pass the same check run by GitHub Actions:
+
+```bash
+uv run --only-group dev ruff check .
+```
+
+The rules enforce import sorting and checks for common bugs, outdated Python syntax, unnecessary complexity, and problematic comprehensions. The complete, authoritative configuration is in `pyproject.toml`. Please keep functions focused, use descriptive names, and avoid unrelated formatting changes in the same pull request. Use NumPy-style docstrings for public modules, classes, and functions, including `Parameters`, `Returns`, and `Raises` sections where applicable.
+
+Ruff can automatically correct many findings:
+
+```bash
+uv run --only-group dev ruff check . --fix
+```
 
 ### Testing
 

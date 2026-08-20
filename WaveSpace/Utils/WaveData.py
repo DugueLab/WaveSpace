@@ -1,11 +1,14 @@
-from . import ImportHelpers
-import numpy as np
-from . import HelperFuns as hf
-import re
 import pickle
+import re
+
+import numpy as np
+
+from . import HelperFuns as hf
+from . import ImportHelpers
+
 
 class DataBucket:
-    def __init__(self, data, description, dimord, chanNames, sampleRate=1000, time=[], unit=""):
+    def __init__(self, data, description, dimord, chanNames, sampleRate=1000, time=None, unit=""):
         """Store one named data array and its metadata.
 
         Parameters
@@ -29,6 +32,9 @@ class DataBucket:
         unit : str, default=""
             Physical unit of the stored data.
         """
+        if time is None:
+            time = []
+        
         self._data = data
         self._description = description
         self._dimord = dimord
@@ -37,7 +43,7 @@ class DataBucket:
         self._unit = unit
         self._reservedNames = ["time", "chan", "posx", "posy", "trl"]
         if len(time) == 0:
-            if not("time" in dimord):
+            if "time" not in dimord:
                 print(f"Warning: no time dimension in databucket: {self._description} \n timevector will be empty")
                 self._time = []
             else:
@@ -221,22 +227,8 @@ class DataBucket:
         if len(chanShape) > 0 :
             self._chanNames = np.reshape(self._chanNames, chanShape, order="C")
 
-    def assure_consistency():
-        """Provide a placeholder consistency check.
-
-        Returns
-        -------
-        None
-            Always returns ``None``.
-
-        Notes
-        -----
-        This method currently performs no validation.
-        """
-        return None
-
-class WaveData():
-    def __init__(self, chanpos=[], coords2D=[], time = [], sampleRate=0.0):
+class WaveData:
+    def __init__(self, chanpos=None, coords2D=None, time = None, sampleRate=0.0):
         """Create an empty container for WaveSpace data buckets and metadata.
 
         Parameters
@@ -257,6 +249,12 @@ class WaveData():
         Add data through :meth:`add_data_bucket`. The latest added bucket
         becomes the active data bucket.
         """
+        if time is None:
+            time = []
+        if coords2D is None:
+            coords2D = []
+        if chanpos is None:
+            chanpos = []
         self.DataBuckets= {}
         self.ActiveDataBucket = ""
         self.HasRegularLayout = False
@@ -282,10 +280,10 @@ class WaveData():
         """
         out= ""
         for key, dataBucket in self.DataBuckets.items():
-            out += "DataBuckets[\"%s\"]| %s | %s \n" % (key , dataBucket.get_dimord(),dataBucket.get_data().shape )
-        out += "%s | %s(Hz) \n" % ("Sampling Rate", self._sampleRate)
+            out += f"DataBuckets[\"{key}\"]| {dataBucket.get_dimord()} | {dataBucket.get_data().shape} \n"
+        out += "{} | {}(Hz) \n".format("Sampling Rate", self._sampleRate)
         if len(self.get_time()>1):
-            out += "%s | %s(S) - %s(S) \n" % ("Time", self.get_time()[0], self.get_time()[-1])
+            out += "{} | {}(S) - {}(S) \n".format("Time", self.get_time()[0], self.get_time()[-1])
         return out  
     
     def append_dataset(self, wavedata, dataBucketName):
@@ -349,7 +347,7 @@ class WaveData():
         None
         """
         if (self.has_data_bucket(dataBucketName)):
-            Warning(f"DataBucket {dataBucketName} already exists, overwriting it")
+            raise Warning(f"DataBucket {dataBucketName} already exists, overwriting it")
         name = dataBucketName.get_description()
         self.ActiveDataBucket = name
         self.DataBuckets[name] = (dataBucketName)
@@ -371,7 +369,7 @@ class WaveData():
         NameError
             If no bucket has the requested name.
         """
-        if dataBucketName in self.DataBuckets.keys():
+        if dataBucketName in self.DataBuckets:
             del self.DataBuckets[dataBucketName]
         else:
             raise NameError("DataBucket does not exist")
@@ -494,10 +492,10 @@ class WaveData():
         """
         if (type(chanpos) == np.ndarray):
             self._chanpos = chanpos
-        elif type(chanpos) == str:
+        elif isinstance(chanpos, str):
             self._chanpos= ImportHelpers.load_channel_positions(chanpos)
         else:
-            raise Exception("Incorrect format for channel positions. Supply ND-array or filepath")
+            raise TypeError("Incorrect format for channel positions. Supply ND-array or filepath")
         
     def set_time(self, time, dataBucketName = ""):
         """Set the time vector for a data bucket.
@@ -549,8 +547,8 @@ class WaveData():
         Exception
             If no bucket has the requested name.
         """
-        if not (name in self.DataBuckets.keys()):
-            raise Exception(f"DataBucket {name} does not exist, can not set as active databucket")
+        if not (name in self.DataBuckets):
+            raise KeyError(f"DataBucket {name} does not exist, can not set as active databucket")
         self.ActiveDataBucket = name
 
     def set_sample_rate(self, sampleRate):
@@ -639,10 +637,8 @@ class WaveData():
         """
         if filename=="":
             filename = "WaveData_" + '_'.join([element[1] for element in self._history])
-        
-        f = open(filename, 'wb')
-        pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
-        f.close()
+        with open(filename, 'wb') as f:
+            pickle.dump(self, f, pickle.HIGHEST_PROTOCOL)
         
     def get_SimInfo(self):
         """Return simulation metadata.

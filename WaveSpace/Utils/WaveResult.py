@@ -1,6 +1,7 @@
 import pandas as pd
 
-class waveResult():
+
+class waveResult:
     def __init__(self) -> None:
         """
         Returns

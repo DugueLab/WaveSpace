@@ -1,23 +1,19 @@
 #%%
-import WaveSpace.Utils.WaveData as wd
-import WaveSpace.Utils.HelperFuns as hf
-from sklearn.manifold import MDS, Isomap
-from sklearn.neighbors import NearestNeighbors
-import numpy as np
 import gdist
-from scipy.spatial import distance_matrix
-from scipy.spatial.transform import Rotation as R
+import joblib
+import matplotlib.pyplot as plt
+import numpy as np
+import plotly.graph_objects as go
+import vtk
+from matplotlib.path import Path
 from scipy.interpolate import Rbf
 from scipy.linalg import svd
-from scipy.spatial import Delaunay, KDTree, ConvexHull
-from matplotlib.path import Path
-import vtk
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-import plotly.graph_objects as go
-import joblib
-import platform
-import multiprocessing
+from scipy.spatial import ConvexHull, Delaunay, KDTree, distance_matrix
+from sklearn.manifold import MDS, Isomap
+from sklearn.neighbors import NearestNeighbors
+
+import WaveSpace.Utils.HelperFuns as hf
+import WaveSpace.Utils.WaveData as wd
 
 #%%
 
@@ -149,8 +145,8 @@ def create_surface_from_points(data, type = 'channels', num_points=1000, plottin
                     
                     positions[i] = closest_proj if closest_proj is not None else hull_vertices[
                         KDTree(hull_vertices).query(positions[i])[1]]
-        except:
-            pass
+        except Exception as e:
+            print(f"Ignoring Exception: {e}")
     # make points for VTK
     points = vtk.vtkPoints()
     for position in positions:
@@ -188,21 +184,21 @@ def create_surface_from_points(data, type = 'channels', num_points=1000, plottin
                                    y=channel_positions[:, 1],
                                    z=channel_positions[:, 2],
                                    mode='markers',
-                                   marker=dict(size=3, color='blue', opacity=0.8)))
+                                   marker={"size": 3, "color": 'blue', "opacity": 0.8}))
         
         # Add scatter plot for vertex locations
         fig.add_trace(go.Scatter3d(x=vertices[:, 0],
                                    y=vertices[:, 1],
                                    z=vertices[:, 2],
                                    mode='markers',
-                                   marker=dict(size=2, color='red')))
+                                   marker={"size": 2, "color": 'red'}))
 
-        fig.update_layout(scene=dict(xaxis=dict(nticks=4, range=[np.min(vertices),np.max(vertices)],),
-                             yaxis=dict(nticks=4, range=[np.min(vertices),np.max(vertices)],),
-                             zaxis=dict(nticks=4, range=[np.min(vertices),np.max(vertices)],),
-                             aspectmode='cube'),
+        fig.update_layout(scene={"xaxis": {"nticks": 4, "range": [np.min(vertices),np.max(vertices)],},
+                             "yaxis": {"nticks": 4, "range": [np.min(vertices),np.max(vertices)],},
+                             "zaxis": {"nticks": 4, "range": [np.min(vertices),np.max(vertices)],},
+                             "aspectmode": 'cube'},
                              width=700,
-                             margin=dict(r=20, l=10, b=10, t=10))
+                             margin={"r": 20, "l": 10, "b": 10, "t": 10})
         
         
         fig.show()   
@@ -309,10 +305,10 @@ def distance_along_surface(data, Surface, tolerance = 0.01, get_extent = False, 
             y=channel_positions[:, 1],
             z=channel_positions[:, 2],
             mode='markers',
-            marker=dict(
-                size=6,
-                color='blue',  # all channel positions are blue
-            )
+            marker={
+                "size": 6,
+                "color": 'blue',  # all channel positions are blue
+            }
         )])
 
         # Add the channels used for max_distance_x and max_distance_y
@@ -321,20 +317,20 @@ def distance_along_surface(data, Surface, tolerance = 0.01, get_extent = False, 
             y=channel_positions[[min_x_index, max_x_index], 1],
             z=channel_positions[[min_x_index, max_x_index], 2],
             mode='markers',
-            marker=dict(
-                size=6,
-                color='red',  # channels for max_distance_x are red
-            )
+            marker={
+                "size": 6,
+                "color": 'red',  # channels for max_distance_x are red
+            }
         ))
         fig.add_trace(go.Scatter3d(
             x=channel_positions[[min_y_index, max_y_index], 0],
             y=channel_positions[[min_y_index, max_y_index], 1],
             z=channel_positions[[min_y_index, max_y_index], 2],
             mode='markers',
-            marker=dict(
-                size=6,
-                color='green',  # channels for max_distance_y are green
-            )
+            marker={
+                "size": 6,
+                "color": 'green',  # channels for max_distance_y are green
+            }
         ))
 
         # Print the max distances
@@ -391,7 +387,7 @@ def find_midline_channels(channel_positions, tolerance=0.1):
     sagittal_channels = np.where(np.abs(channel_positions[:, 0] - sagittal_plane) < tolerance)[0]
     coronal_channels = np.where(np.abs(channel_positions[:, 1] - coronal_plane) < tolerance)[0]
     #plot to check
-    fig, ax = plt.subplots()
+    _fig, ax = plt.subplots()
     ax.scatter(channel_positions[:, 0], channel_positions[:, 1], label='All channels')
     ax.scatter(channel_positions[sagittal_channels, 0], channel_positions[sagittal_channels, 1], label='Sagittal channels', color='red')
     ax.scatter(channel_positions[coronal_channels, 0], channel_positions[coronal_channels, 1], label='Coronal channels', color='green')
@@ -427,10 +423,10 @@ def plot_distance_along_surface(waveData):
         y=channel_positions[:, 1],
         z=channel_positions[:, 2],
         mode='markers',
-        marker=dict(
-            size=5,
-            color='black',  # Color of the points
-        )
+        marker={
+            "size": 5,
+            "color": 'black',  # Color of the points
+        }
     )
 
     # Create a list to hold the line shapes
@@ -459,15 +455,15 @@ def plot_distance_along_surface(waveData):
                     y=[y0, y1],
                     z=[z0, z1],
                     mode='lines',
-                    line=dict(
-                        color='rgb'+str(rgba_color[:3]),  # Use the rgb color
-                        width=2
-                    )
+                    line={
+                        "color": 'rgb'+str(rgba_color[:3]),  # Use the rgb color
+                        "width": 2
+                    }
                 )
                 line_shapes.append(line)
 
     # Combine the scatter plot and line shapes
-    plotData = [scatter] + line_shapes
+    plotData = [scatter, *line_shapes]
     min_distance = DistMat.min()
     max_distance = DistMat.max()
     coolwarm = [[0, 'blue'], [0.5, 'white'], [1, 'red']]
@@ -475,25 +471,25 @@ def plot_distance_along_surface(waveData):
     dummy_scatter = go.Scatter3d(
         x=[None, None], y=[None, None], z=[None, None],  # Two points
         mode='markers',
-        marker=dict(
-            size=0,  # No markers
-            color=[min_distance, max_distance],  # Color range
-            colorscale=coolwarm,  # The same color scale used for the lines
-            colorbar=dict(title='Distance')  # The colorbar
-        )
+        marker={
+            "size": 0,  # No markers
+            "color": [min_distance, max_distance],  # Color range
+            "colorscale": coolwarm,  # The same color scale used for the lines
+            "colorbar": {"title": 'Distance'}  # The colorbar
+        }
     )
 
     # Add the dummy scatter plot to the data
-    plotData = [scatter, dummy_scatter] + line_shapes
+    plotData = [scatter, dummy_scatter, *line_shapes]
 
     # Define the layout of the plot
     layout = go.Layout(
         title='3D EEG Sensor Positions and Connections',
-        scene=dict(
-            xaxis_title='X',
-            yaxis_title='Y',
-            zaxis_title='Z'
-        ),
+        scene={
+            "xaxis_title": 'X',
+            "yaxis_title": 'Y',
+            "zaxis_title": 'Z'
+        },
         showlegend=False,
         width=800,  # Set the width of the figure
         height=800  # Set the height of the figure
@@ -683,9 +679,8 @@ def is_regular_grid_2d(distMat, tolerance = 0.001):
     adj_dist = distMat[0][1]
     for i in range(size):
         for j in range(size):
-            if abs(i-j) == 1:
-                if not np.isclose(distMat[i][j],adj_dist,atol=0, rtol=tolerance):
-                    return False
+            if abs(i-j) == 1 and not np.isclose(distMat[i][j],adj_dist,atol=0, rtol=tolerance):
+                return False
     return True
 
 def interpolate_pos_to_grid_process_trial(k, data, indices,distances, grid_x_shape, idw_power):
@@ -709,7 +704,7 @@ def interpolate_pos_to_grid_process_trial(k, data, indices,distances, grid_x_sha
         grid_z[:, j] = idw_interpolation(z, distances, idw_power=idw_power)
     return grid_z.reshape((grid_x_shape[0], grid_x_shape[1], data.shape[-1]))
 
-def interpolate_pos_to_grid(waveData, numGridBins=10, dataBucketName = "", return_mask= False, mask_stretching = False):
+def interpolate_pos_to_grid(waveData, numGridBins=10, dataBucketName = "", return_mask= False, mask_stretching = False, plotting= False):
     """Interpolate sensor data from irregular positions onto a square grid.
 
     Parameters
@@ -769,10 +764,7 @@ def interpolate_pos_to_grid(waveData, numGridBins=10, dataBucketName = "", retur
     range_x = x_max - x_min
     range_y = y_max - y_min
     step_size = max(range_x, range_y) / (numGridBins - 1)
-    if mask_stretching:
-        stretch = step_size * 2 
-    else:
-        stretch = 0
+    stretch = step_size * 2 if mask_stretching else 0
     # Calculate the new min and max for x and y to create a square grid
     x_min_new = x_min - (step_size * numGridBins - range_x) / 2
     x_max_new = x_min_new + step_size * numGridBins
@@ -785,14 +777,15 @@ def interpolate_pos_to_grid(waveData, numGridBins=10, dataBucketName = "", retur
     grid_x, grid_y = np.meshgrid(x_range, y_range)
 
     # Plot the original positions
-    plt.figure(figsize=(10, 10))
-    plt.scatter(pos_2d[:,0], pos_2d[:,1], color='blue', label='Original positions')
+    if plotting:
+        plt.figure(figsize=(10, 10))
+        plt.scatter(pos_2d[:,0], pos_2d[:,1], color='blue', label='Original positions')
 
-    # Plot the grid points
-    plt.scatter(grid_x, grid_y, color='red', s=2, label='Grid points')
+        # Plot the grid points
+        plt.scatter(grid_x, grid_y, color='red', s=2, label='Grid points')
 
-    plt.legend()
-    plt.show()
+        plt.legend()
+        plt.show()
 
     # Calculate the convex hull of the 2D positions
     hull = ConvexHull(pos_2d)
@@ -807,13 +800,14 @@ def interpolate_pos_to_grid(waveData, numGridBins=10, dataBucketName = "", retur
     inside_mask_grid = inside_mask.reshape(grid_x.shape)
 
     # Plot the mask
-    plt.figure(figsize=(10, 10))
-    plt.imshow(inside_mask_grid, extent=(x_min_new, x_max_new, y_min_new, y_max_new), origin='lower', cmap='gray', alpha=0.5)
-    plt.plot(pos_2d[hull.vertices, 0], pos_2d[hull.vertices, 1], 'r--', lw=2)
-    plt.plot(pos_2d[hull.vertices[0], 0], pos_2d[hull.vertices[0], 1], 'ro')
-    plt.scatter(pos_2d[:,0], pos_2d[:,1], color='blue', label='Original positions')
-    plt.legend()
-    plt.show()
+    if plotting:
+        plt.figure(figsize=(10, 10))
+        plt.imshow(inside_mask_grid, extent=(x_min_new, x_max_new, y_min_new, y_max_new), origin='lower', cmap='gray', alpha=0.5)
+        plt.plot(pos_2d[hull.vertices, 0], pos_2d[hull.vertices, 1], 'r--', lw=2)
+        plt.plot(pos_2d[hull.vertices[0], 0], pos_2d[hull.vertices[0], 1], 'ro')
+        plt.scatter(pos_2d[:,0], pos_2d[:,1], color='blue', label='Original positions')
+        plt.legend()
+        plt.show()
 
     grid_points = np.c_[grid_x.ravel(), grid_y.ravel()]
 
@@ -879,7 +873,7 @@ def best_fit_sphere(coord_3d):
     """
     A = np.hstack((2 * coord_3d, np.ones((coord_3d.shape[0], 1))))
     f = np.sum(coord_3d ** 2, axis=1)
-    C, residuals, rank, singval = np.linalg.lstsq(A, f, rcond=None)
+    C, _residuals, _rank, _singval = np.linalg.lstsq(A, f, rcond=None)
 
     # The center of the sphere:
     center = C[:3]
@@ -926,16 +920,13 @@ def apply_mask(waveData, mask, dataBucketName, overwrite = True, maskValue = 0.,
     oldshape = data.shape
     currentDimord = waveData.DataBuckets[dataBucketName].get_dimord()
     currentDims = currentDimord.split("_")
-    if len(mask.shape)==2:
-        desiredDimord = "trl_posx_posy_time"
-    else:
-        desiredDimord = "trl_chan_time"
+    desiredDimord = "trl_posx_posy_time" if len(mask.shape) == 2 else "trl_chan_time"
     desiredDims = desiredDimord.split("_")
     hasBeenReshaped, data =  hf.force_dimord(data, currentDimord , desiredDimord)
     data[:,~mask,:] = maskValue
     if hasBeenReshaped:
-        trl_dim = currentDims.index("trl")
-        new_trl_dim = desiredDims.index("trl")
+        currentDims.index("trl")
+        desiredDims.index("trl")
         data = np.reshape(data, oldshape)
     if overwrite:
         waveData.DataBuckets[dataBucketName]._data = data
@@ -990,7 +981,7 @@ def interpolate_spherical_spline_2d(waveData, resolution=10, scalePos=1000, func
     # Shift electrode positions to center around the best fit sphere center
     pos_3d -= center
 
-    r, theta, phi = cart2sph(pos_3d[:,0], pos_3d[:,1], pos_3d[:,2])
+    _r, theta, phi = cart2sph(pos_3d[:,0], pos_3d[:,1], pos_3d[:,2])
 
     theta_range = np.arange(np.min(theta), np.max(theta), np.radians(resolution))
     phi_range = np.arange(np.min(phi), np.max(phi), np.radians(resolution))
@@ -1041,8 +1032,8 @@ def fake_grid(waveData, surface):
     -------
     list of numpy.ndarray
     """
+
     import vtk
-    import numpy as np
 
     # 'surface' contains the vtkPolyData surface
 
@@ -1069,7 +1060,7 @@ def fake_grid(waveData, surface):
     # Now you have the UV mapping coordinates for each point on the surface
 
     # Access the texture coordinates
-    texture_coords_array = surface.GetPointData().GetTCoords()
+    surface.GetPointData().GetTCoords()
 
     # Get the unwrapped surface vertices and faces
     unwrapped_vertices = np.array([surface.GetPoint(i) for i in range(surface.GetNumberOfPoints())])

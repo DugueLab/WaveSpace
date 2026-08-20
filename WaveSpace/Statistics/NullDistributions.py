@@ -1,10 +1,9 @@
-#%%
 import numpy as np
-import WaveSpace.Utils.WaveData as wd
-import WaveSpace.Utils.HelperFuns as hf
+from scipy.interpolate import interp2d
+from skimage.color import rgb2gray
+from skimage.transform import resize
 
-#%%
-#mirrior-pad data array to all sides
+
 def pad_data(data, padSize):
     """Reflect-pad the first two dimensions of a three-dimensional array.
 
@@ -114,13 +113,6 @@ def warp_array(data,maxDistortion, nSteps):
 
     return warpdata
 
-
-
-from scipy.ndimage import map_coordinates
-from scipy.interpolate import interp2d
-from skimage.color import rgb2gray
-from skimage.transform import resize
-
 def warp_snapshot(data, XIn, YIn):
     """Warp spatial data with supplied displacement fields.
 
@@ -151,11 +143,9 @@ def warp_snapshot(data, XIn, YIn):
     for quadrant in range(1, 5):
         if quadrant == 1:
             cx, cy = XIn, YIn
-            ind = 1
         elif quadrant == 2:
             cx, cy = XIn - XIn, YIn - YIn
         elif quadrant == 3:
-            ind = 4
             interpIm = data.copy()
             cx, cy = XIn, YIn
         elif quadrant == 4:

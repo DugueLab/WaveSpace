@@ -34,9 +34,13 @@ jobs:
           name: python-package-distributions
           path: dist/
 
+  docs-build:
+    name: Build documentation
+    uses: ./.github/workflows/docs-build.yml
+
   publish:
     name: Publish to PyPI
-    needs: build
+    needs: [build, docs-build]
     runs-on: ubuntu-latest
 
     environment:

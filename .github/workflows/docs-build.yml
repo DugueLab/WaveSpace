@@ -1,0 +1,44 @@
+name: Docs Build (reusable)
+
+on:
+  workflow_call:
+    inputs:
+      upload-artifact:
+        description: "Upload built HTML docs as an artifact"
+        type: boolean
+        default: false
+
+jobs:
+  build-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install uv and set up Python 3.13
+        uses: astral-sh/setup-uv@v10.0.0
+        with:
+          python-version: "3.13"
+          enable-cache: true
+
+      - name: Install system lib for VTK
+        run: sudo apt-get update && sudo apt-get install -y libgl1
+
+      - name: Cache gallery output
+        uses: actions/cache@v4
+        with:
+          path: |
+            docs/auto_examples
+            docs/_build
+          key: docs-build-${{ runner.os }}-${{ hashFiles('Examples/**/*.py', 'docs/conf.py') }}
+          restore-keys: |
+            docs-build-${{ runner.os }}-
+
+      - name: Build docs
+        run: uv run --group docs sphinx-build -b html docs docs/_build/html -W
+
+      - name: Upload HTML artifact
+        if: ${{ inputs.upload-artifact }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: documentation-html
+          path: docs/_build/html

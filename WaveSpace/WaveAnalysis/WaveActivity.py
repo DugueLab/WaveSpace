@@ -1,6 +1,8 @@
 import numpy as np
+
 import WaveSpace.Utils.HelperFuns as hf
 import WaveSpace.Utils.WaveData as wd
+
 
 def find_wave_activity(waveData, dataBucketName=None, dataInd = None, nBases=3):
     """Extract dominant traveling-wave spatial bases from complex data.
@@ -64,7 +66,6 @@ def find_wave_activity(waveData, dataBucketName=None, dataInd = None, nBases=3):
 
         groupDimensions = splitDimensions[0:nGroupDimensions]
         groupDimSizes = origShape[:len(groupDimensions)]
-        multi_indices  = np.array(np.unravel_index(np.arange(complexData.shape[0]), groupDimSizes)).T
         
         bases = np.reshape(bases, (*channelShape, bases.shape[-1]))
         basesBucket = wd.DataBucket(bases,"Bases","posx_posy_base",chanNames= chan_names)
@@ -99,7 +100,7 @@ def c_TW_bases_betas(phi_cts,nBases=3):
     phi_Cs = np.asarray(phi_cts.reshape(-1,phi_cts.shape[-1]))
     phi_cent = phi_Cs - phi_Cs.mean(0)
     COV = phi_cent.T.conj()@phi_cent
-    u,s,vh = np.linalg.svd(COV)
+    _u,_s,vh = np.linalg.svd(COV)
     bases_sb = vh[:nBases].T
     betas_Cb = phi_cent.dot(bases_sb.conj())
     model_Cs = np.exp(1j*np.angle(bases_sb.dot(betas_Cb.T).T))

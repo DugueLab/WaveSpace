@@ -1,5 +1,8 @@
-from . import ClusterGradient
-from . import DistanceCorrelation
-from . import OpticalFlow
-from . import WaveActivity
-from . import WaveAnalysis
+from . import (
+    DistanceCorrelation,
+    OpticalFlow,
+    WaveActivity,
+    WaveAnalysis,
+)
+
+__all__ = ["DistanceCorrelation", "OpticalFlow", "WaveActivity", "WaveAnalysis"]

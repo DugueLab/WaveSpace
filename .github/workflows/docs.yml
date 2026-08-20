@@ -1,0 +1,14 @@
+name: Docs
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  docs:
+    uses: ./.github/workflows/docs-build.yml
+    with:
+      upload-artifact: true

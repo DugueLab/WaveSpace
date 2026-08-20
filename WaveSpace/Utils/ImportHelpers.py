@@ -1,6 +1,8 @@
-import scipy.io as io 
 import pickle
+
 import mne
+from scipy import io
+
 
 def load_MNE_data(filename):
     """Load epoched MNE data from disk.
@@ -100,7 +102,7 @@ def save_wavedata_object(waveData, filename):
 
 
     """
-    f = open(filename, 'wb')
+    f = open(filename, 'wb')  # noqa: SIM115
     pickle.dump(waveData, f, pickle.HIGHEST_PROTOCOL)
     f.close()
 

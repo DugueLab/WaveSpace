@@ -1,9 +1,13 @@
-import matplotlib.pyplot as plt
+import copy
+import multiprocessing
+
 import numpy as np
-from matplotlib.colors import LogNorm
+import pandas as pd
+from joblib import Parallel, delayed
+
 from WaveSpace.Utils import HelperFuns
 from WaveSpace.Utils import WaveData as wd
-import pandas as pd
+
 
 def FFT_2D(waveData, channelIndices, lowerBound, upperBound, DataBucketName = ""):
     """Calculate a two-dimensional spatial-temporal Fourier transform.
@@ -50,17 +54,17 @@ def FFT_2D(waveData, channelIndices, lowerBound, upperBound, DataBucketName = ""
     """
     
 
-    if not DataBucketName == "":
+    if DataBucketName != "":
         waveData.set_active_dataBucket(DataBucketName)
 
     HelperFuns.assure_consistency(waveData)
     shape = waveData.get_active_data().shape
-    if type(channelIndices[0]) == list or type(channelIndices[0]) == tuple:
+    if isinstance(channelIndices[0], (list, tuple)):
         if len(shape) == 3:
             raise Exception("two dimensional index used for one dimensional channel data")
         dataIDX = (slice(None), [i[0] for i in channelIndices], [i[1] for i in channelIndices], slice(None))
         filteredData = waveData.get_active_data()[dataIDX]   
-        channelPositions = waveData.get_channel_positions()
+        waveData.get_channel_positions()
 
     else:
         if len(shape) == 4:
@@ -134,9 +138,6 @@ def FFT_2D(waveData, channelIndices, lowerBound, upperBound, DataBucketName = ""
     resultBucket = wd.DataBucket(df, "Result", "2D_FFT", chanNames=waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names())
     waveData.add_data_bucket(resultBucket)
 
-import copy
-from joblib import Parallel, delayed
-import multiprocessing
 
 def FFT_2D_shuffle_and_average(waveData, channelIndices, lowerBound, upperBound,num_iterations = 100, DataBucketName = ""):
     """
@@ -153,15 +154,15 @@ def FFT_2D_shuffle_and_average(waveData, channelIndices, lowerBound, upperBound,
     -------
     None
     """
-    if not DataBucketName == "":
+    if DataBucketName != "":
         waveData.set_active_dataBucket(DataBucketName)
     HelperFuns.assure_consistency(waveData)
     shape = waveData.get_active_data().shape
-    if type(channelIndices[0]) == list or type(channelIndices[0]) == tuple:
-        if len(shape) == 3:
+    if isinstance(channelIndices[0], (list, tuple)):
+        if len(shape) == 3: 
             raise Exception("two dimensional index used for one dimensional channel data")
-        dataIDX = (slice(None), [i[0] for i in channelIndices], [i[1] for i in channelIndices], slice(None))
-        channelPositions = waveData.get_channel_positions()
+        (slice(None), [i[0] for i in channelIndices], [i[1] for i in channelIndices], slice(None))
+        waveData.get_channel_positions()
         channelNames = [waveData.DataBuckets[waveData.ActiveDataBucket].get_channel_names()[idx[0],idx[1]] for idx in channelIndices]
 
     else:

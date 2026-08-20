@@ -1,15 +1,15 @@
-from WaveSpace.Utils import WaveData as wd
-from WaveSpace.Utils import HelperFuns as hf
+import multiprocessing
+import platform
+from itertools import product
 
 import emd
-from scipy import signal
-import numpy as np
-import matplotlib.pyplot as plt
-from scipy import signal
-import multiprocessing
-from itertools import product
 import joblib
-import platform
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy import signal
+
+from WaveSpace.Utils import HelperFuns as hf
+from WaveSpace.Utils import WaveData as wd
 
 
 def start_emd_logging():
@@ -47,7 +47,7 @@ def FreqAmpPhaseFromAnalytic(waveData, smooth_phase=None, smooth_freq = 3, dataB
     oldShape = currentData.shape
     hasBeenReshaped, currentData =  hf.force_dimord(currentData, currentDimord , "imf_trl_chan_time")
     # Get the number of trials, channels, and IMFs
-    if not timeRange == (slice(None)):
+    if timeRange != slice(None):
         currentData = currentData[:,:,:,timeRange[0]:timeRange[1]]
     nIMFs, nTrials, nChans,  nTime = currentData.shape
     IA = np.full((nIMFs,nTrials, nChans,  nTime), np.nan, dtype=float)
@@ -107,8 +107,8 @@ def checkFrequencySpectrum(IA, IF, waveData, freqMin, freqMax, nbins=50, trialnu
     """
     currentDimord = waveData.DataBuckets[waveData.ActiveDataBucket].get_dimord()
     hf.assure_consistency(waveData)
-    IAhasBeenReshaped, IA =  hf.force_dimord(IA, currentDimord , "imf_trl_chan_time")
-    IFhasBeenReshaped, IF =  hf.force_dimord(IF, currentDimord , "imf_trl_chan_time")
+    _IAhasBeenReshaped, IA =  hf.force_dimord(IA, currentDimord , "imf_trl_chan_time")
+    _IFhasBeenReshaped, IF =  hf.force_dimord(IF, currentDimord , "imf_trl_chan_time")
     IA = IA[:,trialnum, chanNum].T
     IF = IF[:,trialnum, chanNum].T
     #remove potential nan IMFs
@@ -116,10 +116,10 @@ def checkFrequencySpectrum(IA, IF, waveData, freqMin, freqMax, nbins=50, trialnu
     IF = IF[:, ~np.all(np.isnan(IF), axis=0)]
     freqEdges, freqCenters = emd.spectra.define_hist_bins(
         freqMin, freqMax, nbins)
-    freqRes = freqCenters[1]-freqCenters[0]
-    f, spec_weighted = emd.spectra.hilberthuang(
+    freqCenters[1]-freqCenters[0]
+    _, spec_weighted = emd.spectra.hilberthuang(
         IF, IA, freqEdges, sample_rate=waveData.get_sample_rate(), sum_imfs=False)
-    f, spec_unweighted = emd.spectra.hilberthuang(IF, np.ones_like(
+    _f, spec_unweighted = emd.spectra.hilberthuang(IF, np.ones_like(
         IA), freqEdges, sample_rate=waveData.get_sample_rate(), sum_imfs=False)
     fig = plt.figure(figsize=(10, 4))
     plt.subplots_adjust(hspace=0.4)
@@ -132,7 +132,7 @@ def checkFrequencySpectrum(IA, IF, waveData, freqMin, freqMax, nbins=50, trialnu
         label_y = np.max(spec_unweighted) - 0.05 * np.max(spec_unweighted)  # Slightly below the max
         label_x_offset = 1  # Adjust this as per your needs
         plt.annotate(str(FOI) + 'Hz', xy=(FOI, label_y), xytext=(FOI + label_x_offset, label_y),
-                arrowprops=dict(facecolor='black', arrowstyle='->'),
+                arrowprops={'facecolor': 'black', 'arrowstyle': '->'},
                 verticalalignment='center')
     plt.xlim(0, freqMax)
     plt.xlabel('Frequency (Hz)')
@@ -147,7 +147,7 @@ def checkFrequencySpectrum(IA, IF, waveData, freqMin, freqMax, nbins=50, trialnu
         label_y = np.max(spec_weighted) - 0.05 * np.max(spec_weighted)  # Slightly below the max
         label_x_offset = 1  # Adjust this as per your needs
         plt.annotate(str(FOI) + 'Hz', xy=(FOI, label_y), xytext=(FOI + label_x_offset, label_y),
-                arrowprops=dict(facecolor='black', arrowstyle='->'),
+                arrowprops={'facecolor': 'black', 'arrowstyle': '->'},
                 verticalalignment='center')
     plt.xlim(0, freqMax)
     plt.xlabel('Frequency (Hz)')
@@ -171,7 +171,7 @@ def freqSpecTrialAverage(waveData, freqMin, freqMax, nbins=50, dataBucketName = 
     -------
     list[numpy.ndarray]
     """
-    freqEdges, freqCenters = emd.spectra.define_hist_bins(
+    freqEdges, _freqCenters = emd.spectra.define_hist_bins(
         freqMin, freqMax, nbins)
     if dataBucketName == "":
         dataBucketName = waveData.ActiveDataBucket
@@ -180,11 +180,11 @@ def freqSpecTrialAverage(waveData, freqMin, freqMax, nbins=50, dataBucketName = 
     hf.assure_consistency(waveData)
     assert (len(waveData.DataBuckets[dataBucketName].get_dimord().split("_"))==4) , "Inputdata must have 4 dimensions of order imf_trl_chan_time"
     currentData = waveData.DataBuckets[dataBucketName].get_data()
-    imf, trials, channels, time = currentData.shape
+    _imf, trials, channels, _time = currentData.shape
     sample_rate=waveData.get_sample_rate()
-    AllSpecWeighted = np.zeros((channels, nbins))
+    np.zeros((channels, nbins))
     tempSpec = np.zeros((trials, nbins))    
-    IF, IA, IP = FreqAmpPhaseFromAnalytic(waveData, 5, 3, dataBucketName="", timeRange = timeRange)
+    IF, IA, _IP = FreqAmpPhaseFromAnalytic(waveData, 5, 3, dataBucketName="", timeRange = timeRange)
     
     #prepare arguments for parallel
     args = [(IF[:, :, channel, : ], IA[:, :, channel, : ], trials, freqEdges, sample_rate, tempSpec) for channel in range(channels)]
@@ -209,11 +209,8 @@ def freqSpecTrialAverageProcessChannel(args):
     """
     IF, IA, trials, freqEdges, sample_rate, tempSpec = args
     for trl in range(trials):
-        if np.isnan(IF[:,trl,0]).any():
-            ind = np.min(np.where(np.isnan(IF)))
-        else:
-            ind= IF.shape[0]+1
-        f, IMFspectrum = emd.spectra.hilberthuang(
+        ind = np.min(np.where(np.isnan(IF))) if np.isnan(IF[:,trl,0]).any() else IF.shape[0]+1
+        _f, IMFspectrum = emd.spectra.hilberthuang(
                 IF[0:ind,trl,:].T, IA[0:ind,trl, :].T, freqEdges, sample_rate= sample_rate , sum_imfs=True)
         tempSpec[trl,:] = IMFspectrum
     AllSpecWeighted = np.mean(tempSpec, axis=0)    
@@ -246,11 +243,11 @@ def check_for_harmonics(waveData, IPs, IFs, IAs, base_imf_list):
     list[list[numpy.ndarray]]
     """
     currentDimord= waveData.DataBuckets[waveData.ActiveDataBucket].get_dimord()
-    IAhasBeenReshaped, IAs =  hf.force_dimord(IAs, currentDimord , "imf_trl_chan_time")
-    IFhasBeenReshaped, IFs =  hf.force_dimord(IFs, currentDimord , "imf_trl_chan_time")
+    _IAhasBeenReshaped, IAs =  hf.force_dimord(IAs, currentDimord , "imf_trl_chan_time")
+    _IFhasBeenReshaped, IFs =  hf.force_dimord(IFs, currentDimord , "imf_trl_chan_time")
     pairs = list(product(range(IPs.shape[1]), range(IPs.shape[2])))
     num_trials, num_channels = IPs.shape[1:3]
-    args = [list((IPs[:, pair[0], pair[1]], IFs[:, pair[0], pair[1]], IAs[:, pair[0], pair[1]], base_imf_list[pair[0], pair[1]])) for pair in pairs]
+    args = [[IPs[:, pair[0], pair[1]], IFs[:, pair[0], pair[1]], IAs[:, pair[0], pair[1]], base_imf_list[pair[0], pair[1]]] for pair in pairs]
     #make sure there are no nan IMFs    
     for argnum, arg in enumerate(args):
         if np.isnan(arg[0]).any():
@@ -334,7 +331,7 @@ def find_nearest_to_FOI(waveData, IF, FOI, start_time=None, end_time=None):
     """
     hf.assure_consistency(waveData)
     currentDimord = waveData.DataBuckets[waveData.ActiveDataBucket].get_dimord()
-    hasBeenReshaped, IF =  hf.force_dimord(IF, currentDimord , "imf_trl_chan_time")
+    _hasBeenReshaped, IF =  hf.force_dimord(IF, currentDimord , "imf_trl_chan_time")
     shape = IF.shape
     ind = np.zeros((shape[1], shape[2]),dtype=int)
     meanFreq = np.zeros((shape[1], shape[2]))
@@ -419,7 +416,13 @@ def EMD(waveData, nIMFs=7, dataBucketName="", noiseVar = 0.05, n_noiseChans = 10
     elif siftType == "ensemble_sift":
         siftfun = emd.sift.ensemble_sift
     elif siftType == "multivariate_sift":
-        from WaveSpace.Decomposition import MEMD_Matlab_translation as MEMD
+        try:
+            from WaveSpace.Decomposition import MEMD_Matlab_translation as MEMD
+        except ImportError as e:
+            raise ImportError(
+                "chaospy and numba are required for multivariate sift. "
+                "Install them with: pip install wavespace[memd]"
+            ) from e
         #uses de Souza e Silva translation from Matlab to Python
         #original is based on: Rehman and D. P. Mandic, "Multivariate Empirical Mode Decomposition", Proceedings of the Royal Society A, 2010
         #KP added some noise channels, see: ur Rehman, N., Park, C., Huang, N. E., & Mandic, D. P. (2013). EMD via MEMD: multivariate noise-aided computation of standard EMD. Advances in adaptive data analysis, 5(02), 1350007.

@@ -1,12 +1,14 @@
 import unittest
+
 import numpy as np
+
 import WaveSpace.Utils.HelperFuns as hf
-import WaveSpace.Utils.WaveData as wd
+
 
 # Mocking posxy_to_chan if it's from another module
 def posxy_to_chan(data):
     shape = data.shape
-    new_shape = shape[:-3] + (shape[-3] * shape[-2], shape[-1])
+    new_shape = (*shape[:-3], shape[-3] * shape[-2], shape[-1])
     reshaped = data.reshape(new_shape)
     return reshaped, (shape[-3], shape[-2])
 
@@ -35,7 +37,7 @@ class helperfuns_test(unittest.TestCase):
 
     def test_force_dimord_invalid_expand_posxy(self):
         data = np.random.randn(10, 20, 30)
-        with self.assertRaises(Exception):
+        with self.assertRaises(ValueError):
             hf.force_dimord(data, "chan_time", "posx_posy_time")
 
     def test_force_dimord_insert_trl_to_posxy(self):

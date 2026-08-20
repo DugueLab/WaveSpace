@@ -1,9 +1,10 @@
 import numpy as np
+from numpy.lib.stride_tricks import sliding_window_view
+from scipy.optimize import curve_fit
+
 import WaveSpace.Utils.HelperFuns as hf
 import WaveSpace.Utils.WaveData as wd
 
-from scipy.optimize import curve_fit
-from numpy.lib.stride_tricks import sliding_window_view
 
 def wavelet_convolution(waveData, frequencies, n_cycles=3, dataBucketName=None):
     """Compute a tapered-Gaussian Morlet transform in the time domain.

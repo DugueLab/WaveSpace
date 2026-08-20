@@ -1,12 +1,11 @@
 #%%
-from certifi import where
 import matplotlib.pyplot as plt
 import numpy as np
-import numpy.matlib as matlib
-from scipy.signal import convolve2d
-from importlib import reload
-from WaveSpace.Utils import WaveData as wd
+from numpy import matlib
+
 from WaveSpace.Utils import HelperFuns as hf
+from WaveSpace.Utils import WaveData as wd
+
 
 def assertCorrectWaveSettings(Type, ntrials, waveSettings):
     """Validate type-specific wave simulation settings.
@@ -34,20 +33,20 @@ def assertCorrectWaveSettings(Type, ntrials, waveSettings):
     """
     # Check if all required variables are set for the type of wave
     if Type == "PlaneWave" or Type == "TargetWave" :
-        assert "TemporalFrequency" in waveSettings.keys(), "TemporalFrequency not set"
-        assert "SpatialFrequency" in waveSettings.keys(), "SpatialFrequency not set"
-        assert "WaveDirection" in waveSettings.keys(), "WaveDirection not set" 
+        assert "TemporalFrequency" in waveSettings, "TemporalFrequency not set"
+        assert "SpatialFrequency" in waveSettings, "SpatialFrequency not set"
+        assert "WaveDirection" in waveSettings, "WaveDirection not set" 
     if Type == "RotatingWave": 
-       assert "TemporalFrequency" in waveSettings.keys(), "TemporalFrequency not set"
-       assert "WaveDirection" in waveSettings.keys(), "WaveDirection not set" 
+       assert "TemporalFrequency" in waveSettings, "TemporalFrequency not set"
+       assert "WaveDirection" in waveSettings, "WaveDirection not set" 
     if Type == "LocalOscillation":
-        assert "TemporalFrequency" in waveSettings.keys(), "TemporalFrequency not set"
-        assert "OscillatoryPhase" in waveSettings.keys(), "OscillatoryPhase not set" 
+        assert "TemporalFrequency" in waveSettings, "TemporalFrequency not set"
+        assert "OscillatoryPhase" in waveSettings, "OscillatoryPhase not set" 
     # Check if all required variables are set
-    if "NonLinearSkew" in waveSettings.keys():
-        assert "NonLinearDegree" in waveSettings.keys() and (Type == "PlaneWave") , "NonLinearSkew set without NonLinearDegree or to wrong type of data"
-    if "NonLinearDegree" in waveSettings.keys():
-        assert "NonLinearSkew" in waveSettings.keys() and (Type == "PlaneWave") , "NonLinearDegree set without NonLinearSkew or to wrong type of data"
+    if "NonLinearSkew" in waveSettings:
+        assert "NonLinearDegree" in waveSettings and (Type == "PlaneWave") , "NonLinearSkew set without NonLinearDegree or to wrong type of data"
+    if "NonLinearDegree" in waveSettings:
+        assert "NonLinearSkew" in waveSettings and (Type == "PlaneWave") , "NonLinearDegree set without NonLinearSkew or to wrong type of data"
        
     # If array or list is supplied, size must be the same as amount of trials
     for item in waveSettings.items():
@@ -55,7 +54,7 @@ def assertCorrectWaveSettings(Type, ntrials, waveSettings):
             assert len(item[1])==ntrials, f"Length of supplied array for \"{item[0]}\" must equal amount of trials"
 
 #%%
-def simulate_signal(Type, ntrials, MatrixSize, SampleRate, SimDuration, SimLayout= "channels",time=[], **waveSettings):
+def simulate_signal(Type, ntrials, MatrixSize, SampleRate, SimDuration, SimLayout= "channels",time=None, **waveSettings):
     """Generate simulated wave or noise data as a WaveData object.
 
     Parameters
@@ -92,6 +91,8 @@ def simulate_signal(Type, ntrials, MatrixSize, SampleRate, SimDuration, SimLayou
         simulation settings attached. A ``Mask`` bucket is added when onset,
         duration, or oscillator-proportion settings are supplied.
     """
+    if time is None:
+        time = []
     assertCorrectWaveSettings(Type, ntrials, waveSettings)
     #InitializeDataCubes
     fullData = np.zeros((ntrials,MatrixSize,MatrixSize,int(np.floor(SampleRate*SimDuration))))
@@ -108,7 +109,7 @@ def simulate_signal(Type, ntrials, MatrixSize, SampleRate, SimDuration, SimLayou
             else:
                 currentOptions[key] = values
         simOptions.append(currentOptions)
-    isMaskPresent = "WaveOnset" in waveSettings.keys() or "WaveDuration" in waveSettings.keys() or "OscillatorProportion" in waveSettings.keys()
+    isMaskPresent = "WaveOnset" in waveSettings or "WaveDuration" in waveSettings or "OscillatorProportion" in waveSettings
     if isMaskPresent:
         fullMask = np.zeros((ntrials,MatrixSize,MatrixSize,int(np.floor(SampleRate*SimDuration))))
     
@@ -167,7 +168,7 @@ def initialize_data(MatrixSize, SampleRate,SimDuration):
     """
     return np.zeros((MatrixSize,MatrixSize,int(np.floor(SimDuration * SampleRate))))  
 
-def create_wavedata(data, SampleRate, SimDuration, SimLayout, simOptions, name = "SimulatedData", time=[]):
+def create_wavedata(data, SampleRate, SimDuration, SimLayout, simOptions, name = "SimulatedData", time=None):
     """Create a WaveData object from simulated array data.
 
     Parameters
@@ -196,6 +197,8 @@ def create_wavedata(data, SampleRate, SimDuration, SimLayout, simOptions, name =
         metadata, and simulation settings.
     """
     #flatten channels
+    if time is None:
+        time = []
     if (len(data.shape)==4):
        data = np.reshape(data,(data.shape[0],data.shape[1]*data.shape[2],data.shape[3]), order='C') 
     dimord = "trl_chan_time"
@@ -259,7 +262,7 @@ def create_stationary_pulse(MatrixSize, SampleRate, SimDuration, SimOptions):
         Array ordered as x position, y position, and time.
     """
     signalCube = initialize_data(MatrixSize, SampleRate, SimDuration)
-    xsize, ysize, npoints = signalCube.shape    
+    _, _, npoints = signalCube.shape    
     grid = get_board(MatrixSize)
     centerX = SimOptions["CenterX"]
     centerY = SimOptions["CenterY"]
@@ -312,12 +315,11 @@ def create_plane_wave(MatrixSize, SampleRate, SimDuration,SimOption):
     signalCube = initialize_data(MatrixSize, SampleRate, SimDuration) 
     NonLinearDegree = 0
     NonLinearSkew = 0
-    if ("NonLinearDegree" in SimOption.keys()):
+    if ("NonLinearDegree" in SimOption):
         NonLinearDegree = SimOption["NonLinearDegree"]
-    if ("NonLinearSkew" in SimOption.keys()):
+    if ("NonLinearSkew" in SimOption):
         NonLinearSkew = SimOption["NonLinearSkew"]
 
-    phase_offset = 0 
     grid = get_board(MatrixSize)    
     X = grid[0]
     Y = grid[1]
@@ -409,7 +411,8 @@ def create_plane_wave_mask(MatrixSize, SampleRate, SimDuration,SimOption):
 
         #Signal Onset        
         if (timeSample < (len(onsetTimeVector) + onsetStartingIndex)) and (timeSample >= onsetStartingIndex) :            
-            MatrixFunction = np.vectorize(lambda a : 0.0 if a <= onsetTimeVector[timeSample-onsetStartingIndex] else 1.0)
+            onset = onsetTimeVector[timeSample - onsetStartingIndex]
+            MatrixFunction = np.vectorize(lambda a, onset=onset: 0.0 if a <= onset else 1.0)
             MaskCube[:,:,timeSample]  = MatrixFunction(M)
 
         # no mask Sustain
@@ -418,8 +421,8 @@ def create_plane_wave_mask(MatrixSize, SampleRate, SimDuration,SimOption):
 
         #Offset
         if (timeSample >= offsetStartingIndex) and (timeSample < offsetStartingIndex + len(onsetTimeVector)):            
-            MatrixFunction = np.vectorize(lambda a : 1.0\
-                            if a <= onsetTimeVector[timeSample - offsetStartingIndex ] else 0.0)
+            offset = onsetTimeVector[timeSample - offsetStartingIndex]
+            MatrixFunction = np.vectorize(lambda a, offset=offset: 1.0 if a <= offset else 0.0)
             MaskCube[:,:,timeSample]  = MatrixFunction(M)
         #Signal Off
         if (timeSample >= offsetStartingIndex + len(onsetTimeVector)):
@@ -449,12 +452,11 @@ def create_frequency_gradient(MatrixSize, SampleRate, SimDuration,SimOption):
     signalCube = initialize_data(MatrixSize, SampleRate, SimDuration) 
     NonLinearDegree = 0
     NonLinearSkew = 0
-    if ("NonLinearDegree" in SimOption.keys()):
+    if ("NonLinearDegree" in SimOption):
         NonLinearDegree = SimOption["NonLinearDegree"]
-    if ("NonLinearSkew" in SimOption.keys()):
+    if ("NonLinearSkew" in SimOption):
         NonLinearSkew = SimOption["NonLinearSkew"]
 
-    phase_offset = 0 
     grid = get_board(MatrixSize)    
     X = grid[0]
     Y = grid[1]
@@ -470,7 +472,6 @@ def create_frequency_gradient(MatrixSize, SampleRate, SimDuration,SimOption):
             tmp_M = np.matmul(R,np.array([X[ii,jj] , Y[ii,jj]]).T)                
             M[ii,jj] = tmp_M[0] 
     FrequencyGradient = hf.scale(M, (SimOption["MinTemporalFrequency"], SimOption["MaxTemporalFrequency"]))
-    L = MatrixSize # from cycles per image to shift per gridstep
 
     for ii in range(MatrixSize):
         for jj in range(MatrixSize):
@@ -529,12 +530,12 @@ def create_target_wave(MatrixSize, SampleRate, SimDuration,SimOption):
     for ii in range(MatrixSize):
         for jj in range(MatrixSize):
             #Radial wave
-            signalCube[ii,jj,:] = np.exp(freq_sign * 1j * ( 2 * np.pi * np.abs(SimOption["TemporalFrequency"]) * \
-                time_vect -2 * np.pi / L * D[ii,jj]))
+            signalCube[ii,jj,:] = np.real(np.exp(freq_sign * 1j * ( 2 * np.pi * np.abs(SimOption["TemporalFrequency"]) * \
+                time_vect -2 * np.pi / L * D[ii,jj])))
     if SimOption["WaveDirection"] < 0:
-        return np.flip(np.real(signalCube), axis=2)
+        return np.flip(signalCube, axis=2)
     else:
-        return np.real(signalCube)
+        return signalCube
 
 def create_rotating_wave(MatrixSize, SampleRate, SimDuration,SimOption):
     """Generate a rotating wave.
@@ -561,7 +562,7 @@ def create_rotating_wave(MatrixSize, SampleRate, SimDuration,SimOption):
     X = grid[0] 
     Y = grid[1] 
 
-    [R,TH] = cart2pol(X,Y)
+    [_R,TH] = cart2pol(X,Y)
     # direction of wave
     freq_sign = np.sign(SimOption["TemporalFrequency"])
     direction = np.sign(SimOption["WaveDirection"] )
@@ -569,8 +570,8 @@ def create_rotating_wave(MatrixSize, SampleRate, SimDuration,SimOption):
     time_vect = np.linspace(0, SimDuration , int(SimDuration *SampleRate ))
     for ii in range(MatrixSize):
         for jj in range(MatrixSize):
-            signalCube[ii,jj,:] = np.exp(freq_sign * 1j * (2*np.pi*np.abs(SimOption["TemporalFrequency"]) * 
-                time_vect - direction * TH[ii,jj]))
+            signalCube[ii,jj,:] = np.real(np.exp(freq_sign * 1j * (2*np.pi*np.abs(SimOption["TemporalFrequency"]) * 
+                time_vect - direction * TH[ii,jj])))
     return signalCube
 
 def create_local_oscillators(MatrixSize, SampleRate, SimDuration,SimOption):
@@ -687,7 +688,7 @@ def create_pink_noise( MatrixSize, SampleRate, SimDuration):
         u = matlib.repmat(u,MatrixSize, 1)
         v = u.T
         SF = (u**2 + v**2)**(beta / 2)
-        SF[SF==np.inf] = 0
+        SF[np.inf == SF] = 0
         # phi=(np.reshape(np.arange(0,1,1/(16*16)),[16,16])).T
         #Take timepoint over space
         phi=scale(signalCube[:,:,i],[0,2*np.pi]).T
@@ -727,10 +728,10 @@ def SNRMix(SignalWaveData, NoiseWaveData, SNR, Mask=None, SimLayout="channels"):
     """
     if Mask is not None and np.any(Mask):
         SNR = SNR * (1-Mask)
-    elif "Mask" in SignalWaveData.DataBuckets.keys():
+    elif "Mask" in SignalWaveData.DataBuckets:
         SNR = SNR * (1-SignalWaveData.DataBuckets["Mask"].get_data())
     
-    signal = SignalWaveData.DataBuckets[list(SignalWaveData.DataBuckets.keys())[0]].get_data()
+    signal = SignalWaveData.DataBuckets[next(iter(SignalWaveData.DataBuckets.keys()))].get_data()
     noise = NoiseWaveData.get_active_data()
     if isinstance(SNR, (float, int)) or SNR.shape == signal.shape:
         signalCube = (noise + (signal * SNR)) / (1 + SNR)
